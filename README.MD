@@ -12,6 +12,12 @@ Alternatively, it can also emulate a browser with JavaScript disabled by using
 
 ## Installation with Docker
 
+ - Installation from Docker Hub
+
+  `docker pull capsulecode/singlefile`
+
+  `docker tag capsulecode/singlefile singlefile`
+
 - Manual installation
 
   `git clone --depth 1 --recursive https://github.com/gildas-lormeau/single-file-cli.git`
