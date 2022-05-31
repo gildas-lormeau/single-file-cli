@@ -12,11 +12,11 @@
 		"build": "./build-lib.sh"
 	},
 	"repository": {
-	  "type": "git",
-	  "url": "git+https://github.com/gildas-lormeau/single-file-cli.git"
+		"type": "git",
+		"url": "git+https://github.com/gildas-lormeau/single-file-cli.git"
 	},
 	"bugs": {
-	  "url": "https://github.com/gildas-lormeau/single-file-cli/issues"
+		"url": "https://github.com/gildas-lormeau/single-file-cli/issues"
 	},
 	"homepage": "https://github.com/gildas-lormeau/single-file-cli#readme",
 	"dependencies": {
