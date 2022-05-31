@@ -110,7 +110,7 @@ async function initialize(options) {
 	}
 	return {
 		capture: urls => capture(urls, options),
-		finish: () => finish(options),
+		finish: () => finish(options)
 	};
 }
 
