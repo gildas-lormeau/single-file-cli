@@ -12,7 +12,7 @@ Alternatively, it can also emulate a browser with JavaScript disabled by using
 
 ## Installation with Docker
 
- - Installation from Docker Hub
+- Installation from Docker Hub
 
   `docker pull capsulecode/singlefile`
 
