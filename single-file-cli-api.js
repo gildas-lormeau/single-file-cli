@@ -33,7 +33,6 @@ const DEFAULT_OPTIONS = {
 	removeUnusedStyles: true,
 	removeUnusedFonts: true,
 	removeFrames: false,
-	removeImports: true,
 	compressHTML: true,
 	compressCSS: false,
 	loadDeferredImages: true,

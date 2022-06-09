@@ -81,7 +81,6 @@ const args = require("yargs")
 		"remove-unused-styles": true,
 		"remove-unused-fonts": true,
 		"remove-frames": false,
-		"remove-imports": true,
 		"block-scripts": true,
 		"block-audios": true,
 		"block-videos": true,
@@ -213,8 +212,6 @@ const args = require("yargs")
 	.boolean("remove-unused-styles")
 	.options("remove-unused-fonts", { description: "Remove unused CSS font rules" })
 	.boolean("remove-unused-fonts")
-	.options("remove-imports", { description: "Remove HTML imports" })
-	.boolean("remove-imports")
 	.options("block-scripts", { description: "Block scripts" })
 	.boolean("block-scripts")
 	.options("block-audios", { description: "Block audio elements" })
