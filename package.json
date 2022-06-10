@@ -9,7 +9,8 @@
 		"single-file": "./single-file"
 	},
 	"scripts": {
-		"build": "./build-lib.sh"
+		"build": "./build-lib.sh",
+		"prepublishOnly": "./build-lib.sh"
 	},
 	"repository": {
 		"type": "git",
