@@ -28,7 +28,6 @@ const fs = require("fs");
 const SCRIPTS = [
 	"lib/single-file.js",
 	"lib/single-file-bootstrap.js",
-	"lib/single-file-hooks.js",
 	"lib/single-file-hooks-frames.js"
 ];
 
