@@ -65,6 +65,7 @@ const args = require("yargs")
 		"filename-max-length": 192,
 		"filename-max-length-unit": "bytes",
 		"group-duplicate-images": true,
+		"max-size-duplicate-images": 512 * 1024,
 		"http-header": [],
 		"include-infobar": false,
 		"insert-meta-csp": true,
@@ -180,6 +181,8 @@ const args = require("yargs")
 	.string("filename-max-length-unit")
 	.options("group-duplicate-images", { description: "Group duplicate images into CSS custom properties" })
 	.boolean("group-duplicate-images")
+	.options("max-size-duplicate-images", { description: "Maximum sie in bytes of duplicate images stored as CSS custom properties" })
+	.number("max-size-duplicate-images")
 	.options("http-header", { description: "Extra HTTP header (puppeteer, jsdom)" })
 	.array("http-header")
 	.options("include-BOM", { description: "Include the UTF-8 BOM into the HTML page" })
