@@ -65,7 +65,7 @@ const DEFAULT_OPTIONS = {
 	insertSingleFileComment: true,
 	blockImages: false,
 	blockStylesheets: false,
-	blockFont: false,
+	blockFonts: false,
 	blockScripts: true,
 	blockVideos: true,
 	blockAudios: true
