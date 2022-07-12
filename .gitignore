@@ -3,3 +3,4 @@
 **/chromedriver
 **/chromedriver.exe
 **/geckodriver.exe
+.idea

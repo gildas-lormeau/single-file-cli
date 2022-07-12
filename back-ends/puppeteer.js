@@ -63,7 +63,9 @@ exports.closeBrowser = () => {
 };
 
 function getBrowserOptions(options = {}) {
-	const browserOptions = {};
+	const browserOptions = {
+		ignoreHTTPSErrors: true
+	};
 	if (options.browserHeadless !== undefined) {
 		browserOptions.headless = options.browserHeadless && !options.browserDebug;
 	}
