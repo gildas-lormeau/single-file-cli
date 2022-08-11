@@ -50,7 +50,7 @@ exports.getPageData = async (options, page) => {
 		await setPageOptions(page, options);
 		return await getPageData(browser, page, options);
 	} finally {
-		if (privatePage) {
+		if (privatePage && !options.browserDebug) {
 			await page.close();
 		}
 	}

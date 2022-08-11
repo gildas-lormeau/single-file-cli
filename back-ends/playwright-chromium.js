@@ -45,7 +45,7 @@ exports.getPageData = async options => {
 		await setPageOptions(page, options);
 		return await getPageData(page, options);
 	} finally {
-		if (page) {
+		if (page && !options.browserDebug) {
 			await page.close();
 		}
 	}
@@ -81,7 +81,7 @@ async function setPageOptions(page, options) {
 			width: options.browserWidth,
 			height: options.browserHeight
 		});
-	}	
+	}
 	if (options.httpHeaders) {
 		page.setExtraHTTPHeaders(options.httpHeaders);
 	}

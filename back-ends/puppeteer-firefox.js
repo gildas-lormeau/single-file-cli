@@ -42,7 +42,7 @@ exports.getPageData = async options => {
 		await setPageOptions(page, options);
 		return await getPageData(browser, page, options);
 	} finally {
-		if (page) {
+		if (page && !options.browserDebug) {
 			await page.close();
 		}
 	}
