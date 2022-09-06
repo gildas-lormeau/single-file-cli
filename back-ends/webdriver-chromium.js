@@ -158,11 +158,7 @@ function getPageDataScript() {
 		.catch(error => callback({ error: error && error.toString() }));
 
 	async function getPageData() {
-		const pageData = await singlefile.getPageData(options);
-		if (options.includeInfobar) {
-			await infobar.includeScript(pageData);
-		}
-		return pageData;
+		return await singlefile.getPageData(options);
 	}
 	`;
 }

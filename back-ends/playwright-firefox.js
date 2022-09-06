@@ -21,7 +21,7 @@
  *   Source.
  */
 
-/* global singlefile, infobar, require, exports */
+/* global singlefile, require, exports */
 
 const playwright = require("playwright").firefox;
 const scripts = require("./common/scripts.js");
@@ -104,10 +104,6 @@ async function getPageData(page, options) {
 		await page.waitForTimeout(options.browserWaitDelay);
 	}
 	return await page.evaluate(async options => {
-		const pageData = await singlefile.getPageData(options);
-		if (options.includeInfobar) {
-			await infobar.includeScript(pageData);
-		}
-		return pageData;
+		return await singlefile.getPageData(options);
 	}, options);
 }
