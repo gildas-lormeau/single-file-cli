@@ -72,7 +72,7 @@ Alternatively, it can also emulate a browser with JavaScript disabled by using
 
   - Download and install globally with `npm`
 
-    `npm install -g "gildas-lormeau/single-file-cli"`
+    `npm install -g "single-file-cli"`
 
   - Download and unzip manually the
     [master archive](https://github.com/gildas-lormeau/single-file-cli/archive/master.zip)
