@@ -23,19 +23,19 @@
 	"dependencies": {
 		"file-url": "3.0.0",
 		"iconv-lite": "0.6.3",
-		"jsdom": "20.0.0",
-		"puppeteer-core": "16.2.0",
-		"selenium-webdriver": "4.4.0",
-		"single-file-core": "1.0.22",
+		"jsdom": "20.0.1",
+		"puppeteer-core": "19.0.0",
+		"selenium-webdriver": "4.5.0",
+		"single-file-core": "1.0.23",
 		"strong-data-uri": "1.0.6",
-		"yargs": "17.5.1"
+		"yargs": "17.6.0"
 	},
 	"devDependencies": {
 		"@rollup/plugin-node-resolve": "15.0.0",
 		"rollup": "2.79.1",
 		"rollup-plugin-terser": "7.0.2"
 	},
-    "overrides": {
-        "terser": "^5.15.0"
-    }
+	"overrides": {
+		"terser": "^5.15.0"
+	}
 }
