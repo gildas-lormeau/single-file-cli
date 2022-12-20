@@ -86,7 +86,9 @@ async function setPageOptions(page, options) {
 		page.setExtraHTTPHeaders(options.httpHeaders);
 	}
 	if (options.emulateMediaFeatures) {
-		await page.emulateMediaFeatures(options.emulateMediaFeatures);
+		await page.emulateMedia({
+			features: options.emulateMediaFeatures
+		});
 	}
 }
 
