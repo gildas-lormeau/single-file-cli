@@ -80,7 +80,8 @@ const backEnds = {
 	"webdriver-chromium": "./back-ends/webdriver-chromium.js",
 	"webdriver-gecko": "./back-ends/webdriver-gecko.js",
 	"playwright-firefox": "./back-ends/playwright-firefox.js",
-	"playwright-chromium": "./back-ends/playwright-chromium.js"
+	"playwright-chromium": "./back-ends/playwright-chromium.js",
+	"playwright-webkit": "./back-ends/playwright-webkit.js"
 };
 
 let backend, tasks = [], maxParallelWorkers = 8, sessionFilename;
