@@ -90,6 +90,7 @@ async function setPageOptions(page, options) {
 			features: options.emulateMediaFeatures
 		});
 	}
+	options.browserWaitUntil = "load";
 }
 
 async function getPageData(page, options) {

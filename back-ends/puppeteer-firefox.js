@@ -98,6 +98,7 @@ async function setPageOptions(page, options) {
 			// ignored
 		}
 	}
+	options.browserWaitUntil = "load";
 }
 
 async function getPageData(browser, page, options) {
