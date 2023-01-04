@@ -37,9 +37,21 @@ exports.initialize = async options => {
 exports.getPageData = async options => {
 	let page, context;
 	try {
-		context = await browser.newContext({
+		const contextOptions = {
 			bypassCSP: options.browserBypassCSP === undefined || options.browserBypassCSP
-		});
+		};
+		if (options.httpProxyServer) {
+			contextOptions.proxy = {
+				server: options.httpProxyServer
+			};
+			if (options.httpProxyUsername) {
+				contextOptions.proxy.username = options.httpProxyUsername;
+			}
+			if (options.httpProxyPassword) {
+				contextOptions.proxy.password = options.httpProxyPassword;
+			}
+		}
+		context = await browser.newContext(contextOptions);
 		await setContextOptions(context, options);
 		page = await context.newPage();
 		await setPageOptions(page, options);

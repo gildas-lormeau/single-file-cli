@@ -30,7 +30,7 @@ const EXECUTION_CONTEXT_DESTROYED_ERROR = "Execution context was destroyed";
 const NETWORK_IDLE_STATE = "networkidle0";
 const NETWORK_STATES = ["networkidle0", "networkidle2", "load", "domcontentloaded"];
 
-let browser;
+let browser, context;
 
 exports.initialize = async options => {
 	if (options.browserServer) {
@@ -45,10 +45,15 @@ exports.getPageData = async (options, page) => {
 	const privatePage = !page;
 	try {
 		if (privatePage) {
-			page = await browser.newPage();
+			const contextOptions = {};
+			if (options.httpProxyServer) {
+				contextOptions.proxyServer = options.httpProxyServer;
+			}
+			context = await browser.createIncognitoBrowserContext(contextOptions);
+			page = await context.newPage();
 		}
 		await setPageOptions(page, options);
-		return await getPageData(browser, page, options);
+		return await getPageData(context || browser, page, options);
 	} finally {
 		if (privatePage && !options.browserDebug) {
 			await page.close();
@@ -109,9 +114,15 @@ async function setPageOptions(page, options) {
 	if (options.emulateMediaFeatures) {
 		await page.emulateMediaFeatures(options.emulateMediaFeatures);
 	}
+	if (options.httpProxyServer && (options.httpProxyUsername || options.httpProxyPassword)) {
+		await page.authenticate({
+			username: options.httpProxyUsername,
+			password: options.httpProxyPassword
+		});
+	}
 }
 
-async function getPageData(browser, page, options) {
+async function getPageData(context, page, options) {
 	const injectedScript = await scripts.get(options);
 	await page.evaluateOnNewDocument(injectedScript);
 	if (options.browserDebug) {
@@ -124,7 +135,7 @@ async function getPageData(browser, page, options) {
 			const browserWaitUntil = NETWORK_STATES[(NETWORK_STATES.indexOf(options.browserWaitUntil) + 1)];
 			if (browserWaitUntil) {
 				options.browserWaitUntil = browserWaitUntil;
-				return getPageData(browser, page, options);
+				return getPageData(context, page, options);
 			} else {
 				throw error;
 			}
@@ -141,7 +152,7 @@ async function getPageData(browser, page, options) {
 		}, options);
 	} catch (error) {
 		if (error.message && error.message.includes(EXECUTION_CONTEXT_DESTROYED_ERROR)) {
-			const pageData = await handleJSRedirect(browser, options);
+			const pageData = await handleJSRedirect(context, options);
 			if (pageData) {
 				return pageData;
 			} else {
@@ -153,8 +164,8 @@ async function getPageData(browser, page, options) {
 	}
 }
 
-async function handleJSRedirect(browser, options) {
-	const pages = await browser.pages();
+async function handleJSRedirect(context, options) {
+	const pages = await context.pages();
 	const page = pages[1] || pages[0];
 	try {
 		await pageGoto(page, options);
@@ -166,7 +177,7 @@ async function handleJSRedirect(browser, options) {
 	const url = page.url();
 	if (url != options.url) {
 		options.url = url;
-		await browser.close();
+		await context.close();
 		return exports.getPageData(options);
 	}
 }
