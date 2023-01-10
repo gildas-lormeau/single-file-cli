@@ -37,7 +37,7 @@ async function run(options) {
 		options.url = fileUrl(options.url);
 	}
 	if (options.urlsFile) {
-		urls = fs.readFileSync(options.urlsFile).toString().split("\n");
+		urls = fs.readFileSync(options.urlsFile).toString().split(/\r?\n/);
 	} else {
 		urls = [options.url];
 	}
@@ -57,7 +57,7 @@ async function run(options) {
 
 function parseCookies(textValue) {
 	const httpOnlyRegExp = /^#HttpOnly_(.*)/;
-	return textValue.split(/\r\n|\n/)
+	return textValue.split(/\r?\n/)
 		.filter(line => line.trim() && (!/^#/.test(line) || httpOnlyRegExp.test(line)))
 		.map(line => {
 			const httpOnly = httpOnlyRegExp.test(line);
