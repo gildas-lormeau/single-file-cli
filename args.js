@@ -268,6 +268,7 @@ args.includeBOM = args.includeBom;
 args.crawlReplaceURLs = args.crawlReplaceUrls;
 args.crawlRemoveURLFragment = args.crawlRemoveUrlFragment;
 args.insertMetaCSP = args.insertMetaCsp;
+args.saveOriginalURLs = args.saveOriginalUrls;
 if (args.removeScripts) {
 	args.blockScripts = true;
 }
