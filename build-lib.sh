@@ -1,7 +1,5 @@
 #!/bin/sh
 
-sudo apt install zip jq
-
 npm install
 npm update
 
