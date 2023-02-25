@@ -75,6 +75,8 @@ function getBrowserOptions(options) {
 	if (options.userAgent) {
 		firefoxOptions.setPreference("general.useragent.override", options.userAgent);
 	}
+
+    return firefoxOptions;
 }
 
 async function getPageData(driver, options) {
