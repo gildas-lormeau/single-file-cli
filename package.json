@@ -23,12 +23,12 @@
 	"dependencies": {
 		"file-url": "3.0.0",
 		"iconv-lite": "0.6.3",
-		"jsdom": "21.1.0",
-		"puppeteer-core": "19.5.2",
-		"selenium-webdriver": "4.7.1",
+		"jsdom": "21.1.1",
+		"puppeteer-core": "19.7.5",
+		"selenium-webdriver": "4.8.1",
 		"single-file-core": "1.0.43",
 		"strong-data-uri": "1.0.6",
-		"yargs": "17.6.2"
+		"yargs": "17.7.1"
 	},
 	"devDependencies": {
 		"@rollup/plugin-node-resolve": "15.0.1",
