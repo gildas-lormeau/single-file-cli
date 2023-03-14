@@ -96,7 +96,8 @@ async function getBrowserOptions(options) {
 		}
 	}
 	const resourceLoader = new ResourceLoader({
-		userAgent: options.userAgent
+		userAgent: options.userAgent,
+		strictSSL: options.browserIgnoreInsecureCerts === undefined || !options.browserIgnoreInsecureCerts
 	});
 	const jsdomOptions = {
 		virtualConsole: new VirtualConsole(),

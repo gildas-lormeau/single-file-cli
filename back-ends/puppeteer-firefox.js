@@ -63,6 +63,9 @@ function getBrowserOptions(options) {
 	if (options.browserExecutablePath) {
 		browserOptions.executablePath = options.browserExecutablePath || "firefox";
 	}
+	if (options.browserIgnoreInsecureCerts !== undefined) {
+		browserOptions.ignoreHTTPSErrors = options.browserIgnoreInsecureCerts;
+	}
 	browserOptions.product = "firefox";
 	return browserOptions;
 }

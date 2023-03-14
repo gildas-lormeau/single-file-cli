@@ -24,7 +24,7 @@
 /* global require, exports, process, setTimeout, clearTimeout, Buffer */
 
 const chrome = require("selenium-webdriver/chrome");
-const { Builder } = require("selenium-webdriver");
+const { Builder, Capabilities } = require("selenium-webdriver");
 
 exports.initialize = async () => { };
 
@@ -33,6 +33,7 @@ exports.getPageData = async options => {
 	try {
 		const builder = new Builder();
 		builder.setChromeOptions(getBrowserOptions(options));
+		setBuilderCapabilities(builder, options);
 		driver = builder.forBrowser("chrome").build();
 		return await getPageData(driver, options);
 	} finally {
@@ -43,6 +44,14 @@ exports.getPageData = async options => {
 };
 
 exports.closeBrowser = () => { };
+
+function setBuilderCapabilities(builder, options) {
+	if (options.browserIgnoreInsecureCerts !== undefined && options.browserIgnoreInsecureCerts) {
+		const capabilities = new Capabilities();
+		capabilities.setAcceptInsecureCerts(true);
+		builder.withCapabilities(capabilities);
+	}
+}
 
 function getBrowserOptions(options) {
 	const chromeOptions = new chrome.Options();

@@ -55,6 +55,7 @@ const args = require("yargs")
 		"browser-start-minimized": false,
 		"browser-cookie": [],
 		"browser-cookies-file": "",
+		"browser-ignore-insecure-certs": false,
 		"compress-CSS": false,
 		"compress-HTML": true,
 		"dump-content": false,
@@ -150,6 +151,8 @@ const args = require("yargs")
 	.array("browser-cookie")
 	.options("browser-cookies-file", { description: "Path of the cookies file formatted as a JSON file or a Netscape text file (puppeteer, webdriver-gecko, webdriver-chromium, jsdom)" })
 	.string("browser-cookies-file")
+	.options("browser-ignore-insecure-certs", { description: "Ignore HTTPs errors" })
+	.boolean("browser-ignore-insecure-certs")
 	.options("compress-CSS", { description: "Compress CSS stylesheets" })
 	.boolean("compress-CSS")
 	.options("compress-HTML", { description: "Compress HTML content" })

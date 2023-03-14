@@ -38,7 +38,8 @@ exports.getPageData = async options => {
 	let page, context;
 	try {
 		const contextOptions = {
-			bypassCSP: options.browserBypassCSP === undefined || options.browserBypassCSP
+			bypassCSP: options.browserBypassCSP === undefined || options.browserBypassCSP,
+			ignoreHTTPSErrors: options.browserIgnoreInsecureCerts !== undefined && options.browserIgnoreInsecureCerts
 		};
 		if (options.httpProxyServer) {
 			contextOptions.proxy = {

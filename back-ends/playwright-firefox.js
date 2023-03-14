@@ -38,7 +38,8 @@ exports.getPageData = async options => {
 	let page, context;
 	try {
 		context = await browser.newContext({
-			bypassCSP: options.browserBypassCSP === undefined || options.browserBypassCSP
+			bypassCSP: options.browserBypassCSP === undefined || options.browserBypassCSP,
+			ignoreHTTPSErrors: options.browserIgnoreInsecureCerts !== undefined && options.browserIgnoreInsecureCerts
 		});
 		await setContextOptions(context, options);
 		page = await context.newPage();

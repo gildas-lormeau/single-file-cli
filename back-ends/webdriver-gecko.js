@@ -24,7 +24,7 @@
 /* global require, exports, process, setTimeout, clearTimeout */
 
 const firefox = require("selenium-webdriver/firefox");
-const { Builder, By, Key } = require("selenium-webdriver");
+const { Builder, By, Key, Capabilities } = require("selenium-webdriver");
 
 exports.initialize = async () => { };
 
@@ -33,6 +33,7 @@ exports.getPageData = async options => {
 	try {
 		const builder = new Builder().withCapabilities({ "pageLoadStrategy": "none" });
 		builder.setFirefoxOptions(getBrowserOptions(options));
+		setBuilderCapabilities(builder, options);
 		driver = builder.forBrowser("firefox").build();
 		return await getPageData(driver, options);
 	} finally {
@@ -43,6 +44,14 @@ exports.getPageData = async options => {
 };
 
 exports.closeBrowser = () => { };
+
+function setBuilderCapabilities(builder, options) {
+	if (options.browserIgnoreInsecureCerts !== undefined && options.browserIgnoreInsecureCerts) {
+		const capabilities = new Capabilities();
+		capabilities.setAcceptInsecureCerts(true);
+		builder.withCapabilities(capabilities);
+	}
+}
 
 function getBrowserOptions(options) {
 	const firefoxOptions = new firefox.Options().setBinary(firefox.Channel.NIGHTLY);
@@ -75,8 +84,7 @@ function getBrowserOptions(options) {
 	if (options.userAgent) {
 		firefoxOptions.setPreference("general.useragent.override", options.userAgent);
 	}
-
-    return firefoxOptions;
+	return firefoxOptions;
 }
 
 async function getPageData(driver, options) {
