@@ -32,6 +32,7 @@ const DEFAULT_OPTIONS = {
 	removeHiddenElements: true,
 	removeUnusedStyles: true,
 	removeUnusedFonts: true,
+	removeSavedDate: false,
 	removeFrames: false,
 	compressHTML: true,
 	compressCSS: false,

@@ -85,6 +85,7 @@ const args = require("yargs")
 		"remove-hidden-elements": true,
 		"remove-unused-styles": true,
 		"remove-unused-fonts": true,
+		"remove-saved-date": false,
 		"remove-frames": false,
 		"block-scripts": true,
 		"block-audios": true,
@@ -237,6 +238,8 @@ const args = require("yargs")
 	.boolean("remove-unused-styles")
 	.options("remove-unused-fonts", { description: "Remove unused CSS font rules" })
 	.boolean("remove-unused-fonts")
+	.options("remove-saved-date", { description: "Remove saved date metadata in HTML header" })
+  .boolean("remove-saved-date")
 	.options("block-scripts", { description: "Block scripts" })
 	.boolean("block-scripts")
 	.options("block-audios", { description: "Block audio elements" })
