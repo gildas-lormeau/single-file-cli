@@ -82,6 +82,7 @@ const args = require("yargs")
 		"max-resource-size": 10,
 		"move-styles-in-head": false,
 		"output-directory": "",
+		"output-status": false,
 		"remove-hidden-elements": true,
 		"remove-unused-styles": true,
 		"remove-unused-fonts": true,
@@ -266,6 +267,8 @@ const args = require("yargs")
 	.string("web-driver-executable-path")
 	.options("output-directory", { description: "Path to where to save files, this path must exist." })
 	.string("output-directory")
+  .options("output-status", { description: "Outputs status of snapshot" })
+  .boolean("output-status")
 	.argv;
 args.backgroundSave = true;
 args.compressCSS = args.compressCss;
