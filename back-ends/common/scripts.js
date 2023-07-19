@@ -63,12 +63,29 @@ function initSingleFile() {
 	});
 }
 
+function browserFreezePrototypes() {
+	Object.freeze(Object.prototype);
+	Object.freeze(Function.prototype);
+	Object.freeze(Array.prototype);
+	Object.freeze(String.prototype);
+	Object.freeze(Number.prototype);
+	Object.freeze(Boolean.prototype);
+	Object.freeze(Date.prototype);
+	Object.freeze(RegExp.prototype);
+	Object.freeze(Math.prototype);
+	Object.freeze(Error.prototype);
+	Object.freeze(JSON.prototype);
+}
+
 exports.get = async options => {
 	let scripts = "let _singleFileDefine; if (typeof define !== 'undefined') { _singleFileDefine = define; define = null }";
 	scripts += await readScriptFiles(SCRIPTS, basePath);
 	scripts += await readScriptFiles(options && options.browserScripts ? options.browserScripts : [], "");
 	if (options.browserStylesheets && options.browserStylesheets.length) {
 		scripts += "addEventListener(\"load\",()=>{const styleElement=document.createElement(\"style\");styleElement.textContent=" + JSON.stringify(await readScriptFiles(options.browserStylesheets, "")) + ";document.body.appendChild(styleElement);});";
+	}
+	if (options.browserFreezePrototypes) {
+		scripts += "(" + browserFreezePrototypes.toString() + ")();";
 	}
 	scripts += "if (_singleFileDefine) { define = _singleFileDefine; _singleFileDefine = null }";
 	scripts += "(" + initSingleFile.toString() + ")();";
