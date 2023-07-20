@@ -66,6 +66,7 @@ const args = require("yargs")
 		"filename-replacement-character": "_",
 		"filename-max-length": 192,
 		"filename-max-length-unit": "bytes",
+		"replace-emojis-in-filename": false,
 		"group-duplicate-images": true,
 		"max-size-duplicate-images": 512 * 1024,
 		"http-header": [],
@@ -199,6 +200,8 @@ const args = require("yargs")
 	.number("filename-max-length")
 	.options("filename-max-length-unit", { description: "Specify the unit of the maximum length of the filename ('bytes' or 'chars')" })
 	.string("filename-max-length-unit")
+	.options("replace-emojis-in-filename", { description: "Replace emojis in the filename with their unicode text representation" })
+	.boolean("replace-emojis-in-filename")
 	.options("group-duplicate-images", { description: "Group duplicate images into CSS custom properties" })
 	.boolean("group-duplicate-images")
 	.options("max-size-duplicate-images", { description: "Maximum sie in bytes of duplicate images stored as CSS custom properties" })
