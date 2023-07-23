@@ -79,6 +79,7 @@ const args = require("yargs")
 		"load-deferred-images-dispatch-scroll-event": false,
 		"load-deferred-images-max-idle-time": 1500,
 		"load-deferred-images-keep-zoom-level": false,
+		"load-deferred-images-before-frames": false,
 		"max-parallel-workers": 8,
 		"max-resource-size-enabled": false,
 		"max-resource-size": 10,
@@ -228,6 +229,8 @@ const args = require("yargs")
 	.number("load-deferred-images-max-idle-time")
 	.options("load-deferred-images-keep-zoom-level", { description: "Load deferred images by keeping zoomed out the page" })
 	.boolean("load-deferred-images-keep-zoom-level")
+	.options("load-deferred-images-before-frames", { description: "Load deferred frames before before saving fame contents" })
+	.boolean("load-deferred-images-before-frames")
 	.options("max-parallel-workers", { description: "Maximum number of browsers launched in parallel when processing a list of URLs (cf --urls-file)" })
 	.number("max-parallel-workers")
 	.options("max-resource-size-enabled", { description: "Enable removal of embedded resources exceeding a given size" })
