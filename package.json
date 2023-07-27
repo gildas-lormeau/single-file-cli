@@ -26,7 +26,7 @@
 		"jsdom": "21.1.1",
 		"puppeteer-core": "19.7.5",
 		"selenium-webdriver": "4.8.1",
-		"single-file-core": "1.0.56",
+		"single-file-core": "1.0.57",
 		"strong-data-uri": "1.0.6",
 		"yargs": "17.7.1"
 	},
