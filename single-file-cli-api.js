@@ -25,7 +25,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const scripts = require("./back-ends/common/scripts.js");
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
 const DEFAULT_OPTIONS = {
@@ -253,9 +252,6 @@ async function capturePage(options) {
 	try {
 		let filename;
 		const pageData = await backend.getPageData(options);
-		if (options.includeInfobar) {
-			await includeInfobarScript(pageData);
-		}
 		if (options.output) {
 			filename = getFilename(options.output, options);
 		} else if (options.dumpContent) {
@@ -317,9 +313,4 @@ function getFilename(filename, options, index = 1) {
 
 function escapeRegExp(string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-async function includeInfobarScript(pageData) {
-	const infobarContent = await scripts.getInfobarScript();
-	pageData.content += "<script>document.currentScript.remove();" + infobarContent + "</script>";
 }
