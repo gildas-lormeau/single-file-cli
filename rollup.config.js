@@ -43,13 +43,4 @@ export default [{
 	}],
 	plugins: PLUGINS,
 	external: EXTERNAL
-}, {
-	input: ["single-file-core/single-file-infobar.js"],
-	output: [{
-		file: "lib/single-file-infobar.js",
-		format: "iife",
-		plugins: [terser()]
-	}],
-	plugins: PLUGINS,
-	external: EXTERNAL
 }];
