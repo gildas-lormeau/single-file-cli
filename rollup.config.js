@@ -1,5 +1,7 @@
-import { terser } from "rollup-plugin-terser";
-import resolve from "@rollup/plugin-node-resolve";
+/* global require */
+
+const { terser } = require("rollup-plugin-terser");
+const resolve= require("@rollup/plugin-node-resolve");
 
 const PLUGINS = [resolve({ moduleDirectories: ["node_modules"] })];
 const EXTERNAL = ["single-file-core"];
