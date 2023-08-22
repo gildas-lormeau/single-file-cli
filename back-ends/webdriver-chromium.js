@@ -32,6 +32,9 @@ exports.getPageData = async options => {
 	let driver;
 	try {
 		const builder = new Builder();
+		if (options.webDriverExecutablePath) {
+			builder.setChromeService(new chrome.ServiceBuilder(options.webDriverExecutablePath));
+		}
 		builder.setChromeOptions(getBrowserOptions(options));
 		setBuilderCapabilities(builder, options);
 		driver = builder.forBrowser("chrome").build();
@@ -61,9 +64,6 @@ function getBrowserOptions(options) {
 	}
 	if (options.browserExecutablePath) {
 		chromeOptions.setChromeBinaryPath(options.browserExecutablePath);
-	}
-	if (options.webDriverExecutablePath) {
-		process.env["PATH"] += ";" + options.webDriverExecutablePath.replace(/chromedriver(\.exe)?$/, "");
 	}
 	if (options.browserArgs) {
 		const args = JSON.parse(options.browserArgs);

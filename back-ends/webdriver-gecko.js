@@ -32,6 +32,9 @@ exports.getPageData = async options => {
 	let driver;
 	try {
 		const builder = new Builder().withCapabilities({ "pageLoadStrategy": "none" });
+		if (options.webDriverExecutablePath) {
+			builder.setFirefoxService(new firefox.ServiceBuilder(options.webDriverExecutablePath));
+		}
 		builder.setFirefoxOptions(getBrowserOptions(options));
 		setBuilderCapabilities(builder, options);
 		driver = builder.forBrowser("firefox").build();
@@ -60,9 +63,6 @@ function getBrowserOptions(options) {
 	}
 	if (options.browserExecutablePath) {
 		firefoxOptions.setBinary(options.browserExecutablePath);
-	}
-	if (options.webDriverExecutablePath) {
-		process.env["PATH"] += ";" + options.webDriverExecutablePath.replace(/geckodriver(\.exe)?$/, "");
 	}
 	const extensions = [];
 	if (options.browserDisableWebSecurity === undefined || options.browserDisableWebSecurity) {
