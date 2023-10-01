@@ -68,7 +68,8 @@ const DEFAULT_OPTIONS = {
 	blockFonts: false,
 	blockScripts: true,
 	blockVideos: true,
-	blockAudios: true
+	blockAudios: true,
+	outputStatus: false,
 };
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
