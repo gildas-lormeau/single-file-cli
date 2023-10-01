@@ -44,4 +44,14 @@ export default [{
 	}],
 	plugins: PLUGINS,
 	external: EXTERNAL
+}, {
+	input: ["single-file-core/vendor/zip/zip.min.js"],
+	output: [{
+		file: "lib/single-file-zip.min.js",
+		format: "es",
+		plugins: []
+	}],
+	context: "this",
+	plugins: PLUGINS,
+	external: EXTERNAL
 }];

@@ -21,7 +21,7 @@
  *   Source.
  */
 
-/* global require, exports, URL */
+/* global require, exports, URL, process */
 
 const fs = require("fs");
 const path = require("path");
@@ -62,6 +62,7 @@ const DEFAULT_OPTIONS = {
 	includeBOM: false,
 	insertMetaCSP: true,
 	insertMetaNoIndex: false,
+	password: "",
 	insertSingleFileComment: true,
 	blockImages: false,
 	blockStylesheets: false,
@@ -129,7 +130,7 @@ async function capture(urls, options) {
 async function finish(options) {
 	const promiseTasks = tasks.map(task => task.promise);
 	await Promise.all(promiseTasks);
-	if (options.crawlReplaceURLs) {
+	if (options.crawlReplaceURLs && !options.compressContent) {
 		tasks.forEach(task => {
 			try {
 				let pageContent = fs.readFileSync(task.filename).toString();
@@ -251,11 +252,16 @@ function getHostURL(url) {
 async function capturePage(options) {
 	try {
 		let filename;
+		options.zipScript = fs.readFileSync(require.resolve("./lib/single-file-zip.min.js")).toString();
 		const pageData = await backend.getPageData(options);
 		if (options.output) {
 			filename = getFilename(options.output, options);
 		} else if (options.dumpContent) {
-			console.log(pageData.content); // eslint-disable-line no-console
+			if (options.compressContent) {
+				await new Promise(resolve => process.stdout.write(pageData.content, resolve));
+			} else {
+				console.log(pageData.content); // eslint-disable-line no-console
+			}
 		} else {
 			filename = getFilename(pageData.filename, options);
 		}

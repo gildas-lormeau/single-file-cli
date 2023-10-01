@@ -57,6 +57,7 @@ const args = require("yargs")
 		"browser-cookies-file": "",
 		"browser-ignore-insecure-certs": false,
 		"browser-freeze-prototypes": false,
+		"compress-content": false,
 		"compress-CSS": false,
 		"compress-HTML": true,
 		"dump-content": false,
@@ -85,6 +86,7 @@ const args = require("yargs")
 		"max-resource-size": 10,
 		"move-styles-in-head": false,
 		"output-directory": "",
+		"password": "",
 		"remove-hidden-elements": true,
 		"remove-unused-styles": true,
 		"remove-unused-fonts": true,
@@ -107,7 +109,11 @@ const args = require("yargs")
 		"crawl-max-depth": 1,
 		"crawl-external-links-max-depth": 1,
 		"crawl-replace-urls": false,
-		"crawl-rewrite-rule": []
+		"crawl-rewrite-rule": [],
+		"insert-text-body": false,
+		"create-root-directory": false,
+		"self-extracting-archive": true,
+		"extract-data-from-page": true
 	})
 	.options("back-end", { description: "Back-end to use" })
 	.choices("back-end", ["jsdom", "puppeteer", "webdriver-chromium", "webdriver-gecko", "puppeteer-firefox", "playwright-firefox", "playwright-chromium", "playwright-webkit"])
@@ -159,6 +165,8 @@ const args = require("yargs")
 	.boolean("browser-ignore-insecure-certs")
 	.options("browser-freeze-prototypes", { description: "Freeze prototypes of built-in objects in the page" })
 	.boolean("browser-freeze-prototypes")
+	.options("compress-content", { description: "Compress the output file into a ZIP file" })
+	.boolean("compress-content")
 	.options("compress-CSS", { description: "Compress CSS stylesheets" })
 	.boolean("compress-CSS")
 	.options("compress-HTML", { description: "Compress HTML content" })
@@ -239,6 +247,8 @@ const args = require("yargs")
 	.number("max-resource-size")
 	.options("move-styles-in-head", { description: "Move style elements outside the head element into the head element" })
 	.boolean("move-styles-in-head")
+	.options("password", { description: "Password of the zip file" })
+	.string("password")
 	.options("remove-frames", { description: "Remove frames (puppeteer, webdriver-gecko, webdriver-chromium)" })
 	.boolean("remove-frames")
 	.options("remove-hidden-elements", { description: "Remove HTML elements which are not displayed" })
@@ -248,7 +258,7 @@ const args = require("yargs")
 	.options("remove-unused-fonts", { description: "Remove unused CSS font rules" })
 	.boolean("remove-unused-fonts")
 	.options("remove-saved-date", { description: "Remove saved date metadata in HTML header" })
-  .boolean("remove-saved-date")
+	.boolean("remove-saved-date")
 	.options("block-scripts", { description: "Block scripts" })
 	.boolean("block-scripts")
 	.options("block-audios", { description: "Block audio elements" })
@@ -273,6 +283,14 @@ const args = require("yargs")
 	.boolean("user-script-enabled")
 	.options("web-driver-executable-path", { description: "Path to Selenium WebDriver executable (webdriver-gecko, webdriver-chromium)" })
 	.string("web-driver-executable-path")
+	.options("self-extracting-archive", { description: "Create a self extracting HTML file" })
+	.boolean("self-extracting-archive")
+	.options("insert-text-body", { description: "Insert the text of the page into the self-extracting HTML file" })
+	.boolean("insert-text-body")
+	.options("create-root-directory", { description: "Create a root directory based on the timestamp" })
+	.boolean("create-root-directory")
+	.options("extract-data-from-page", { description: "Extract compressed data from the page instead of fetching the page" })
+	.boolean("extract-data-from-page")
 	.options("output-directory", { description: "Path to where to save files, this path must exist." })
 	.string("output-directory")
 	.argv;

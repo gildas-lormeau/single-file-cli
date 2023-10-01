@@ -151,6 +151,9 @@ async function getPageData(driver, options) {
 	if (result.error) {
 		throw result.error;
 	} else {
+		if (options.compressContent) {
+			result.pageData.content = new Uint8Array(result.pageData.content);
+		}
 		return result.pageData;
 	}
 }

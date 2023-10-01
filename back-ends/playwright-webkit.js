@@ -118,7 +118,9 @@ async function getPageData(page, options) {
 	if (options.browserWaitDelay) {
 		await page.waitForTimeout(options.browserWaitDelay);
 	}
-	return await page.evaluate(async options => {
-		return await singlefile.getPageData(options);
-	}, options);
+	const pageData = await page.evaluate(async options => await singlefile.getPageData(options), options);
+	if (options.compressContent) {
+		pageData.content = new Uint8Array(pageData.content);
+	}
+	return pageData;
 }

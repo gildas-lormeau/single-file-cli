@@ -84,6 +84,9 @@ async function getPageData(win, options) {
 		await new Promise(resolve => setTimeout(resolve, options.browserWaitDelay));
 	}
 	const pageData = await win.singlefile.getPageData(options, undefined, doc, win);
+	if (options.compressContent) {
+		pageData.content = new Uint8Array(pageData.content);
+	}
 	return pageData;
 }
 
