@@ -62,7 +62,7 @@ const args = require("yargs")
 		"compress-HTML": true,
 		"dump-content": false,
 		"emulateMediaFeature": [],
-		"filename-template": "{page-title} ({date-iso} {time-locale}).html",
+		"filename-template": "{page-title} ({date-iso} {time-locale}).{filename-extension}",
 		"filename-conflict-action": "uniquify",
 		"filename-replacement-character": "_",
 		"filename-max-length": 192,
