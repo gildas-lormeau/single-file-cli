@@ -113,7 +113,8 @@ const args = require("yargs")
 		"insert-text-body": false,
 		"create-root-directory": false,
 		"self-extracting-archive": true,
-		"extract-data-from-page": true
+		"extract-data-from-page": true,
+		"prevent-appended-data": false
 	})
 	.options("back-end", { description: "Back-end to use" })
 	.choices("back-end", ["jsdom", "puppeteer", "webdriver-chromium", "webdriver-gecko", "puppeteer-firefox", "playwright-firefox", "playwright-chromium", "playwright-webkit"])
@@ -289,8 +290,10 @@ const args = require("yargs")
 	.boolean("insert-text-body")
 	.options("create-root-directory", { description: "Create a root directory based on the timestamp" })
 	.boolean("create-root-directory")
-	.options("extract-data-from-page", { description: "Extract compressed data from the page instead of fetching the page" })
+	.options("extract-data-from-page", { description: "Extract compressed data from the page instead of fetching the page in order to create universal self-extracting HTML files" })
 	.boolean("extract-data-from-page")
+	.options("prevent-appended-data", { description: "Prevent appending data after the compressed data when creating self-extracting HTML files" })
+	.boolean("prevent-appended-data")
 	.options("output-directory", { description: "Path to where to save files, this path must exist." })
 	.string("output-directory")
 	.argv;
