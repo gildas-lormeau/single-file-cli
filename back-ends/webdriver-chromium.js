@@ -79,10 +79,10 @@ function getBrowserOptions(options) {
 		}
 		const extensions = [];
 		if (options.browserBypassCSP === undefined || options.browserBypassCSP) {
-			extensions.push(encode(require.resolve("./extensions/signed/bypass_csp-0.0.3-an+fx.xpi")));
+			extensions.push(require.resolve("./extensions/signed/bypass_csp-0.0.3-an+fx.xpi"));
 		}
 		if (options.browserWaitUntil === undefined || options.browserWaitUntil == "networkidle0" || options.browserWaitUntil == "networkidle2") {
-			extensions.push(encode(require.resolve("./extensions/signed/network_idle-0.0.2-an+fx.xpi")));
+			extensions.push(require.resolve("./extensions/signed/network_idle-0.0.2-an+fx.xpi"));
 		}
 		chromeOptions.addExtensions(extensions);
 	}
@@ -156,10 +156,6 @@ async function getPageData(driver, options) {
 		}
 		return result.pageData;
 	}
-}
-
-function encode(file) {
-	return new Buffer.from(require("fs").readFileSync(file)).toString("base64");
 }
 
 function getPageDataScript() {
