@@ -158,10 +158,6 @@ async function getPageData(driver, options) {
 	}
 }
 
-function encode(file) {
-	return new Buffer.from(require("fs").readFileSync(file)).toString("base64");
-}
-
 function getPageDataScript() {
 	return `
 	const [options, callback] = arguments;
