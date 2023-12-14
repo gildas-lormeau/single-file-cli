@@ -21,7 +21,7 @@
  *   Source.
  */
 
-/* global require, exports, setTimeout, clearTimeout, Buffer */
+/* global require, exports, setTimeout, clearTimeout */
 
 const chrome = require("selenium-webdriver/chrome");
 const { Builder, Capabilities } = require("selenium-webdriver");
