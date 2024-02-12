@@ -23,10 +23,10 @@
 	"dependencies": {
 		"file-url": "3.0.0",
 		"iconv-lite": "0.6.3",
-		"jsdom": "23.0.0",
-		"puppeteer-core": "21.5.2",
-		"selenium-webdriver": "4.15.0",
-		"single-file-core": "1.3.18",
+		"jsdom": "24.0.0",
+		"puppeteer-core": "22.0.0",
+		"selenium-webdriver": "4.17.0",
+		"single-file-core": "1.3.21",
 		"strong-data-uri": "1.0.6",
 		"yargs": "17.7.2"
 	},
