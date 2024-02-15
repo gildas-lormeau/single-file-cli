@@ -21,7 +21,7 @@
  *   Source.
  */
 
-/* global singlefile, require, exports */
+/* global singlefile, require, exports, setTimeout */
 
 const puppeteer = require("puppeteer-core");
 const scripts = require("./common/scripts.js");
@@ -108,13 +108,13 @@ async function getPageData(browser, page, options) {
 	const injectedScript = await scripts.get(options);
 	await page.evaluateOnNewDocument(injectedScript);
 	if (options.browserDebug) {
-		await page.waitForTimeout(3000);
+		await new Promise(resolve => setTimeout(resolve, 3000));
 	}
 	await pageGoto(page, options);
 	try {
 		await page.evaluate(injectedScript);
 		if (options.browserWaitDelay) {
-			await page.waitForTimeout(options.browserWaitDelay);
+			await new Promise(resolve => setTimeout(resolve, options.browserWaitDelay));
 		}
 		const pageData = await page.evaluate(async options => await singlefile.getPageData(options), options);
 		if (options.compressContent) {
