@@ -60,7 +60,7 @@ function getBrowserOptions(options) {
 	const chromeOptions = new chrome.Options();
 	const optionHeadless = (options.browserHeadless === undefined || options.browserHeadless) && !options.browserDebug;
 	if (optionHeadless) {
-		chromeOptions.headless();
+		chromeOptions.addArguments("--headless");
 	}
 	if (options.browserExecutablePath) {
 		chromeOptions.setChromeBinaryPath(options.browserExecutablePath);
