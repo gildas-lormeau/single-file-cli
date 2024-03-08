@@ -67,7 +67,7 @@ async function launchBrowser(options = {}, indexPath = 0) {
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
 			if (indexPath + 1 < BROWSER_PATHS[Deno.build.os].length) {
-				await launchBrowser(options = {}, indexPath + 1);
+				await launchBrowser(options, indexPath + 1);
 			} else {
 				throw error;
 			}
