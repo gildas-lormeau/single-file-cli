@@ -1,12 +1,11 @@
-FROM zenika/alpine-chrome:with-node
+FROM zenika/alpine-chrome:with-deno
 
-RUN npm install --production single-file-cli
+RUN git clone --depth 1 --recursive https://github.com/gildas-lormeau/single-file-cli.git
 
-WORKDIR /usr/src/app/node_modules/single-file-cli
+WORKDIR /usr/src/app/single-file-cli
 
 ENTRYPOINT [ \
     "./single-file", \
     "--browser-executable-path", "/usr/bin/chromium-browser", \
     "--output-directory", "./../../out/", \
-    "--browser-args", "[\"--no-sandbox\"]", \
     "--dump-content" ]

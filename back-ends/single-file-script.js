@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2020 Gildas Lormeau
+ * Copyright 2010-2024 Gildas Lormeau
  * contact : gildas.lormeau <at> gmail.com
  * 
  * This file is part of SingleFile.
@@ -21,9 +21,7 @@
  *   Source.
  */
 
-/* global require, exports, singlefile, XMLHttpRequest */
-
-const fs = require("fs");
+/* global Deno, singlefile, XMLHttpRequest */
 
 const SCRIPTS = [
 	"lib/single-file.js",
@@ -33,6 +31,8 @@ const SCRIPTS = [
 ];
 
 const basePath = "./../../";
+
+export { getScriptSource };
 
 function initSingleFile() {
 	singlefile.init({
@@ -78,7 +78,7 @@ function browserFreezePrototypes() {
 	Object.freeze(JSON.prototype);
 }
 
-exports.get = async options => {
+async function getScriptSource(options) {
 	let scripts = "let _singleFileDefine; if (typeof define !== 'undefined') { _singleFileDefine = define; define = null }";
 	scripts += await readScriptFiles(SCRIPTS, basePath);
 	scripts += await readScriptFiles(options && options.browserScripts ? options.browserScripts : [], "");
@@ -91,20 +91,8 @@ exports.get = async options => {
 	scripts += "if (_singleFileDefine) { define = _singleFileDefine; _singleFileDefine = null }";
 	scripts += "(" + initSingleFile.toString() + ")();";
 	return scripts;
-};
-
-async function readScriptFiles(paths, basePath = "../../../") {
-	return (await Promise.all(paths.map(path => readScriptFile(path, basePath)))).join("");
 }
 
-function readScriptFile(path, basePath) {
-	return new Promise((resolve, reject) =>
-		fs.readFile(basePath ? require.resolve(basePath + path) : path, (err, data) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(data.toString() + "\n");
-			}
-		})
-	);
+async function readScriptFiles(paths, basePath = "../../../") {
+	return (await Promise.all(paths.map(path => Deno.readTextFile(path, basePath)))).join("");
 }

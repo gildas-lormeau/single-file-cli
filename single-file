@@ -1,7 +1,7 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-net --allow-env --allow-run
 
 /*
- * Copyright 2010-2020 Gildas Lormeau
+ * Copyright 2010-2024 Gildas Lormeau
  * contact : gildas.lormeau <at> gmail.com
  *
  * This file is part of SingleFile.
@@ -23,26 +23,26 @@
  *   Source.
  */
 
-/* global require */
+/* global Deno */
 
-const fileUrl = require("file-url");
-const fs = require("fs");
-const api = require("./single-file-cli-api");
-run(require("./args"))
-	.catch(error => console.error(error.message || error)); // eslint-disable-line no-console	
+import * as path from "https://deno.land/std/path/mod.ts";
+import { VALID_URL_TEST, initialize } from "./single-file-cli-api.js";
+import args from "./args.js";
 
-async function run(options) {
+await run(args);
+
+async function run(options = {}) {
 	let urls;
-	if (options.url && !api.VALID_URL_TEST.test(options.url)) {
-		options.url = fileUrl(options.url);
+	if (options.url && !VALID_URL_TEST.test(options.url)) {
+		options.url = path.to_file_url(options.url);
 	}
 	if (options.urlsFile) {
-		urls = fs.readFileSync(options.urlsFile).toString().split("\n");
+		urls = (await Deno.readTextFile(options.urlsFile)).split("\n");
 	} else {
 		urls = [options.url];
 	}
 	if (options.browserCookiesFile) {
-		const cookiesContent = fs.readFileSync(options.browserCookiesFile).toString();
+		const cookiesContent = await Deno.readTextFile(options.browserCookiesFile);
 		try {
 			options.browserCookies = JSON.parse(cookiesContent);
 		} catch (error) {
@@ -50,7 +50,7 @@ async function run(options) {
 		}
 	}
 	options.retrieveLinks = true;
-	const singlefile = await api.initialize(options);
+	const singlefile = await initialize(options);
 	await singlefile.capture(urls);
 	await singlefile.finish();
 }

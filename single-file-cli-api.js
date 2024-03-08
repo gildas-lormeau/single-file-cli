@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2020 Gildas Lormeau
+ * Copyright 2010-2024 Gildas Lormeau
  * contact : gildas.lormeau <at> gmail.com
  *
  * This file is part of SingleFile.
@@ -21,10 +21,11 @@
  *   Source.
  */
 
-/* global require, exports, URL, process */
+/* global Deno, URL */
 
-const fs = require("fs");
-const path = require("path");
+import * as path from "https://deno.land/std/path/mod.ts";
+import * as backend from "./back-ends/chromium-back-end.js";
+
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
 const DEFAULT_OPTIONS = {
@@ -74,32 +75,17 @@ const DEFAULT_OPTIONS = {
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
-const backEnds = {
-	jsdom: "./back-ends/jsdom.js",
-	puppeteer: "./back-ends/puppeteer.js",
-	"puppeteer-firefox": "./back-ends/puppeteer-firefox.js",
-	"webdriver-chromium": "./back-ends/webdriver-chromium.js",
-	"webdriver-gecko": "./back-ends/webdriver-gecko.js",
-	"playwright-firefox": "./back-ends/playwright-firefox.js",
-	"playwright-chromium": "./back-ends/playwright-chromium.js",
-	"playwright-webkit": "./back-ends/playwright-webkit.js"
-};
+let tasks = [], maxParallelWorkers, sessionFilename;
 
-let backend, tasks = [], maxParallelWorkers = 8, sessionFilename;
-
-exports.getBackEnd = backEndName => require(backEnds[backEndName]);
-exports.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
-exports.VALID_URL_TEST = VALID_URL_TEST;
-exports.initialize = initialize;
+export { DEFAULT_OPTIONS, VALID_URL_TEST, initialize };
 
 async function initialize(options) {
 	options = Object.assign({}, DEFAULT_OPTIONS, options);
-	maxParallelWorkers = options.maxParallelWorkers;
-	backend = require(backEnds[options.backEnd]);
+	maxParallelWorkers = options.maxParallelWorkers || 8;
 	await backend.initialize(options);
 	if (options.crawlSyncSession || options.crawlLoadSession) {
 		try {
-			tasks = JSON.parse(fs.readFileSync(options.crawlSyncSession || options.crawlLoadSession).toString());
+			tasks = JSON.parse(await Deno.readTextFile(options.crawlSyncSession || options.crawlLoadSession));
 		} catch (error) {
 			if (options.crawlLoadSession) {
 				throw error;
@@ -122,7 +108,7 @@ async function capture(urls, options) {
 	newTasks = newTasks.filter(task => task && !taskUrls.includes(task.url));
 	if (newTasks.length) {
 		tasks = tasks.concat(newTasks);
-		saveTasks();
+		await saveTasks();
 	}
 	await runTasks();
 }
@@ -131,9 +117,9 @@ async function finish(options) {
 	const promiseTasks = tasks.map(task => task.promise);
 	await Promise.all(promiseTasks);
 	if (options.crawlReplaceURLs && !options.compressContent) {
-		tasks.forEach(task => {
+		for (const task of tasks) {
 			try {
-				let pageContent = fs.readFileSync(task.filename).toString();
+				let pageContent = await Deno.readTextFile(task.filename);
 				tasks.forEach(otherTask => {
 					if (otherTask.filename) {
 						pageContent = pageContent.replace(new RegExp(escapeRegExp("\"" + otherTask.originalUrl + "\""), "gi"), "\"" + otherTask.filename + "\"");
@@ -143,11 +129,11 @@ async function finish(options) {
 						pageContent = pageContent.replace(new RegExp(escapeRegExp("=" + otherTask.originalUrl + ">"), "gi"), "=" + filename + ">");
 					}
 				});
-				fs.writeFileSync(task.filename, pageContent);
+				await Deno.writeTextFile(task.filename, pageContent);
 			} catch (error) {
 				// ignored
 			}
-		});
+		}
 	}
 	if (!options.browserDebug) {
 		return backend.closeBrowser();
@@ -171,7 +157,7 @@ async function runNextTask() {
 		let taskOptions = JSON.parse(JSON.stringify(options));
 		taskOptions.url = task.url;
 		task.status = STATE_PROCESSING;
-		saveTasks();
+		await saveTasks();
 		task.promise = capturePage(taskOptions);
 		const pageData = await task.promise;
 		task.status = STATE_PROCESSED;
@@ -188,7 +174,7 @@ async function runNextTask() {
 				tasks.splice(tasks.length, 0, ...newTasks);
 			}
 		}
-		saveTasks();
+		await saveTasks();
 		await runTasks();
 	}
 }
@@ -218,9 +204,9 @@ function createTask(url, options, parentTask, rootTask) {
 	}
 }
 
-function saveTasks() {
+async function saveTasks() {
 	if (sessionFilename) {
-		fs.writeFileSync(sessionFilename, JSON.stringify(
+		await Deno.writeTextFile(sessionFilename, JSON.stringify(
 			tasks.map(task => Object.assign({}, task, {
 				status: task.status == STATE_PROCESSING ? undefined : task.status,
 				promise: undefined,
@@ -252,38 +238,38 @@ function getHostURL(url) {
 async function capturePage(options) {
 	try {
 		let filename;
-		options.zipScript = fs.readFileSync(require.resolve("./lib/single-file-zip.min.js")).toString();
+		options.zipScript = await Deno.readTextFile("./lib/single-file-zip.min.js");
 		const pageData = await backend.getPageData(options);
 		if (options.output) {
-			filename = getFilename(options.output, options);
+			filename = await getFilename(options.output, options);
 		} else if (options.dumpContent) {
 			if (options.compressContent) {
-				await new Promise(resolve => process.stdout.write(pageData.content, resolve));
+				await Deno.stdout.write(pageData.content);
 			} else {
 				console.log(pageData.content); // eslint-disable-line no-console
 			}
 		} else {
-			filename = getFilename(pageData.filename, options);
+			filename = await getFilename(pageData.filename, options);
 		}
 		if (filename) {
 			const dirname = path.dirname(filename);
 			if (dirname) {
-				fs.mkdirSync(dirname, { recursive: true });
+				await Deno.mkdir(dirname, { recursive: true });
 			}
-			fs.writeFileSync(filename, pageData.content);
+			await Deno.writeTextFile(filename, pageData.content);
 		}
 		return pageData;
 	} catch (error) {
 		const message = "URL: " + options.url + "\nStack: " + error.stack + "\n";
 		if (options.errorFile) {
-			fs.writeFileSync(options.errorFile, message, { flag: "a" });
+			await Deno.writeTextFile(options.errorFile, message, { append: true });
 		} else {
 			console.error(error.message || error, message); // eslint-disable-line no-console
 		}
 	}
 }
 
-function getFilename(filename, options, index = 1) {
+async function getFilename(filename, options, index = 1) {
 	if (Array.isArray(options.outputDirectory)) {
 		const outputDirectory = options.outputDirectory.pop();
 		if (outputDirectory.startsWith("/")) {
@@ -308,11 +294,12 @@ function getFilename(filename, options, index = 1) {
 			newFilename += " (" + index + ")";
 		}
 	}
-	if (fs.existsSync(newFilename)) {
+	try {
+		await Deno.stat(newFilename);
 		if (options.filenameConflictAction != "skip") {
 			return getFilename(filename, options, index + 1);
 		}
-	} else {
+	} catch (_) {
 		return newFilename;
 	}
 }

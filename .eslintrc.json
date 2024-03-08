@@ -1,6 +1,4 @@
-/* global module */
-
-module.exports = {
+{
 	"env": {
 		"es6": true,
 		"node": false,
@@ -11,7 +9,7 @@ module.exports = {
 	},
 	"extends": "eslint:recommended",
 	"parserOptions": {
-		"ecmaVersion": 2017,
+		"ecmaVersion": 2022,
 		"sourceType": "module"
 	},
 	"ignorePatterns": [
@@ -20,7 +18,8 @@ module.exports = {
 	"rules": {
 		"indent": [
 			"error",
-			"tab", {
+			"tab",
+			{
 				"SwitchCase": 1
 			}
 		],
@@ -40,4 +39,4 @@ module.exports = {
 			"warn"
 		]
 	}
-};
+}

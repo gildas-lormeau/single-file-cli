@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2020 Gildas Lormeau
+ * Copyright 2010-2024 Gildas Lormeau
  * contact : gildas.lormeau <at> gmail.com
  *
  * This file is part of SingleFile.
@@ -21,9 +21,11 @@
  *   Source.
  */
 
-/* global require, module */
+/* global Deno */
 
-const args = require("yargs")
+import yargs from "npm:yargs";
+
+const args = yargs(Deno.args)
 	.wrap(null)
 	.command("$0 [url] [output]", "Save a page into a single HTML file.", yargs => {
 		yargs.positional("url", { description: "URL or path on the filesystem of the page to save", type: "string" });
@@ -46,7 +48,7 @@ const args = require("yargs")
 		"browser-height": 720,
 		"browser-load-max-time": 60000,
 		"browser-wait-delay": 0,
-		"browser-wait-until": "networkidle0",
+		"browser-wait-until": "networkIdle",
 		"browser-wait-until-fallback": true,
 		"browser-debug": false,
 		"browser-script": [],
@@ -145,7 +147,7 @@ const args = require("yargs")
 	.options("browser-wait-delay", { description: "Time to wait before capturing the page in ms" })
 	.number("browser-wait-delay")
 	.options("browser-wait-until", { description: "When to consider the page is loaded (puppeteer, webdriver-gecko, webdriver-chromium)" })
-	.choices("browser-wait-until", ["networkidle0", "networkidle2", "load", "domcontentloaded"])
+	.choices("browser-wait-until", ["networkIdle", "networkAlmostIdle", "load", "DOMContentLoaded"])
 	.options("browser-wait-until-fallback", { description: "Retry with the next value of --browser-wait-until when a timeout error is thrown" })
 	.boolean("browser-wait-until-fallback")
 	.options("browser-debug", { description: "Enable debug mode (puppeteer, webdriver-gecko, webdriver-chromium)" })
@@ -297,6 +299,7 @@ const args = require("yargs")
 	.options("output-directory", { description: "Path to where to save files, this path must exist." })
 	.string("output-directory")
 	.argv;
+
 args.backgroundSave = true;
 args.compressCSS = args.compressCss;
 args.compressHTML = args.compressHtml;
@@ -305,15 +308,6 @@ args.crawlReplaceURLs = args.crawlReplaceUrls;
 args.crawlRemoveURLFragment = args.crawlRemoveUrlFragment;
 args.insertMetaCSP = args.insertMetaCsp;
 args.saveOriginalURLs = args.saveOriginalUrls;
-if (args.removeScripts) {
-	args.blockScripts = true;
-}
-if (args.removeAudioSrc) {
-	args.blockAudios = true;
-}
-if (args.removeVideoSrc) {
-	args.blockVideos = true;
-}
 const headers = args.httpHeader;
 delete args.httpHeader;
 args.httpHeaders = {};
@@ -358,4 +352,5 @@ Object.keys(args).filter(optionName => optionName.includes("-"))
 	.forEach(optionName => delete args[optionName]);
 delete args["$0"];
 delete args["_"];
-module.exports = args;
+
+export default args;
