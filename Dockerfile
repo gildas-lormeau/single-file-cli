@@ -15,5 +15,5 @@ ENTRYPOINT [ \
     "--allow-run", \
     "./single-file", \
     "--browser-executable-path", "/usr/bin/chromium-browser", \
-    "--output-directory", "./../../out/", \
+    "--output-directory", "./../out/", \
     "--dump-content" ]
