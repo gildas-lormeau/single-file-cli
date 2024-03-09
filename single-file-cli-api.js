@@ -25,6 +25,7 @@
 
 import * as path from "https://deno.land/std/path/mod.ts";
 import * as backend from "./back-ends/chromium-back-end.js";
+import { zipScript } from "./lib/single-file-bundle.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
@@ -238,7 +239,7 @@ function getHostURL(url) {
 async function capturePage(options) {
 	try {
 		let filename;
-		options.zipScript = await Deno.readTextFile("./lib/single-file-zip.min.js");
+		options.zipScript = zipScript;
 		const pageData = await backend.getPageData(options);
 		if (options.output) {
 			filename = await getFilename(options.output, options);
