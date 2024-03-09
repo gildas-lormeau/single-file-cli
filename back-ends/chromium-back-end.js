@@ -130,9 +130,10 @@ async function getPageData(options) {
 				}
 			});
 		});
-		let timeoutReady, timeoutId;
+		let timeoutReady, timeoutId, resolveTimeoutReady;
 		if (options.browserLoadMaxTime) {
-			timeoutReady = new Promise((_, reject) => {
+			timeoutReady = new Promise((resolve, reject) => {
+				resolveTimeoutReady = resolve;
 				timeoutId = setTimeout(() => {
 					const error = new Error("Load timeout");
 					error.code = LOAD_TIMEOUT_ERROR;
@@ -143,6 +144,7 @@ async function getPageData(options) {
 		await Promise.race([Promise.all([pageNavigated, pageReady, debuggerReady]), timeoutReady]);
 		if (timeoutId) {
 			clearTimeout(timeoutId);
+			resolveTimeoutReady();
 		}
 		const { result } = await cdp.Runtime.evaluate({
 			expression: `singlefile.getPageData(${JSON.stringify(options)})`,
