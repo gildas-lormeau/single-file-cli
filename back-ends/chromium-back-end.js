@@ -152,7 +152,7 @@ async function getPageData(options) {
 			returnByValue: true,
 			executionContextName: "singlefile"
 		});
-		const { value } = await result;
+		const { value } = result;
 		if (options.compressContent) {
 			value.content = new Uint8Array(value.content);
 		}
