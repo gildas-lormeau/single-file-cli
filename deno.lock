@@ -2,12 +2,22 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "npm:simple-cdp": "npm:simple-cdp@1.7.16"
+      "jsr:@simple-cdp/simple-cdp@^1.7.16": "jsr:@simple-cdp/simple-cdp@1.7.16",
+      "jsr:@std/assert@^0.219.1": "jsr:@std/assert@0.219.1",
+      "jsr:@std/path@^0.219.1": "jsr:@std/path@0.219.1"
     },
-    "npm": {
-      "simple-cdp@1.7.16": {
-        "integrity": "sha512-v0WkcXEBcN+6CLT1tQRtg3RFp+nCQorgTFqLUnRlKjbAolVHIw3H01AsW4AXFlxmE51iYsoaaeNciEp9wnSdMA==",
-        "dependencies": {}
+    "jsr": {
+      "@simple-cdp/simple-cdp@1.7.16": {
+        "integrity": "44eeb576470eb5f21d3b4f4317da1d098745795224ef4d0cb8b8d6547e43fbd5"
+      },
+      "@std/assert@0.219.1": {
+        "integrity": "e76c2a1799a78f0f4db7de04bdc9b908a7a4b821bb65eda0285885297d4fb8af"
+      },
+      "@std/path@0.219.1": {
+        "integrity": "e5c0ffef3a8ef2b48e9e3d88a1489320e8fb2cc7be767b17c91a1424ffb4c8ed",
+        "dependencies": [
+          "jsr:@std/assert@^0.219.1"
+        ]
       }
     }
   },
