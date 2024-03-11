@@ -1,5 +1,5 @@
 {
-  "name": "single-file-cli",
+  "name": "@single-file/single-file-cli",
   "version": "2.0.0",
   "description": "SingleFile CLI",
   "nodeModulesDir": true
