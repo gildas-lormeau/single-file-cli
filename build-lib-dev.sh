@@ -1,6 +1,7 @@
 #!/bin/sh
 
-deno vendor "npm:single-file-core"
+mkdir -p node_modules/single-file-core
+cp -R ../single-file-core/* node_modules/single-file-core
 
 echo "
 import { build } from 'npm:esbuild';
