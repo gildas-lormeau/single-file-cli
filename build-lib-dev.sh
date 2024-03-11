@@ -77,6 +77,6 @@ script += 'const zipScript = ' + JSON.stringify(zipScript) + ';';
 script += 'export { script, zipScript };';
 await Deno.writeTextFile(new URL('lib/single-file-bundle.js', import.meta.url), script)
 await Promise.all(SCRIPTS.map(script => Deno.remove(script)));
-" |  deno run --allow-read --allow-write --allow-net --allow-run --allow-env -
+" |  deno run --allow-read --allow-write --allow-net --allow-run --allow-env --lock=node_modules/deno.lock.tmp -
 
 rm -rf node_modules
