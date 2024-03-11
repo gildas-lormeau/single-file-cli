@@ -1,5 +1,6 @@
 {
-    "name": "single-file-cli",
-    "version": "2.0.0",
-    "description": "SingleFile CLI"
+  "name": "single-file-cli",
+  "version": "2.0.0",
+  "description": "SingleFile CLI",
+  "nodeModulesDir": true
 }
