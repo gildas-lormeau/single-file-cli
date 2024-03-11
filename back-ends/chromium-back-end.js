@@ -23,7 +23,7 @@
 
 /* global setTimeout, clearTimeout */
 
-import { CDP } from "npm:simple-cdp";
+import { CDP } from "jsr:@simple-cdp/simple-cdp@^1.7.16";
 import { launchBrowser, closeBrowser } from "./chromium-browser.js";
 import { getScriptSource } from "./single-file-script.js";
 
