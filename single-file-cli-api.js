@@ -23,7 +23,7 @@
 
 /* global Deno, URL */
 
-import * as path from "https://deno.land/std/path/mod.ts";
+import { dirname } from "jsr:@std/path@^0.219.1";
 import * as backend from "./back-ends/chromium-back-end.js";
 import { zipScript } from "./lib/single-file-bundle.js";
 
@@ -253,9 +253,9 @@ async function capturePage(options) {
 			filename = await getFilename(pageData.filename, options);
 		}
 		if (filename) {
-			const dirname = path.dirname(filename);
-			if (dirname) {
-				await Deno.mkdir(dirname, { recursive: true });
+			const directoryName = dirname(filename);
+			if (directoryName) {
+				await Deno.mkdir(directoryName, { recursive: true });
 			}
 			await Deno.writeTextFile(filename, pageData.content);
 		}
