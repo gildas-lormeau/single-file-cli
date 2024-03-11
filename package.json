@@ -3,6 +3,9 @@
 	"version": "2.0.0",
 	"description": "SingleFile CLI",
 	"author": "Gildas Lormeau",
+	"engines": {
+		"deno": ">=1.4"
+	},
 	"scripts": {
 		"build": "./build-lib.sh",
 		"build-dev": "./build-lib-dev.sh",
