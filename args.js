@@ -153,6 +153,18 @@ function getOptions() {
 			}
 		}
 	});
+	options.acceptHeaders = {
+		font: options.acceptHeaderFont,
+		image: options.acceptHeaderImage,
+		stylesheet: options.acceptHeaderStylesheet,
+		script: options.acceptHeaderScript,
+		document: options.acceptHeaderDocument
+	};
+	delete options.acceptHeaderFont;
+	delete options.acceptHeaderImage;
+	delete options.acceptHeaderStylesheet;
+	delete options.acceptHeaderScript;
+	delete options.acceptHeaderDocument;
 	return { ...options, url: positionals[0], output: positionals[1] };
 }
 
