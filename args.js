@@ -23,329 +23,234 @@
 
 /* global Deno */
 
-import yargs from "npm:yargs";
+const USAGE_TEXT = `single-file [url] [output]
 
-const args = yargs(Deno.args)
-	.wrap(null)
-	.command("$0 [url] [output]", "Save a page into a single HTML file.", yargs => {
-		yargs.positional("url", { description: "URL or path on the filesystem of the page to save", type: "string" });
-		yargs.positional("output", { description: "Output filename", type: "string" });
-	})
-	.default({
-		"accept-headers": {
-			"font": "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8",
-			"image": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-			"stylesheet": "text/css,*/*;q=0.1",
-			"script": "*/*",
-			"document": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-		},
-		"block-mixed-content": false,
-		"browser-server": "",
-		"browser-headless": true,
-		"browser-executable-path": "",
-		"browser-width": 1280,
-		"browser-height": 720,
-		"browser-load-max-time": 60000,
-		"browser-wait-delay": 0,
-		"browser-wait-until": "networkIdle",
-		"browser-wait-until-fallback": true,
-		"browser-debug": false,
-		"browser-script": [],
-		"browser-stylesheet": [],
-		"browser-args": "",
-		"browser-start-minimized": false,
-		"browser-cookie": [],
-		"browser-cookies-file": "",
-		"browser-ignore-insecure-certs": false,
-		"browser-freeze-prototypes": false,
-		"compress-content": false,
-		"compress-CSS": false,
-		"compress-HTML": true,
-		"dump-content": false,
-		"emulateMediaFeature": [],
-		"filename-template": "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}",
-		"filename-conflict-action": "uniquify",
-		"filename-replacement-character": "_",
-		"filename-max-length": 192,
-		"filename-max-length-unit": "bytes",
-		"replace-emojis-in-filename": false,
-		"group-duplicate-images": true,
-		"max-size-duplicate-images": 512 * 1024,
-		"http-header": [],
-		"http-proxy-server": "",
-		"http-proxy-username": "",
-		"http-proxy-password": "",
-		"include-infobar": false,
-		"insert-meta-csp": true,
-		"load-deferred-images": true,
-		"load-deferred-images-dispatch-scroll-event": false,
-		"load-deferred-images-max-idle-time": 1500,
-		"load-deferred-images-keep-zoom-level": false,
-		"load-deferred-images-before-frames": false,
-		"max-parallel-workers": 8,
-		"max-resource-size-enabled": false,
-		"max-resource-size": 10,
-		"move-styles-in-head": false,
-		"output-directory": "",
-		"password": "",
-		"remove-hidden-elements": true,
-		"remove-unused-styles": true,
-		"remove-unused-fonts": true,
-		"remove-saved-date": false,
-		"remove-frames": false,
-		"block-scripts": true,
-		"block-audios": true,
-		"block-videos": true,
-		"remove-alternative-fonts": true,
-		"remove-alternative-medias": true,
-		"remove-alternative-images": true,
-		"save-original-urls": false,
-		"save-raw-page": false,
-		"web-driver-executable-path": "",
-		"user-script-enabled": true,
-		"include-BOM": false,
-		"crawl-links": false,
-		"crawl-inner-links-only": true,
-		"crawl-remove-url-fragment": true,
-		"crawl-max-depth": 1,
-		"crawl-external-links-max-depth": 1,
-		"crawl-replace-urls": false,
-		"crawl-rewrite-rule": [],
-		"insert-text-body": false,
-		"create-root-directory": false,
-		"self-extracting-archive": true,
-		"extract-data-from-page": true,
-		"prevent-appended-data": false
-	})
-	.options("block-audios", { description: "Block audios" })
-	.boolean("block-audios")
-	.options("block-fonts", { description: "Block fonts" })
-	.boolean("block-fonts")
-	.options("block-images", { description: "Block images" })
-	.boolean("block-images")
-	.options("block-scripts", { description: "Block scripts" })
-	.boolean("block-scripts")
-	.options("block-videos", { description: "Block videos" })
-	.boolean("block-videos")
-	.options("block-mixed-content", { description: "Block mixed contents" })
-	.boolean("block-mixed-content")
-	.options("browser-server", { description: "Server to connect to" })
-	.string("browser-server")
-	.options("browser-headless", { description: "Run the browser in headless mode" })
-	.boolean("browser-headless")
-	.options("browser-executable-path", { description: "Path to chrome/chromium executable" })
-	.string("browser-executable-path")
-	.options("browser-width", { description: "Width of the browser viewport in pixels" })
-	.number("browser-width")
-	.options("browser-height", { description: "Height of the browser viewport in pixels" })
-	.number("browser-height")
-	.options("browser-load-max-time", { description: "Maximum delay of time to wait for page loading in ms" })
-	.number("browser-load-max-time")
-	.options("browser-wait-delay", { description: "Time to wait before capturing the page in ms" })
-	.number("browser-wait-delay")
-	.options("browser-wait-until", { description: "When to consider the page is loaded" })
-	.choices("browser-wait-until", ["networkIdle", "networkAlmostIdle", "load", "DOMContentLoaded"])
-	.options("browser-wait-until-fallback", { description: "Retry with the next value of --browser-wait-until when a timeout error is thrown" })
-	.boolean("browser-wait-until-fallback")
-	.options("browser-debug", { description: "Enable debug mode" })
-	.boolean("browser-debug")
-	.options("browser-script", { description: "Path of a script executed in the page (and all the frames) before it is loaded" })
-	.array("browser-script")
-	.options("browser-stylesheet", { description: "Path of a stylesheet file inserted into the page (and all the frames) after it is loaded" })
-	.array("browser-stylesheet")
-	.options("browser-args", { description: "Arguments provided as a JSON array and passed to the browser" })
-	.string("browser-args")
-	.options("browser-start-minimized", { description: "Minimize the browser" })
-	.boolean("browser-start-minimized")
-	.options("browser-cookie", { description: "Ordered list of cookie parameters separated by a comma: name,value,domain,path,expires,httpOnly,secure,sameSite,url" })
-	.array("browser-cookie")
-	.options("browser-cookies-file", { description: "Path of the cookies file formatted as a JSON file or a Netscape text file" })
-	.string("browser-cookies-file")
-	.options("browser-ignore-insecure-certs", { description: "Ignore HTTPs errors" })
-	.boolean("browser-ignore-insecure-certs")
-	.options("browser-freeze-prototypes", { description: "Freeze prototypes of built-in objects in the page" })
-	.boolean("browser-freeze-prototypes")
-	.options("compress-content", { description: "Compress the output file into a ZIP file" })
-	.boolean("compress-content")
-	.options("compress-CSS", { description: "Compress CSS stylesheets" })
-	.boolean("compress-CSS")
-	.options("compress-HTML", { description: "Compress HTML content" })
-	.boolean("compress-HTML")
-	.options("crawl-links", { description: "Crawl and save pages found via inner links" })
-	.boolean("crawl-links")
-	.options("crawl-inner-links-only", { description: "Crawl pages found via inner links only if they are hosted on the same domain" })
-	.boolean("crawl-inner-links-only")
-	.options("crawl-no-parent", { description: "Crawl pages found via inner links only if their URLs are not parent of the URL to crawl" })
-	.boolean("crawl-no-parent")
-	.options("crawl-load-session", { description: "Name of the file of the session to load (previously saved with --crawl-save-session or --crawl-sync-session)" })
-	.string("crawl-load-session")
-	.options("crawl-remove-url-fragment", { description: "Remove URL fragments found in links" })
-	.boolean("crawl-remove-url-fragment")
-	.options("crawl-save-session", { description: "Name of the file where to save the state of the session" })
-	.string("crawl-save-session")
-	.options("crawl-sync-session", { description: "Name of the file where to load and save the state of the session" })
-	.string("crawl-sync-session")
-	.options("crawl-max-depth", { description: "Max depth when crawling pages found in internal and external links (0: infinite)" })
-	.number("crawl-max-depth")
-	.options("crawl-external-links-max-depth", { description: "Max depth when crawling pages found in external links (0: infinite)" })
-	.number("crawl-external-links-max-depth")
-	.options("crawl-replace-urls", { description: "Replace URLs of saved pages with relative paths of saved pages on the filesystem" })
-	.boolean("crawl-replace-urls")
-	.options("crawl-rewrite-rule", { description: "Rewrite rule used to rewrite URLs of crawled pages" })
-	.array("crawl-rewrite-rule")
-	.options("dump-content", { description: "Dump the content of the processed page in the console ('true' when running in Docker)" })
-	.boolean("dump-content")
-	.options("emulate-media-feature", { description: "Emulate a media feature. The syntax is <name>:<value>, e.g. \"prefers-color-scheme:dark\"" })
-	.array("emulate-media-feature")
-	.options("error-file")
-	.string("error-file")
-	.options("filename-template", { description: "Template used to generate the output filename (see help page of the extension for more info)" })
-	.string("filename-template")
-	.options("filename-conflict-action", { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"" })
-	.string("filename-conflict-action")
-	.options("filename-replacement-character", { description: "The character used for replacing invalid characters in filenames" })
-	.string("filename-replacement-character")
-	.options("filename-max-length", { description: "Specify the maximum length of the filename" })
-	.number("filename-max-length")
-	.options("filename-max-length-unit", { description: "Specify the unit of the maximum length of the filename ('bytes' or 'chars')" })
-	.string("filename-max-length-unit")
-	.options("replace-emojis-in-filename", { description: "Replace emojis in the filename with their unicode text representation" })
-	.boolean("replace-emojis-in-filename")
-	.options("group-duplicate-images", { description: "Group duplicate images into CSS custom properties" })
-	.boolean("group-duplicate-images")
-	.options("max-size-duplicate-images", { description: "Maximum sie in bytes of duplicate images stored as CSS custom properties" })
-	.number("max-size-duplicate-images")
-	.options("http-header", { description: "Extra HTTP header " })
-	.array("http-header")
-	.options("http-proxy-server", { description: "Proxy address" })
-	.string("http-proxy-server")
-	.options("http-proxy-username", { description: "HTTP username" })
-	.string("http-proxy-username")
-	.options("http-proxy-password", { description: "HTTP password" })
-	.string("http-proxy-password")
-	.options("include-BOM", { description: "Include the UTF-8 BOM into the HTML page" })
-	.boolean("include-BOM")
-	.options("include-infobar", { description: "Include the infobar" })
-	.boolean("include-infobar")
-	.options("insert-meta-csp", { description: "Include a <meta> tag with a CSP to avoid potential requests to internet when viewing a page" })
-	.boolean("insert-meta-csp")
-	.options("load-deferred-images", { description: "Load deferred (a.k.a. lazy-loaded) images" })
-	.boolean("load-deferred-images")
-	.options("load-deferred-images-dispatch-scroll-event", { description: "Dispatch 'scroll' event when loading deferred images" })
-	.boolean("load-deferred-images-dispatch-scroll-event")
-	.options("load-deferred-images-max-idle-time", { description: "Maximum delay of time to wait for deferred images in ms" })
-	.number("load-deferred-images-max-idle-time")
-	.options("load-deferred-images-keep-zoom-level", { description: "Load deferred images by keeping zoomed out the page" })
-	.boolean("load-deferred-images-keep-zoom-level")
-	.options("load-deferred-images-before-frames", { description: "Load deferred frames before before saving fame contents" })
-	.boolean("load-deferred-images-before-frames")
-	.options("max-parallel-workers", { description: "Maximum number of browsers launched in parallel when processing a list of URLs (cf --urls-file)" })
-	.number("max-parallel-workers")
-	.options("max-resource-size-enabled", { description: "Enable removal of embedded resources exceeding a given size" })
-	.boolean("max-resource-size-enabled")
-	.options("max-resource-size", { description: "Maximum size of embedded resources in MB (i.e. images, stylesheets, scripts and iframes)" })
-	.number("max-resource-size")
-	.options("move-styles-in-head", { description: "Move style elements outside the head element into the head element" })
-	.boolean("move-styles-in-head")
-	.options("password", { description: "Password of the zip file" })
-	.string("password")
-	.options("remove-frames", { description: "Remove frames" })
-	.boolean("remove-frames")
-	.options("remove-hidden-elements", { description: "Remove HTML elements which are not displayed" })
-	.boolean("remove-hidden-elements")
-	.options("remove-unused-styles", { description: "Remove unused CSS rules and unneeded declarations" })
-	.boolean("remove-unused-styles")
-	.options("remove-unused-fonts", { description: "Remove unused CSS font rules" })
-	.boolean("remove-unused-fonts")
-	.options("remove-saved-date", { description: "Remove saved date metadata in HTML header" })
-	.boolean("remove-saved-date")
-	.options("block-scripts", { description: "Block scripts" })
-	.boolean("block-scripts")
-	.options("block-audios", { description: "Block audio elements" })
-	.boolean("block-audios")
-	.options("block-videos", { description: "Block video elements" })
-	.boolean("block-videos")
-	.options("remove-alternative-fonts", { description: "Remove alternative fonts to the ones displayed" })
-	.boolean("remove-alternative-fonts")
-	.options("remove-alternative-medias", { description: "Remove alternative CSS stylesheets" })
-	.boolean("remove-alternative-medias")
-	.options("remove-alternative-images", { description: "Remove images for alternative sizes of screen" })
-	.boolean("remove-alternative-images")
-	.options("save-original-urls", { description: "Save the original URLS in the embedded contents" })
-	.boolean("save-original-urls")
-	.options("save-raw-page", { description: "Save the original page without interpreting it into the browser" })
-	.boolean("save-raw-page")
-	.options("urls-file", { description: "Path to a text file containing a list of URLs (separated by a newline) to save" })
-	.string("urls-file")
-	.options("user-agent", { description: "User-agent of the browser" })
-	.string("user-agent")
-	.options("user-script-enabled", { description: "Enable the event API allowing to execute scripts before the page is saved" })
-	.boolean("user-script-enabled")
-	.options("self-extracting-archive", { description: "Create a self extracting HTML file" })
-	.boolean("self-extracting-archive")
-	.options("insert-text-body", { description: "Insert the text of the page into the self-extracting HTML file" })
-	.boolean("insert-text-body")
-	.options("create-root-directory", { description: "Create a root directory based on the timestamp" })
-	.boolean("create-root-directory")
-	.options("extract-data-from-page", { description: "Extract compressed data from the page instead of fetching the page in order to create universal self-extracting HTML files" })
-	.boolean("extract-data-from-page")
-	.options("prevent-appended-data", { description: "Prevent appending data after the compressed data when creating self-extracting HTML files" })
-	.boolean("prevent-appended-data")
-	.options("output-directory", { description: "Path to where to save files, this path must exist." })
-	.string("output-directory")
-	.argv;
+Positionals:
+  url     URL or path on the filesystem of the page to save  [string]
+  output  Output filename  [string]`;
 
-args.backgroundSave = true;
-args.compressCSS = args.compressCss;
-args.compressHTML = args.compressHtml;
-args.includeBOM = args.includeBom;
-args.crawlReplaceURLs = args.crawlReplaceUrls;
-args.crawlRemoveURLFragment = args.crawlRemoveUrlFragment;
-args.insertMetaCSP = args.insertMetaCsp;
-args.saveOriginalURLs = args.saveOriginalUrls;
-const headers = args.httpHeader;
-delete args.httpHeader;
-args.httpHeaders = {};
-headers.forEach(header => {
-	const matchedHeader = header.match(/^(.*?):(.*)$/);
-	if (matchedHeader.length == 3) {
-		args.httpHeaders[matchedHeader[1].trim()] = matchedHeader[2].trimLeft();
+const OPTIONS_INFO = {
+	"accept-header-font": { description: "Accept header for fonts", type: "string", defaultValue: "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8" },
+	"accept-header-image": { description: "Accept header for images", type: "string", defaultValue: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8" },
+	"accept-header-stylesheet": { description: "Accept header for stylesheets", type: "string", defaultValue: "text/css,*/*;q=0.1" },
+	"accept-header-script": { description: "Accept header for scripts", type: "string", defaultValue: "*/*" },
+	"accept-header-document": { description: "Accept header for documents", type: "string", defaultValue: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
+	"block-audios": { description: "Block audios", type: "boolean", defaultValue: true },
+	"block-fonts": { description: "Block fonts", type: "boolean" },
+	"block-images": { description: "Block images", type: "boolean" },
+	"block-scripts": { description: "Block scripts", type: "boolean", defaultValue: true },
+	"block-videos": { description: "Block videos", type: "boolean", defaultValue: true },
+	"block-mixed-content": { description: "Block mixed contents", type: "boolean" },
+	"browser-server": { description: "Server to connect to", type: "string" },
+	"browser-headless": { description: "Run the browser in headless mode", type: "boolean", defaultValue: true },
+	"browser-executable-path": { description: "Path to chrome/chromium executable", type: "string" },
+	"browser-width": { description: "Width of the browser viewport in pixels", type: "number", defaultValue: 1280 },
+	"browser-height": { description: "Height of the browser viewport in pixels", type: "number", defaultValue: 720 },
+	"browser-load-max-time": { description: "Maximum delay of time to wait for page loading in ms", type: "number", defaultValue: 60000 },
+	"browser-wait-delay": { description: "Time to wait before capturing the page in ms", type: "number" },
+	"browser-wait-until": { description: "When to consider the page is loaded (netWorkIdle, netWorkAlmostIdle, load, domContentLoaded)", type: "string", defaultValue: "networkIdle" },
+	"browser-wait-until-fallback": { description: "Retry with the next value of --browser-wait-until when a timeout error is thrown", type: "boolean", defaultValue: true },
+	"browser-debug": { description: "Enable debug mode", type: "boolean" },
+	"browser-script": { description: "Path of a script executed in the page (and all the frames) before it is loaded", type: "string[]" },
+	"browser-stylesheet": { description: "Path of a stylesheet file inserted into the page (and all the frames) after it is loaded", type: "string[]" },
+	"browser-args": { description: "Arguments provided as a JSON array and passed to the browser", type: "string" },
+	"browser-start-minimized": { description: "Minimize the browser", type: "boolean" },
+	"browser-cookie": { description: "Ordered list of cookie parameters separated by a comma (name,value,domain,path,expires,httpOnly,secure,sameSite,url:", type: "string[]" },
+	"browser-cookies-file": { description: "Path of the cookies file formatted as a JSON file or a Netscape text file", type: "string" },
+	"browser-ignore-insecure-certs": { description: "Ignore HTTPs errors", type: "boolean" },
+	"browser-freeze-prototypes": { description: "Freeze prototypes of built-in objects in the page", type: "boolean" },
+	"compress-content": { description: "Compress the output file into a ZIP file", type: "boolean" },
+	"compress-CSS": { description: "Compress CSS stylesheets", type: "boolean" },
+	"compress-HTML": { description: "Compress HTML content", type: "boolean", defaultValue: true },
+	"crawl-links": { description: "Crawl and save pages found via inner links", type: "boolean" },
+	"crawl-inner-links-only": { description: "Crawl pages found via inner links only if they are hosted on the same domain", type: "boolean", defaultValue: true },
+	"crawl-no-parent": { description: "Crawl pages found via inner links only if their URLs are not parent of the URL to crawl", type: "boolean" },
+	"crawl-load-session": { description: "Name of the file of the session to load (previously saved with --crawl-save-session or --crawl-sync-session)", type: "string" },
+	"crawl-remove-URL-fragment": { description: "Remove URL fragments found in links", type: "boolean", defaultValue: true },
+	"crawl-save-session": { description: "Name of the file where to save the state of the session", type: "string" },
+	"crawl-sync-session": { description: "Name of the file where to load and save the state of the session", type: "string" },
+	"crawl-max-depth": { description: "Max depth when crawling pages found in internal and external links (0: infinite)", type: "number", defaultValue: 1 },
+	"crawl-external-links-max-depth": { description: "Max depth when crawling pages found in external links (0: infinite)", type: "number", defaultValue: 1 },
+	"crawl-replace-URLs": { description: "Replace URLs of saved pages with relative paths of saved pages on the filesystem", type: "boolean" },
+	"crawl-rewrite-rule": { description: "Rewrite rule used to rewrite URLs of crawled pages", type: "string[]" },
+	"dump-content": { description: "Dump the content of the processed page in the console ('true' when running in Docker)", type: "boolean" },
+	"emulate-media-feature": { description: "Emulate a media feature. The syntax is <name>:<value>, e.g. \"prefers-color-scheme:dark\"", type: "string[]" },
+	"error-file": { description: "Path of the file where to save the error messages", type: "string" },
+	"filename-template": { description: "Template used to generate the output filename (see help page of the extension for more info)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
+	"filename-conflict-action": { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"", type: "string", defaultValue: "uniquify" },
+	"filename-replacement-character": { description: "The character used for replacing invalid characters in filenames", type: "string", defaultValue: "_" },
+	"filename-max-length": { description: "Specify the maximum length of the filename", type: "number", defaultValue: 192 },
+	"filename-max-length-unit": { description: "Specify the unit of the maximum length of the filename ('bytes' or 'chars')", type: "string", defaultValue: "bytes" },
+	"replace-emojis-in-filename": { description: "Replace emojis in the filename with their unicode text representation", type: "boolean" },
+	"group-duplicate-images": { description: "Group duplicate images into CSS custom properties", type: "boolean", defaultValue: true },
+	"max-size-duplicate-images": { description: "Maximum size in bytes of duplicate images stored as CSS custom properties", type: "number", defaultValue: 512 * 1024 },
+	"help": { description: "Show help", type: "boolean" },
+	"http-header": { description: "Extra HTTP header", type: "string[]" },
+	"http-proxy-server": { description: "Proxy address", type: "string" },
+	"http-proxy-username": { description: "HTTP username", type: "string" },
+	"http-proxy-password": { description: "HTTP password", type: "string" },
+	"include-BOM": { description: "Include the UTF-8 BOM into the HTML page", type: "boolean" },
+	"include-infobar": { description: "Include the infobar", type: "boolean" },
+	"insert-meta-CSP": { description: "Include a <meta> tag with a CSP to avoid potential requests to internet when viewing a page", type: "boolean", defaultValue: true },
+	"load-deferred-images": { description: "Load deferred (a.k.a. lazy-loaded) images", type: "boolean", defaultValue: true },
+	"load-deferred-images-dispatch-scroll-event": { description: "Dispatch 'scroll' event when loading deferred images", type: "boolean" },
+	"load-deferred-images-max-idle-time": { description: "Maximum delay of time to wait for deferred images in ms", type: "number", defaultValue: 1500 },
+	"load-deferred-images-keep-zoom-level": { description: "Load deferred images by keeping zoomed out the page", type: "boolean" },
+	"load-deferred-images-before-frames": { description: "Load deferred frames before before saving fame contents", type: "boolean" },
+	"max-parallel-workers": { description: "Maximum number of browsers launched in parallel when processing a list of URLs (cf --urls-file)", type: "number", defaultValue: 8 },
+	"max-resource-size-enabled": { description: "Enable removal of embedded resources exceeding a given size", type: "boolean" },
+	"max-resource-size": { description: "Maximum size of embedded resources in MB (i.e. images, stylesheets, scripts and iframes)", type: "number", defaultValue: 10 },
+	"move-styles-in-head": { description: "Move style elements outside the head element into the head element", type: "boolean" },
+	"password": { description: "Password of the zip file", type: "string" },
+	"remove-frames": { description: "Remove frames", type: "boolean" },
+	"remove-hidden-elements": { description: "Remove HTML elements which are not displayed", type: "boolean", defaultValue: true },
+	"remove-unused-styles": { description: "Remove unused CSS rules and unneeded declarations", type: "boolean", defaultValue: true },
+	"remove-unused-fonts": { description: "Remove unused CSS font rules", type: "boolean", defaultValue: true },
+	"remove-saved-date": { description: "Remove saved date metadata in HTML header", type: "boolean" },
+	"remove-alternative-fonts": { description: "Remove alternative fonts to the ones displayed", type: "boolean", defaultValue: true },
+	"remove-alternative-medias": { description: "Remove alternative CSS stylesheets", type: "boolean", defaultValue: true },
+	"remove-alternative-images": { description: "Remove images for alternative sizes of screen", type: "boolean", defaultValue: true },
+	"save-original-URLs": { description: "Save the original URLS in the embedded contents", type: "boolean" },
+	"save-raw-page": { description: "Save the original page without interpreting it into the browser", type: "boolean" },
+	"urls-file": { description: "Path to a text file containing a list of URLs (separated by a newline) to save", type: "string" },
+	"user-agent": { description: "User-agent of the browser", type: "string" },
+	"user-script-enabled": { description: "Enable the event API allowing to execute scripts before the page is saved", type: "boolean", defaultValue: true },
+	"self-extracting-archive": { description: "Create a self extracting HTML file", type: "boolean", defaultValue: true },
+	"insert-text-body": { description: "Insert the text of the page into the self-extracting HTML file", type: "boolean" },
+	"create-root-directory": { description: "Create a root directory based on the timestamp", type: "boolean" },
+	"extract-data-from-page": { description: "Extract compressed data from the page instead of fetching the page in order to create universal self-extracting HTML files", type: "boolean", defaultValue: true },
+	"prevent-appended-data": { description: "Prevent appending data after the compressed data when creating self-extracting HTML files", type: "boolean" },
+	"output-directory": { description: "Path to where to save files, this path must exist.", type: "string" }
+};
+
+const options = getOptions();
+export default options;
+
+function getOptions() {
+	const { positionals, options } = parseArgs();
+	if ((!positionals.length && !Object.keys(options).length) || positionals.length > 2 || options.help) {
+		console.log(USAGE_TEXT + "\n"); // eslint-disable-line no-console
+		console.log("Options:"); // eslint-disable-line no-console
+		Object.keys(OPTIONS_INFO).forEach(optionName => {
+			const optionInfo = getOptionInfo(optionName);
+			let optionType = optionInfo.type;
+			if (isArray(optionType)) {
+				optionType = optionType.replace("[]", "*");
+			}
+			const optionDescription = optionInfo.description;
+			const optionDefaultValue = optionInfo.defaultValue === undefined ? "" : `(default: ${JSON.stringify(optionInfo.defaultValue)})`;
+			console.log(`  --${optionName}: ${optionDescription} <${optionType}> ${optionDefaultValue}`); // eslint-disable-line no-console
+		});
+		console.log(""); // eslint-disable-line no-console
+		Deno.exit(0);
 	}
-});
-const cookies = args.browserCookie;
-delete args.browserCookie;
-args.browserCookies = cookies.map(cookieValue => {
-	const value = cookieValue.split(/(?<!\\),/);
-	return {
-		name: value[0],
-		value: value[1],
-		domain: value[2] || undefined,
-		path: value[3] || undefined,
-		expires: value[4] && Number(value[4]) || undefined,
-		httpOnly: value[5] && value[5] == "true" || undefined,
-		secure: value[6] && value[5] == "true" || undefined,
-		sameSite: value[7] || undefined,
-		url: value[8] || undefined
-	};
-});
-args.browserScripts = args.browserScript;
-delete args.browserScript;
-args.browserStylesheets = args.browserStylesheet;
-delete args.browserStylesheet;
-args.crawlRewriteRules = args.crawlRewriteRule;
-delete args.crawlRewriteRule;
-args.emulateMediaFeatures = args.emulateMediaFeature
-	.map(value => {
-		const splitValue = value.match(/^([^:]+):(.*)$/);
-		if (splitValue.length >= 3) {
-			return { name: splitValue[1].trim(), value: splitValue[2].trim() };
+	Object.keys(OPTIONS_INFO).forEach(optionName => {
+		const optionKey = getOptionKey(optionName);
+		if (options[optionKey] === undefined) {
+			const optionInfo = getOptionInfo(optionName);
+			if (optionInfo.defaultValue !== undefined) {
+				options[optionKey] = OPTIONS_INFO[optionName].defaultValue;
+			}
 		}
-	})
-	.filter(identity => identity);
-delete args.emulateMediaFeature;
-Object.keys(args).filter(optionName => optionName.includes("-"))
-	.forEach(optionName => delete args[optionName]);
-delete args["$0"];
-delete args["_"];
+	});
+	return { ...options, url: positionals[0], output: positionals[1] };
+}
 
-export default args;
+function parseArgs() {
+	const args = Array.from(Deno.args);
+	const positionals = [];
+	const options = {};
+	const result = { positionals, options: {} };
+	let argIndex = 0;
+	const ARGS_REGEX = /^--([^=]+)(?:=(.*))?$/;
+	while (argIndex < args.length) {
+		const arg = args[argIndex];
+		const parsedArg = arg.match(ARGS_REGEX);
+		if (parsedArg && parsedArg.length) {
+			const [_, argName, argValue] = parsedArg; // eslint-disable-line no-unused-vars
+			const optionInfo = getOptionInfo(argName);
+			if (optionInfo) {
+				if (options[argName] === undefined) {
+					options[argName] = [];
+				}
+				if (argValue === undefined) {
+					while (
+						argIndex + 1 < args.length &&
+						!args[argIndex + 1].match(ARGS_REGEX) &&
+						isValid(optionInfo.type, args[argIndex + 1]) &&
+						(isArray(optionInfo.type) || !options[argName].length)) {
+						options[argName].push(args[argIndex + 1]);
+						argIndex++;
+					}
+				} else if (isValid(optionInfo.type, argValue) && (isArray(optionInfo.type) || !options[argName].length)) {
+					options[argName].push(argValue);
+				} else {
+					positionals.push(arg);
+				}
+			} else {
+				positionals.push(arg);
+			}
+		} else {
+			positionals.push(arg);
+		}
+		argIndex++;
+	}
+	Object.keys(options).forEach(optionName => {
+		const optionKey = getOptionKey(optionName);
+		const optionInfo = getOptionInfo(optionName);
+		let optionValue = options[optionName];
+		const isArrayType = isArray(optionInfo.type);
+		if (optionInfo.type.startsWith("boolean")) {
+			optionValue = optionValue.map(value => value == "true");
+			optionValue = isArrayType ?
+				optionValue.length ? optionValue : true :
+				optionValue.length ? optionValue[0] : true;
+		} else if (optionInfo.type.startsWith("number")) {
+			optionValue = optionValue.map(value => Number(value));
+			optionValue = isArrayType ?
+				optionValue.length ? optionValue : optionInfo.defaultValue || 0 :
+				optionValue.length ? optionValue[0] : optionInfo.defaultValue || 0;
+		} else {
+			optionValue = isArrayType ?
+				optionValue.length ? optionValue : optionInfo.defaultValue || "" :
+				optionValue.length ? optionValue[0] : optionInfo.defaultValue || "";
+		}
+		result.options[optionKey] = optionValue;
+	});
+	return result;
+}
+
+function getOptionKey(optionName) {
+	let optionKey;
+	const optionInfo = getOptionInfo(optionName);
+	if (optionInfo) {
+		if (isArray(optionInfo.type)) {
+			optionKey = kebabToCamelCase(optionName + "s");
+		} else {
+			optionKey = kebabToCamelCase(optionName);
+		}
+		return optionKey;
+	}
+}
+
+function getOptionInfo(optionName) {
+	return OPTIONS_INFO[Object.keys(OPTIONS_INFO).find(keyName => keyName.toLowerCase() == optionName.toLowerCase())];
+}
+
+function kebabToCamelCase(optionName) {
+	return optionName.replace(/-([a-zA-Z])/g, g => g[1].toUpperCase());
+}
+
+function isValid(type, value) {
+	if (type.startsWith("boolean")) {
+		return value == "true" || value == "false";
+	} else if (type.startsWith("number")) {
+		return !isNaN(value);
+	} else {
+		return true;
+	}
+}
+
+function isArray(type) {
+	return type.endsWith("[]");
+}
