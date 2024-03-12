@@ -75,8 +75,13 @@ async function getPageData(options) {
 				await cdp.Fetch.continueRequest({ requestId: params.requestId });
 			});
 		}
-		if (options.httpHeaders) {
-			await cdp.Network.setExtraHTTPHeaders({ headers: options.httpHeaders });
+		if (options.httpHeaders && options.httpHeaders.length) {
+			const headers = {};
+			for (const header of options.httpHeaders) {
+				const [name, value] = header.split("=");
+				headers[name] = value.trim();
+			}
+			await cdp.Network.setExtraHTTPHeaders({ headers });
 		}
 		if (options.emulateMediaFeatures) {
 			for (const mediaFeature of options.emulateMediaFeatures) {
