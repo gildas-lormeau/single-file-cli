@@ -55,7 +55,7 @@ const OPTIONS_INFO = {
 	"browser-stylesheet": { description: "Path of a stylesheet file inserted into the page (and all the frames) after it is loaded", type: "string[]" },
 	"browser-args": { description: "Arguments provided as a JSON array and passed to the browser", type: "string" },
 	"browser-start-minimized": { description: "Minimize the browser", type: "boolean" },
-	"browser-cookie": { description: "Ordered list of cookie parameters separated by a comma (name,value,domain,path,expires,httpOnly,secure,sameSite,url:", type: "string[]" },
+	"browser-cookie": { description: "Ordered list of cookie parameters separated by a comma (name,value,domain,path,expires,httpOnly,secure,sameSite,url)", type: "string[]" },
 	"browser-cookies-file": { description: "Path of the cookies file formatted as a JSON file or a Netscape text file", type: "string" },
 	"browser-ignore-insecure-certs": { description: "Ignore HTTPs errors", type: "boolean" },
 	"browser-freeze-prototypes": { description: "Freeze prototypes of built-in objects in the page", type: "boolean" },
