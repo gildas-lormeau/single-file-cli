@@ -41,6 +41,24 @@ async function run(options = {}) {
 	} else {
 		urls = [options.url];
 	}
+	if (options.browserCookies) {
+		const cookies = [];
+		for (const cookie of options.browserCookies) {
+			const [name, value, domain, path, expires, httpOnly, secure, sameSite, url] = cookie.split(",");
+			cookies.push({
+				name,
+				value,
+				url,
+				domain,
+				path,
+				secure,
+				httpOnly,
+				sameSite,
+				expires
+			});
+		}
+		options.browserCookies = cookies;
+	}
 	if (options.browserCookiesFile) {
 		const cookiesContent = await Deno.readTextFile(options.browserCookiesFile);
 		try {
