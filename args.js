@@ -174,31 +174,26 @@ function parseArgs() {
 	const options = {};
 	const result = { positionals, options: {} };
 	let argIndex = 0;
-	const ARGS_REGEX = /^--([^=]+)(?:=(.*))?$/;
 	while (argIndex < args.length) {
 		const arg = args[argIndex];
-		const parsedArg = arg.match(ARGS_REGEX);
-		if (parsedArg && parsedArg.length) {
-			const [_, argName, argValue] = parsedArg; // eslint-disable-line no-unused-vars
-			const optionInfo = getOptionInfo(argName);
-			if (optionInfo) {
-				if (options[argName] === undefined) {
-					options[argName] = [];
+		const { argName, argValue, optionInfo } = parseArg(arg);
+		if (optionInfo) {
+			if (options[argName] === undefined) {
+				options[argName] = [];
+			}
+			let nextArgName;
+			if (argValue === undefined) {
+				while (
+					argIndex + 1 < args.length &&
+					({ argName: nextArgName } = parseArg(args[argIndex + 1])) &&
+					(nextArgName === undefined || !getOptionInfo(nextArgName)) &&
+					isValid(optionInfo.type, args[argIndex + 1]) &&
+					(isArray(optionInfo.type) || !options[argName].length)) {
+					options[argName].push(args[argIndex + 1]);
+					argIndex++;
 				}
-				if (argValue === undefined) {
-					while (
-						argIndex + 1 < args.length &&
-						!args[argIndex + 1].match(ARGS_REGEX) &&
-						isValid(optionInfo.type, args[argIndex + 1]) &&
-						(isArray(optionInfo.type) || !options[argName].length)) {
-						options[argName].push(args[argIndex + 1]);
-						argIndex++;
-					}
-				} else if (isValid(optionInfo.type, argValue) && (isArray(optionInfo.type) || !options[argName].length)) {
-					options[argName].push(argValue);
-				} else {
-					positionals.push(arg);
-				}
+			} else if (isValid(optionInfo.type, argValue) && (isArray(optionInfo.type) || !options[argName].length)) {
+				options[argName].push(argValue);
 			} else {
 				positionals.push(arg);
 			}
@@ -242,6 +237,18 @@ function getOptionKey(optionName) {
 			optionKey = kebabToCamelCase(optionName);
 		}
 		return optionKey;
+	}
+}
+
+function parseArg(arg) {
+	const ARGS_REGEX = /^--([^=]+)(?:=(.*))?$/;
+	const parsedArg = arg.match(ARGS_REGEX);
+	if (parsedArg && parsedArg.length) {
+		const [_, argName, argValue] = parsedArg; // eslint-disable-line no-unused-vars
+		const optionInfo = getOptionInfo(argName);
+		return { argName, argValue, optionInfo };
+	} else {
+		return {};
 	}
 }
 
