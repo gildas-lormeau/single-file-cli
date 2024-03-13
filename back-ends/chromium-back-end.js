@@ -30,6 +30,7 @@ import { getScriptSource } from "./single-file-script.js";
 const LOAD_TIMEOUT_ERROR = "ERR_LOAD_TIMEOUT";
 const NETWORK_IDLE_STATE = "networkIdle";
 const NETWORK_STATES = ["networkAlmostIdle", "load", "DOMContentLoaded"];
+const SINGLE_FILE_WORLD_NAME = "singlefile";
 
 export { initialize, getPageData, closeBrowser };
 
@@ -114,11 +115,26 @@ async function getPageData(options) {
 		}
 		await cdp.Page.addScriptToEvaluateOnNewDocument({
 			source: await getScriptSource(options),
-			runImmediately: true
+			runImmediately: true,
+			worldName: SINGLE_FILE_WORLD_NAME
+		});
+		await cdp.Runtime.enable();
+		let topFrameId;
+		const executionContextIdPromise = new Promise(resolve => {
+			cdp.Runtime.addEventListener("executionContextCreated", executionContextCreated);
+
+			function executionContextCreated({ params }) {
+				const { context } = params;
+				if (context.auxData.isDefault && context.auxData && topFrameId === undefined) {
+					topFrameId = context.auxData.frameId;
+				} else if (context.name === SINGLE_FILE_WORLD_NAME && context.auxData && context.auxData.frameId === topFrameId) {
+					cdp.Runtime.removeEventListener("executionContextCreated", executionContextCreated);
+					resolve(context.id);
+				}
+			}
 		});
 		await cdp.Page.setLifecycleEventsEnabled({ enabled: true });
 		const pageNavigated = cdp.Page.navigate({ url: options.url });
-		const topFrameId = (await cdp.Page.getFrameTree()).frameTree.frame.id;
 		const pageReady = new Promise(resolve => {
 			let contentLoaded;
 			cdp.Page.addEventListener("lifecycleEvent", ({ params }) => {
@@ -146,16 +162,17 @@ async function getPageData(options) {
 				}, options.browserLoadMaxTime);
 			});
 		}
-		await Promise.race([Promise.all([pageNavigated, pageReady, debuggerReady]), timeoutReady]);
+		await Promise.race([Promise.all([pageNavigated, pageReady, debuggerReady, executionContextIdPromise]), timeoutReady]);
 		if (timeoutId) {
 			clearTimeout(timeoutId);
 			resolveTimeoutReady();
 		}
+		const contextId = await executionContextIdPromise;
 		const { result } = await cdp.Runtime.evaluate({
 			expression: `singlefile.getPageData(${JSON.stringify(options)})`,
 			awaitPromise: true,
 			returnByValue: true,
-			executionContextName: "singlefile"
+			contextId
 		});
 		const { value } = result;
 		if (options.compressContent) {
