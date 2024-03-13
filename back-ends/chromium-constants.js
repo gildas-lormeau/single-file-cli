@@ -149,7 +149,6 @@ const BROWSER_PATHS = {
 		"C:\\Program Files\\Yandex\\YandexBrowser\\Application\\browser.exe",
 		"C:\\Program Files (x86)\\Yandex\\YandexBrowser\\Application\\browser.exe"
 	]
-
 };
 
 export {
