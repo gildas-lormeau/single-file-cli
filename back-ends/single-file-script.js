@@ -58,15 +58,14 @@ function initSingleFile() {
 }
 
 async function getScriptSource(options) {
-	let scripts = "let _singleFileDefine; if (typeof define !== 'undefined') { _singleFileDefine = define; define = null }";
-	scripts += script;
-	scripts += await readScriptFiles(options && options.browserScripts ? options.browserScripts : []);
+	let source = "";
+	source += script;
+	source += await readScriptFiles(options && options.browserScripts ? options.browserScripts : []);
 	if (options.browserStylesheets && options.browserStylesheets.length) {
-		scripts += "addEventListener(\"load\",()=>{const styleElement=document.createElement(\"style\");styleElement.textContent=" + JSON.stringify(await readScriptFiles(options.browserStylesheets)) + ";document.body.appendChild(styleElement);});";
+		source += "addEventListener(\"load\",()=>{const styleElement=document.createElement(\"style\");styleElement.textContent=" + JSON.stringify(await readScriptFiles(options.browserStylesheets)) + ";document.body.appendChild(styleElement);});";
 	}
-	scripts += "if (_singleFileDefine) { define = _singleFileDefine; _singleFileDefine = null }";
-	scripts += "(" + initSingleFile.toString() + ")();";
-	return scripts;
+	source += "(" + initSingleFile.toString() + ")();";
+	return source;
 }
 
 async function getHookScriptSource() {
