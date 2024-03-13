@@ -45,7 +45,6 @@ async function getPageData(options) {
 	try {
 		const targetInfo = await CDP.createTarget({ url: EMPTY_PAGE_URL });
 		const cdp = new CDP(targetInfo);
-		await cdp.Page.enable();
 		if (options.browserStartMinimized) {
 			const { windowId, bounds } = await cdp.Browser.getWindowForTarget({ targetId: targetInfo.targetId });
 			if (bounds.windowState !== MINIMIZED_WINDOW_STATE) {
@@ -53,7 +52,6 @@ async function getPageData(options) {
 			}
 		}
 		if (options.browserIgnoreHTTPSErrors !== undefined && options.browserIgnoreHTTPSErrors) {
-			await cdp.Security.enable();
 			await cdp.Security.setIgnoreCertificateErrors({ ignore: true });
 		}
 		if (options.browserByPassCSP === undefined || options.browserByPassCSP) {
@@ -111,6 +109,7 @@ async function getPageData(options) {
 
 				async function onResumed() {
 					cdp.Debugger.removeEventListener("resumed", onResumed);
+					await cdp.Debugger.disable();
 					resolve();
 				}
 			});
@@ -129,21 +128,23 @@ async function getPageData(options) {
 		const executionContextIdPromise = new Promise(resolve => {
 			cdp.Runtime.addEventListener("executionContextCreated", executionContextCreated);
 
-			function executionContextCreated({ params }) {
+			async function executionContextCreated({ params }) {
 				const { context } = params;
 				if (context.auxData && context.auxData.isDefault && topFrameId === undefined) {
 					topFrameId = context.auxData.frameId;
 				} else if (context.name === SINGLE_FILE_WORLD_NAME && context.auxData && context.auxData.frameId === topFrameId) {
 					cdp.Runtime.removeEventListener("executionContextCreated", executionContextCreated);
+					await cdp.Runtime.disable();
 					resolve(context.id);
 				}
 			}
 		});
+		await cdp.Page.enable();
 		await cdp.Page.setLifecycleEventsEnabled({ enabled: true });
 		const pageNavigated = cdp.Page.navigate({ url: options.url });
 		const pageReady = new Promise(resolve => {
 			let contentLoaded;
-			cdp.Page.addEventListener("lifecycleEvent", ({ params }) => {
+			cdp.Page.addEventListener("lifecycleEvent", async ({ params }) => {
 				const { name, frameId } = params;
 				if (name === "DOMContentLoaded" && frameId === topFrameId) {
 					contentLoaded = true;
@@ -152,6 +153,8 @@ async function getPageData(options) {
 					if (options.browserWaitDelay) {
 						setTimeout(() => resolve, options.browserWaitDelay);
 					} else {
+						await cdp.Page.setLifecycleEventsEnabled({ enabled: false });
+						await cdp.Page.disable();
 						resolve();
 					}
 				}
