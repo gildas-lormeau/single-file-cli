@@ -61,6 +61,7 @@ async function getPageData(options) {
 			await cdp.Emulation.setDeviceMetricsOverride({ mobile: true });
 		}
 		if (options.httpProxyServer && options.httpProxyUsername) {
+			const REQUEST_PAUSED_EVENT = "requestPaused";
 			await cdp.Fetch.enable({ handleAuthRequests: true });
 			cdp.Fetch.addEventListener("authRequired", async ({ params }) => {
 				await cdp.Fetch.continueWithAuth({
@@ -72,9 +73,13 @@ async function getPageData(options) {
 					}
 				});
 			});
-			cdp.Fetch.addEventListener("requestPaused", async ({ params }) => {
+			cdp.Fetch.addEventListener(REQUEST_PAUSED_EVENT, onRequestPaused);
+
+			// eslint-disable-next-line no-inner-declarations
+			async function onRequestPaused({ params }) {
+				cdp.Fetch.removeEventListener(REQUEST_PAUSED_EVENT, onRequestPaused);
 				await cdp.Fetch.continueRequest({ requestId: params.requestId });
-			});
+			}
 		}
 		if (options.httpHeaders && options.httpHeaders.length) {
 			await cdp.Network.setExtraHTTPHeaders({ headers: options.httpHeaders });
@@ -94,16 +99,18 @@ async function getPageData(options) {
 		if (options.browserDebug) {
 			await cdp.Debugger.enable();
 			debuggerReady = new Promise(resolve => {
-				cdp.Debugger.addEventListener("scriptParsed", onScriptParsed);
+				const SCRIPT_PARSED_EVENT = "scriptParsed";
+				const RESUMED_EVENT = "resumed";
+				cdp.Debugger.addEventListener(SCRIPT_PARSED_EVENT, onScriptParsed);
 
 				async function onScriptParsed() {
-					cdp.Debugger.removeEventListener("scriptParsed", onScriptParsed);
-					cdp.Debugger.addEventListener("resumed", onResumed);
+					cdp.Debugger.removeEventListener(SCRIPT_PARSED_EVENT, onScriptParsed);
+					cdp.Debugger.addEventListener(RESUMED_EVENT, onResumed);
 					await cdp.Debugger.pause();
 				}
 
 				async function onResumed() {
-					cdp.Debugger.removeEventListener("resumed", onResumed);
+					cdp.Debugger.removeEventListener(RESUMED_EVENT, onResumed);
 					await cdp.Debugger.disable();
 					resolve();
 				}
@@ -121,14 +128,15 @@ async function getPageData(options) {
 		await cdp.Runtime.enable();
 		let topFrameId;
 		const executionContextIdPromise = new Promise(resolve => {
-			cdp.Runtime.addEventListener("executionContextCreated", executionContextCreated);
+			const CONTEXT_CREATED_EVENT = "executionContextCreated";
+			cdp.Runtime.addEventListener(CONTEXT_CREATED_EVENT, executionContextCreated);
 
 			async function executionContextCreated({ params }) {
 				const { context } = params;
 				if (context.auxData && context.auxData.isDefault && topFrameId === undefined) {
 					topFrameId = context.auxData.frameId;
 				} else if (context.name === SINGLE_FILE_WORLD_NAME && context.auxData && context.auxData.frameId === topFrameId) {
-					cdp.Runtime.removeEventListener("executionContextCreated", executionContextCreated);
+					cdp.Runtime.removeEventListener(CONTEXT_CREATED_EVENT, executionContextCreated);
 					await cdp.Runtime.disable();
 					resolve(context.id);
 				}
@@ -138,8 +146,11 @@ async function getPageData(options) {
 		await cdp.Page.setLifecycleEventsEnabled({ enabled: true });
 		const pageNavigated = cdp.Page.navigate({ url: options.url });
 		const pageReady = new Promise(resolve => {
+			const LIFE_CYCLE_EVENT = "lifecycleEvent";
 			let contentLoaded;
-			cdp.Page.addEventListener("lifecycleEvent", async ({ params }) => {
+			cdp.Page.addEventListener(LIFE_CYCLE_EVENT, onLifecycleEvent);
+
+			async function onLifecycleEvent({ params }) {
 				const { name, frameId } = params;
 				if (name === "DOMContentLoaded" && frameId === topFrameId) {
 					contentLoaded = true;
@@ -148,12 +159,13 @@ async function getPageData(options) {
 					if (options.browserWaitDelay) {
 						setTimeout(() => resolve, options.browserWaitDelay);
 					} else {
+						cdp.Page.removeEventListener(LIFE_CYCLE_EVENT, onLifecycleEvent);
 						await cdp.Page.setLifecycleEventsEnabled({ enabled: false });
 						await cdp.Page.disable();
 						resolve();
 					}
 				}
-			});
+			}
 		});
 		let timeoutReady, timeoutId, resolveTimeoutReady;
 		if (options.browserLoadMaxTime) {
