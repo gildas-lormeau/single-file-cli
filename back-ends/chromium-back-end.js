@@ -148,7 +148,7 @@ async function getPageData(options) {
 				if (topFrameId === undefined && frameId !== undefined) {
 					topFrameId = frameId;
 				}
-				if (name === "DOMContentLoaded" && frameId === topFrameId) {
+				if (name === "DOMContentLoaded" && topFrameId !== undefined && frameId === topFrameId) {
 					contentLoaded = true;
 				}
 				if (contentLoaded && name === (options.browserWaitUntil || NETWORK_IDLE_STATE)) {
