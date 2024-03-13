@@ -162,7 +162,7 @@ async function getPageData(options) {
 				}, options.browserLoadMaxTime);
 			});
 		}
-		await Promise.race([Promise.all([pageNavigated, pageReady, debuggerReady, executionContextIdPromise]), timeoutReady]);
+		await Promise.race([Promise.all([pageNavigated, pageReady, debuggerReady]), timeoutReady]);
 		if (timeoutId) {
 			clearTimeout(timeoutId);
 			resolveTimeoutReady();
