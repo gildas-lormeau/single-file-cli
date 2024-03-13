@@ -44,8 +44,7 @@ async function getPageData(options) {
 	let targetInfo;
 	try {
 		const targetInfo = await CDP.createTarget({ url: EMPTY_PAGE_URL });
-		const cdp = new CDP(targetInfo);
-		const { Browser, Security, Page, Emulation, Fetch, Network, Runtime, Debugger } = cdp;
+		const { Browser, Security, Page, Emulation, Fetch, Network, Runtime, Debugger } = new CDP(targetInfo);
 		if (options.browserStartMinimized) {
 			const { windowId, bounds } = await Browser.getWindowForTarget({ targetId: targetInfo.targetId });
 			if (bounds.windowState !== MINIMIZED_WINDOW_STATE) {
