@@ -25,7 +25,7 @@
 
 import { CDP } from "jsr:@simple-cdp/simple-cdp@^1.7.16";
 import { launchBrowser, closeBrowser } from "./chromium-browser.js";
-import { getScriptSource } from "./single-file-script.js";
+import { getScriptSource, getHookScriptSource } from "./single-file-script.js";
 
 const LOAD_TIMEOUT_ERROR = "ERR_LOAD_TIMEOUT";
 const NETWORK_IDLE_STATE = "networkIdle";
@@ -113,6 +113,10 @@ async function getPageData(options) {
 				}
 			});
 		}
+		await cdp.Page.addScriptToEvaluateOnNewDocument({
+			source: await getHookScriptSource(),
+			runImmediately: true
+		});
 		await cdp.Page.addScriptToEvaluateOnNewDocument({
 			source: await getScriptSource(options),
 			runImmediately: true,
