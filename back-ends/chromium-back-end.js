@@ -61,7 +61,6 @@ async function getPageData(options) {
 			await Emulation.setDeviceMetricsOverride({ mobile: true });
 		}
 		if (options.httpProxyServer && options.httpProxyUsername) {
-			const REQUEST_PAUSED_EVENT = "requestPaused";
 			await Fetch.enable({ handleAuthRequests: true });
 			Fetch.addEventListener("authRequired", async ({ params }) => {
 				await Fetch.continueWithAuth({
@@ -73,13 +72,7 @@ async function getPageData(options) {
 					}
 				});
 			});
-			Fetch.addEventListener(REQUEST_PAUSED_EVENT, onRequestPaused);
-
-			// eslint-disable-next-line no-inner-declarations
-			async function onRequestPaused({ params }) {
-				Fetch.removeEventListener(REQUEST_PAUSED_EVENT, onRequestPaused);
-				await Fetch.continueRequest({ requestId: params.requestId });
-			}
+			Fetch.addEventListener("requestPaused", ({ params }) => Fetch.continueRequest({ requestId: params.requestId }));
 		}
 		if (options.httpHeaders && options.httpHeaders.length) {
 			await Network.setExtraHTTPHeaders({ headers: options.httpHeaders });
