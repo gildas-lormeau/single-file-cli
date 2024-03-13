@@ -45,26 +45,27 @@ async function getPageData(options) {
 	try {
 		const targetInfo = await CDP.createTarget({ url: EMPTY_PAGE_URL });
 		const cdp = new CDP(targetInfo);
+		const { Browser, Security, Page, Emulation, Fetch, Network, Runtime, Debugger } = cdp;
 		if (options.browserStartMinimized) {
-			const { windowId, bounds } = await cdp.Browser.getWindowForTarget({ targetId: targetInfo.targetId });
+			const { windowId, bounds } = await Browser.getWindowForTarget({ targetId: targetInfo.targetId });
 			if (bounds.windowState !== MINIMIZED_WINDOW_STATE) {
-				await cdp.Browser.setWindowBounds({ windowId, bounds: { windowState: MINIMIZED_WINDOW_STATE } });
+				await Browser.setWindowBounds({ windowId, bounds: { windowState: MINIMIZED_WINDOW_STATE } });
 			}
 		}
 		if (options.browserIgnoreHTTPSErrors !== undefined && options.browserIgnoreHTTPSErrors) {
-			await cdp.Security.setIgnoreCertificateErrors({ ignore: true });
+			await Security.setIgnoreCertificateErrors({ ignore: true });
 		}
 		if (options.browserByPassCSP === undefined || options.browserByPassCSP) {
-			await cdp.Page.setBypassCSP({ enabled: true });
+			await Page.setBypassCSP({ enabled: true });
 		}
 		if (options.browserMobileEmulation) {
-			await cdp.Emulation.setDeviceMetricsOverride({ mobile: true });
+			await Emulation.setDeviceMetricsOverride({ mobile: true });
 		}
 		if (options.httpProxyServer && options.httpProxyUsername) {
 			const REQUEST_PAUSED_EVENT = "requestPaused";
-			await cdp.Fetch.enable({ handleAuthRequests: true });
-			cdp.Fetch.addEventListener("authRequired", async ({ params }) => {
-				await cdp.Fetch.continueWithAuth({
+			await Fetch.enable({ handleAuthRequests: true });
+			Fetch.addEventListener("authRequired", async ({ params }) => {
+				await Fetch.continueWithAuth({
 					requestId: params.requestId,
 					authChallengeResponse: {
 						response: "ProvideCredentials",
@@ -73,82 +74,82 @@ async function getPageData(options) {
 					}
 				});
 			});
-			cdp.Fetch.addEventListener(REQUEST_PAUSED_EVENT, onRequestPaused);
+			Fetch.addEventListener(REQUEST_PAUSED_EVENT, onRequestPaused);
 
 			// eslint-disable-next-line no-inner-declarations
 			async function onRequestPaused({ params }) {
-				cdp.Fetch.removeEventListener(REQUEST_PAUSED_EVENT, onRequestPaused);
-				await cdp.Fetch.continueRequest({ requestId: params.requestId });
+				Fetch.removeEventListener(REQUEST_PAUSED_EVENT, onRequestPaused);
+				await Fetch.continueRequest({ requestId: params.requestId });
 			}
 		}
 		if (options.httpHeaders && options.httpHeaders.length) {
-			await cdp.Network.setExtraHTTPHeaders({ headers: options.httpHeaders });
+			await Network.setExtraHTTPHeaders({ headers: options.httpHeaders });
 		}
 		if (options.emulateMediaFeatures) {
 			for (const mediaFeature of options.emulateMediaFeatures) {
-				await cdp.Emulation.setEmulatedMedia({
+				await Emulation.setEmulatedMedia({
 					media: mediaFeature.name,
 					features: mediaFeature.value.split(",").map(feature => feature.trim())
 				});
 			}
 		}
 		if (options.browserCookies && options.browserCookies.length) {
-			await cdp.Network.setCookies({ cookies: options.browserCookies });
+			await Network.setCookies({ cookies: options.browserCookies });
 		}
 		let debuggerReady;
 		if (options.browserDebug) {
-			await cdp.Debugger.enable();
+			await Debugger.enable();
 			debuggerReady = new Promise(resolve => {
 				const SCRIPT_PARSED_EVENT = "scriptParsed";
 				const RESUMED_EVENT = "resumed";
-				cdp.Debugger.addEventListener(SCRIPT_PARSED_EVENT, onScriptParsed);
+				Debugger.addEventListener(SCRIPT_PARSED_EVENT, onScriptParsed);
 
 				async function onScriptParsed() {
-					cdp.Debugger.removeEventListener(SCRIPT_PARSED_EVENT, onScriptParsed);
-					cdp.Debugger.addEventListener(RESUMED_EVENT, onResumed);
-					await cdp.Debugger.pause();
+					Debugger.removeEventListener(SCRIPT_PARSED_EVENT, onScriptParsed);
+					Debugger.addEventListener(RESUMED_EVENT, onResumed);
+					await Debugger.pause();
 				}
 
 				async function onResumed() {
-					cdp.Debugger.removeEventListener(RESUMED_EVENT, onResumed);
-					await cdp.Debugger.disable();
+					Debugger.removeEventListener(RESUMED_EVENT, onResumed);
+					await Debugger.disable();
 					resolve();
 				}
 			});
 		}
-		await cdp.Page.addScriptToEvaluateOnNewDocument({
+		await Page.addScriptToEvaluateOnNewDocument({
 			source: await getHookScriptSource(),
 			runImmediately: true
 		});
-		await cdp.Page.addScriptToEvaluateOnNewDocument({
+		await Page.addScriptToEvaluateOnNewDocument({
 			source: await getScriptSource(options),
 			runImmediately: true,
 			worldName: SINGLE_FILE_WORLD_NAME
 		});
-		await cdp.Runtime.enable();
+		await Runtime.enable();
 		let topFrameId;
 		const executionContextIdPromise = new Promise(resolve => {
 			const CONTEXT_CREATED_EVENT = "executionContextCreated";
-			cdp.Runtime.addEventListener(CONTEXT_CREATED_EVENT, executionContextCreated);
+			Runtime.addEventListener(CONTEXT_CREATED_EVENT, executionContextCreated);
 
 			async function executionContextCreated({ params }) {
 				const { context } = params;
 				if (context.auxData && context.auxData.isDefault && topFrameId === undefined) {
 					topFrameId = context.auxData.frameId;
 				} else if (context.name === SINGLE_FILE_WORLD_NAME && context.auxData && context.auxData.frameId === topFrameId) {
-					cdp.Runtime.removeEventListener(CONTEXT_CREATED_EVENT, executionContextCreated);
-					await cdp.Runtime.disable();
+					Runtime.removeEventListener(CONTEXT_CREATED_EVENT, executionContextCreated);
+					await Runtime.disable();
 					resolve(context.id);
 				}
 			}
 		});
-		await cdp.Page.enable();
-		await cdp.Page.setLifecycleEventsEnabled({ enabled: true });
-		const pageNavigated = cdp.Page.navigate({ url: options.url });
+		await Page.enable();
+		await Page.setLifecycleEventsEnabled({ enabled: true });
+		const pageNavigated = Page.navigate({ url: options.url });
 		const pageReady = new Promise(resolve => {
 			const LIFE_CYCLE_EVENT = "lifecycleEvent";
 			let contentLoaded;
-			cdp.Page.addEventListener(LIFE_CYCLE_EVENT, onLifecycleEvent);
+			Page.addEventListener(LIFE_CYCLE_EVENT, onLifecycleEvent);
 
 			async function onLifecycleEvent({ params }) {
 				const { name, frameId } = params;
@@ -159,9 +160,9 @@ async function getPageData(options) {
 					if (options.browserWaitDelay) {
 						setTimeout(() => resolve, options.browserWaitDelay);
 					} else {
-						cdp.Page.removeEventListener(LIFE_CYCLE_EVENT, onLifecycleEvent);
-						await cdp.Page.setLifecycleEventsEnabled({ enabled: false });
-						await cdp.Page.disable();
+						Page.removeEventListener(LIFE_CYCLE_EVENT, onLifecycleEvent);
+						await Page.setLifecycleEventsEnabled({ enabled: false });
+						await Page.disable();
 						resolve();
 					}
 				}
@@ -184,7 +185,7 @@ async function getPageData(options) {
 			resolveTimeoutReady();
 		}
 		const contextId = await executionContextIdPromise;
-		const { result } = await cdp.Runtime.evaluate({
+		const { result } = await Runtime.evaluate({
 			expression: `singlefile.getPageData(${JSON.stringify(options)})`,
 			awaitPromise: true,
 			returnByValue: true,
