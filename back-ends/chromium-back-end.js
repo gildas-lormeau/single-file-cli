@@ -145,6 +145,9 @@ async function getPageData(options) {
 
 			async function onLifecycleEvent({ params }) {
 				const { name, frameId } = params;
+				if (topFrameId === undefined && frameId !== undefined) {
+					topFrameId = frameId;
+				}
 				if (name === "DOMContentLoaded" && frameId === topFrameId) {
 					contentLoaded = true;
 				}
