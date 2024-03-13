@@ -67,6 +67,14 @@ async function run(options = {}) {
 			options.browserCookies = parseCookies(cookiesContent);
 		}
 	}
+	if (options.httpHeaders) {
+		const headers = {};
+		for (const header of options.httpHeaders) {
+			const [name, value] = header.split("=");
+			headers[name] = value.trim();
+		}
+		options.httpHeaders = headers;
+	}
 	options.retrieveLinks = true;
 	const singlefile = await initialize(options);
 	await singlefile.capture(urls);

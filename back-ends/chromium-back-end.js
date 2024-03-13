@@ -77,12 +77,7 @@ async function getPageData(options) {
 			});
 		}
 		if (options.httpHeaders && options.httpHeaders.length) {
-			const headers = {};
-			for (const header of options.httpHeaders) {
-				const [name, value] = header.split("=");
-				headers[name] = value.trim();
-			}
-			await cdp.Network.setExtraHTTPHeaders({ headers });
+			await cdp.Network.setExtraHTTPHeaders({ headers: options.httpHeaders });
 		}
 		if (options.emulateMediaFeatures) {
 			for (const mediaFeature of options.emulateMediaFeatures) {
