@@ -25,7 +25,7 @@
 
 import { dirname } from "jsr:@std/path@^0.219.1";
 import * as backend from "./back-ends/chromium-back-end.js";
-import { zipScript } from "./lib/single-file-bundle.js";
+import { getZipScriptSource } from "./back-ends/single-file-script.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
@@ -239,7 +239,7 @@ function getHostURL(url) {
 async function capturePage(options) {
 	try {
 		let filename;
-		options.zipScript = zipScript;
+		options.zipScript = getZipScriptSource();
 		const pageData = await backend.getPageData(options);
 		if (options.output) {
 			filename = await getFilename(options.output, options);

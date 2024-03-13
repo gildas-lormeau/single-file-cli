@@ -23,9 +23,9 @@
 
 /* global Deno, singlefile, XMLHttpRequest */
 
-import { script, hookScript } from "../lib/single-file-bundle.js";
+import { script, hookScript, zipScript } from "../lib/single-file-bundle.js";
 
-export { getScriptSource, getHookScriptSource };
+export { getScriptSource, getHookScriptSource, getZipScriptSource };
 
 function initSingleFile() {
 	singlefile.init({
@@ -71,6 +71,10 @@ async function getScriptSource(options) {
 
 async function getHookScriptSource() {
 	return hookScript;
+}
+
+async function getZipScriptSource() {
+	return zipScript;
 }
 
 async function readScriptFiles(paths, basePath = "../../../") {
