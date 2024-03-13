@@ -131,7 +131,7 @@ async function getPageData(options) {
 
 			function executionContextCreated({ params }) {
 				const { context } = params;
-				if (context.auxData.isDefault && context.auxData && topFrameId === undefined) {
+				if (context.auxData && context.auxData.isDefault && topFrameId === undefined) {
 					topFrameId = context.auxData.frameId;
 				} else if (context.name === SINGLE_FILE_WORLD_NAME && context.auxData && context.auxData.frameId === topFrameId) {
 					cdp.Runtime.removeEventListener("executionContextCreated", executionContextCreated);
