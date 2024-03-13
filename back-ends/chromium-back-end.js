@@ -30,7 +30,9 @@ import { getScriptSource, getHookScriptSource } from "./single-file-script.js";
 const LOAD_TIMEOUT_ERROR = "ERR_LOAD_TIMEOUT";
 const NETWORK_IDLE_STATE = "networkIdle";
 const NETWORK_STATES = ["networkAlmostIdle", "load", "DOMContentLoaded"];
+const MINIMIZED_WINDOW_STATE = "minimized";
 const SINGLE_FILE_WORLD_NAME = "singlefile";
+const EMPTY_PAGE_URL = "about:blank";
 
 export { initialize, getPageData, closeBrowser };
 
@@ -41,13 +43,13 @@ async function initialize(options) {
 async function getPageData(options) {
 	let targetInfo;
 	try {
-		const targetInfo = await CDP.createTarget({ url: "about:blank" });
+		const targetInfo = await CDP.createTarget({ url: EMPTY_PAGE_URL });
 		const cdp = new CDP(targetInfo);
 		await cdp.Page.enable();
 		if (options.browserStartMinimized) {
 			const { windowId, bounds } = await cdp.Browser.getWindowForTarget({ targetId: targetInfo.targetId });
-			if (bounds.windowState !== "minimized") {
-				await cdp.Browser.setWindowBounds({ windowId, bounds: { windowState: "minimized" } });
+			if (bounds.windowState !== MINIMIZED_WINDOW_STATE) {
+				await cdp.Browser.setWindowBounds({ windowId, bounds: { windowState: MINIMIZED_WINDOW_STATE } });
 			}
 		}
 		if (options.browserIgnoreHTTPSErrors !== undefined && options.browserIgnoreHTTPSErrors) {
