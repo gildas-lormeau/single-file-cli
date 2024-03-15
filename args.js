@@ -246,8 +246,8 @@ function parseArg(arg) {
 		let [_, argName, argValue] = parsedArg; // eslint-disable-line no-unused-vars
 		const optionInfo = getOptionInfo(argName);
 		if (argValue !== undefined &&
-			(argValue.startsWith("\"") && argValue.endsWith("\"")) ||
-			(argValue.startsWith("'") && argValue.endsWith("'"))) {
+			((argValue.startsWith("\"") && argValue.endsWith("\"")) ||
+			(argValue.startsWith("'") && argValue.endsWith("'")))) {
 			argValue = argValue.substring(1, argValue.length - 1);
 		}
 		return { argName, argValue, optionInfo };
