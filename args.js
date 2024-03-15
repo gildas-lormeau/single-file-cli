@@ -243,8 +243,13 @@ function parseArg(arg) {
 	const ARGS_REGEX = /^--([^=]+)(?:=(.*))?$/;
 	const parsedArg = arg.match(ARGS_REGEX);
 	if (parsedArg && parsedArg.length) {
-		const [_, argName, argValue] = parsedArg; // eslint-disable-line no-unused-vars
+		let [_, argName, argValue] = parsedArg; // eslint-disable-line no-unused-vars
 		const optionInfo = getOptionInfo(argName);
+		if (argValue !== undefined &&
+			(argValue.startsWith("\"") && argValue.endsWith("\"")) ||
+			(argValue.startsWith("'") && argValue.endsWith("'"))) {
+			argValue = argValue.substring(1, argValue.length - 1);
+		}
 		return { argName, argValue, optionInfo };
 	} else {
 		return {};
