@@ -1,19 +1,13 @@
-FROM zenika/alpine-chrome:with-deno
+FROM zenika/alpine-chrome:with-node
 
-RUN wget -q -O source.zip https://github.com/gildas-lormeau/single-file-cli/archive/master.zip && unzip -q source.zip && rm source.zip
+RUN npm install --production single-file-cli
 
-WORKDIR /usr/src/app/single-file-cli-master
+WORKDIR /usr/src/app/node_modules/single-file-cli
 
 ENTRYPOINT [ \
-    "deno", \
-    "-q", \
-    "run", \
-    "--allow-read", \
-    "--allow-write", \
-    "--allow-net", \
-    "--allow-env", \
-    "--allow-run", \
+    "node", \
     "./single-file", \
     "--browser-executable-path", "/usr/bin/chromium-browser", \
-    "--output-directory", "./../out/", \
+    "--output-directory", "./../../out/", \
+    "--browser-args", "[\"--no-sandbox\"]", \
     "--dump-content" ]
