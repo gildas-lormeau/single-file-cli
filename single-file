@@ -25,10 +25,10 @@
 
 import { VALID_URL_TEST, initialize } from "./single-file-cli-api.js";
 import { initGlobalThisProperties, readTextFile, toFileUrl } from "./deno-polyfill.js";
-import args from "./args.js";
+import options from "./options.js";
 
 await initGlobalThisProperties();
-await run(args);
+await run(options);
 
 async function run(options = {}) {
 	let urls;
