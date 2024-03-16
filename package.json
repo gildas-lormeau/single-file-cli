@@ -10,12 +10,6 @@
 	},
 	"type": "module",
 	"bin": "./single-file",
-	"scripts": {
-		"build": "./build-lib.sh",
-		"build-dev": "./build-lib-dev.sh",
-		"compile": "./compile.sh",
-		"prepublishOnly": "./build-lib.sh"
-	},
 	"dependencies": {
 		"simple-cdp": "^1.8.2",
 		"ws": "^8.16.0"
