@@ -9,5 +9,4 @@ ENTRYPOINT [ \
     "./single-file", \
     "--browser-executable-path", "/usr/bin/chromium-browser", \
     "--output-directory", "./../../out/", \
-    "--browser-args", "[\"--no-sandbox\"]", \
     "--dump-content" ]
