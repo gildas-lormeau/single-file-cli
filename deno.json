@@ -5,5 +5,9 @@
   "nodeModulesDir": true,
   "exports": {
     ".": "./single-file-cli-api.js"
+  },
+  "imports": {
+    "simple-cdp": "jsr:@simple-cdp/simple-cdp@^1.8.2",
+    "path": "jsr:@std/path@^0.220.1"
   }
 }

@@ -21,9 +21,10 @@
  *   Source.
  */
 
-/* global Deno, singlefile, XMLHttpRequest */
+/* global singlefile, XMLHttpRequest */
 
 import { script, hookScript, zipScript } from "../lib/single-file-bundle.js";
+import { readTextFile } from "../deno-polyfill.js";
 
 export { getScriptSource, getHookScriptSource, getZipScriptSource };
 
@@ -74,8 +75,8 @@ async function getHookScriptSource() {
 
 async function getZipScriptSource() {
 	return zipScript;
-}
+} 
 
 async function readScriptFiles(paths) {
-	return (await Promise.all(paths.map(path => Deno.readTextFile(path)))).join("");
+	return (await Promise.all(paths.map(path => readTextFile(path)))).join("");
 }

@@ -21,7 +21,7 @@
  *   Source.
  */
 
-/* global Deno */
+import { exit, args } from "./deno-polyfill.js";
 
 const USAGE_TEXT = `single-file [url] [output]
 
@@ -141,7 +141,7 @@ function getOptions() {
 			console.log(`  --${optionName}: ${optionDescription} <${optionType}> ${optionDefaultValue}`); // eslint-disable-line no-console
 		});
 		console.log(""); // eslint-disable-line no-console
-		Deno.exit(0);
+		exit(0);
 	}
 	Object.keys(OPTIONS_INFO).forEach(optionName => {
 		const optionKey = getOptionKey(optionName);
@@ -168,13 +168,13 @@ function getOptions() {
 }
 
 function parseArgs() {
-	const args = Array.from(Deno.args);
+	const parsedArgs = Array.from(args);
 	const positionals = [];
 	const options = {};
 	const result = { positionals, options: {} };
 	let argIndex = 0;
-	while (argIndex < args.length) {
-		const arg = args[argIndex];
+	while (argIndex < parsedArgs.length) {
+		const arg = parsedArgs[argIndex];
 		const { argName, argValue, optionInfo } = parseArg(arg);
 		if (optionInfo) {
 			if (options[argName] === undefined) {
@@ -183,12 +183,12 @@ function parseArgs() {
 			let nextArgName;
 			if (argValue === undefined) {
 				while (
-					argIndex + 1 < args.length &&
-					({ argName: nextArgName } = parseArg(args[argIndex + 1])) &&
+					argIndex + 1 < parsedArgs.length &&
+					({ argName: nextArgName } = parseArg(parsedArgs[argIndex + 1])) &&
 					(nextArgName === undefined || !getOptionInfo(nextArgName)) &&
-					isValid(optionInfo.type, args[argIndex + 1]) &&
+					isValid(optionInfo.type, parsedArgs[argIndex + 1]) &&
 					(isArray(optionInfo.type) || !options[argName].length)) {
-					options[argName].push(args[argIndex + 1]);
+					options[argName].push(parsedArgs[argIndex + 1]);
 					argIndex++;
 				}
 			} else if (isValid(optionInfo.type, argValue) && (isArray(optionInfo.type) || !options[argName].length)) {

@@ -21,9 +21,8 @@
  *   Source.
  */
 
-/* global Deno */
-
 import { BROWSER_PATHS, BROWSER_ARGS } from "./chromium-constants.js";
+import { build, makeTempDir, Command, errors, remove } from "../deno-polyfill.js";
 
 const PIPED_STD_CONFIG = "piped";
 
@@ -31,9 +30,9 @@ let child, profilePath;
 export { launchBrowser, closeBrowser };
 
 async function launchBrowser(options = {}, indexPath = 0) {
-	let path = BROWSER_PATHS[Deno.build.os][indexPath];
+	let path = BROWSER_PATHS[build.os][indexPath];
 	const args = Array.from(BROWSER_ARGS);
-	profilePath = await Deno.makeTempDir();
+	profilePath = await makeTempDir();
 	if (options.headless) {
 		args.push("--headless");
 	} else {
@@ -61,12 +60,12 @@ async function launchBrowser(options = {}, indexPath = 0) {
 		args.push(...options.args);
 	}
 	args.push(`--user-data-dir=${profilePath}`);
-	const command = new Deno.Command(path, { args, stdout: PIPED_STD_CONFIG, stderr: PIPED_STD_CONFIG });
+	const command = new Command(path, { args, stdout: PIPED_STD_CONFIG, stderr: PIPED_STD_CONFIG });
 	try {
-		child = command.spawn();
+		child = await command.spawn();
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
-			if (indexPath + 1 < BROWSER_PATHS[Deno.build.os].length) {
+		if (error instanceof errors.NotFound) {
+			if (indexPath + 1 < BROWSER_PATHS[build.os].length) {
 				await launchBrowser(options, indexPath + 1);
 			} else {
 				throw error;
@@ -84,7 +83,7 @@ async function closeBrowser() {
 		child = undefined;
 	}
 	if (profilePath !== undefined) {
-		await Deno.remove(profilePath, { recursive: true });
+		await remove(profilePath, { recursive: true });
 		profilePath = undefined;
 	}
 }

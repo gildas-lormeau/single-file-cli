@@ -23,21 +23,20 @@
  *   Source.
  */
 
-/* global Deno */
-
-import { toFileUrl } from "jsr:@std/path@^0.219.1";
 import { VALID_URL_TEST, initialize } from "./single-file-cli-api.js";
+import { initGlobalThisProperties, readTextFile, toFileUrl } from "./deno-polyfill.js";
 import args from "./args.js";
 
+await initGlobalThisProperties();
 await run(args);
 
 async function run(options = {}) {
 	let urls;
 	if (options.url && !VALID_URL_TEST.test(options.url)) {
-		options.url = toFileUrl(new URL(options.url, import.meta.url).pathname).href;
+		options.url = (await toFileUrl(new URL(options.url, import.meta.url).pathname)).href;
 	}
 	if (options.urlsFile) {
-		urls = (await Deno.readTextFile(options.urlsFile)).split("\n");
+		urls = (await readTextFile(options.urlsFile)).split("\n");
 	} else {
 		urls = [options.url];
 	}
@@ -60,7 +59,7 @@ async function run(options = {}) {
 		options.browserCookies = cookies;
 	}
 	if (options.browserCookiesFile) {
-		const cookiesContent = await Deno.readTextFile(options.browserCookiesFile);
+		const cookiesContent = await readTextFile(options.browserCookiesFile);
 		try {
 			options.browserCookies = JSON.parse(cookiesContent);
 		} catch (error) {

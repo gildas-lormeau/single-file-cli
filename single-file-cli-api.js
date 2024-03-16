@@ -21,11 +21,11 @@
  *   Source.
  */
 
-/* global Deno, URL */
+/* global URL */
 
-import { dirname } from "jsr:@std/path@^0.219.1";
 import * as backend from "./back-ends/chromium-back-end.js";
 import { getZipScriptSource } from "./back-ends/single-file-script.js";
+import { readTextFile, writeTextFile, stdout, mkdir, stat, dirname } from "./deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
@@ -86,7 +86,7 @@ async function initialize(options) {
 	await backend.initialize(options);
 	if (options.crawlSyncSession || options.crawlLoadSession) {
 		try {
-			tasks = JSON.parse(await Deno.readTextFile(options.crawlSyncSession || options.crawlLoadSession));
+			tasks = JSON.parse(await readTextFile(options.crawlSyncSession || options.crawlLoadSession));
 		} catch (error) {
 			if (options.crawlLoadSession) {
 				throw error;
@@ -120,7 +120,7 @@ async function finish(options) {
 	if (options.crawlReplaceURLs && !options.compressContent) {
 		for (const task of tasks) {
 			try {
-				let pageContent = await Deno.readTextFile(task.filename);
+				let pageContent = await readTextFile(task.filename);
 				tasks.forEach(otherTask => {
 					if (otherTask.filename) {
 						pageContent = pageContent.replace(new RegExp(escapeRegExp("\"" + otherTask.originalUrl + "\""), "gi"), "\"" + otherTask.filename + "\"");
@@ -130,7 +130,7 @@ async function finish(options) {
 						pageContent = pageContent.replace(new RegExp(escapeRegExp("=" + otherTask.originalUrl + ">"), "gi"), "=" + filename + ">");
 					}
 				});
-				await Deno.writeTextFile(task.filename, pageContent);
+				await writeTextFile(task.filename, pageContent);
 			} catch (error) {
 				// ignored
 			}
@@ -207,7 +207,7 @@ function createTask(url, options, parentTask, rootTask) {
 
 async function saveTasks() {
 	if (sessionFilename) {
-		await Deno.writeTextFile(sessionFilename, JSON.stringify(
+		await writeTextFile(sessionFilename, JSON.stringify(
 			tasks.map(task => Object.assign({}, task, {
 				status: task.status == STATE_PROCESSING ? undefined : task.status,
 				promise: undefined,
@@ -245,7 +245,7 @@ async function capturePage(options) {
 			filename = await getFilename(options.output, options);
 		} else if (options.dumpContent) {
 			if (options.compressContent) {
-				await Deno.stdout.write(pageData.content);
+				await stdout.write(pageData.content);
 			} else {
 				console.log(pageData.content); // eslint-disable-line no-console
 			}
@@ -253,17 +253,17 @@ async function capturePage(options) {
 			filename = await getFilename(pageData.filename, options);
 		}
 		if (filename) {
-			const directoryName = dirname(filename);
-			if (directoryName) {
-				await Deno.mkdir(directoryName, { recursive: true });
+			const directoryName = await dirname(filename);
+			if (directoryName !== ".") {
+				await mkdir(directoryName, { recursive: true });
 			}
-			await Deno.writeTextFile(filename, pageData.content);
+			await writeTextFile(filename, pageData.content);
 		}
 		return pageData;
 	} catch (error) {
 		const message = "URL: " + options.url + "\nStack: " + error.stack + "\n";
 		if (options.errorFile) {
-			await Deno.writeTextFile(options.errorFile, message, { append: true });
+			await writeTextFile(options.errorFile, message, { append: true });
 		} else {
 			console.error(error.message || error, message); // eslint-disable-line no-console
 		}
@@ -296,7 +296,7 @@ async function getFilename(filename, options, index = 1) {
 		}
 	}
 	try {
-		await Deno.stat(newFilename);
+		await stat(newFilename);
 		if (options.filenameConflictAction != "skip") {
 			return getFilename(filename, options, index + 1);
 		}
