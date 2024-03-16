@@ -24,7 +24,6 @@
 /* global globalThis, URL, Deno, process */
 
 import * as path from "path";
-import { CDP } from "simple-cdp";
 
 const DENO_RUNTIME_DETECTED = typeof Deno !== "undefined";
 
@@ -55,8 +54,7 @@ export {
 	errors,
 	Command,
 	toFileUrl,
-	dirname,
-	getCDP
+	dirname
 };
 
 const args = DENO_RUNTIME_DETECTED ? Deno.args : process.argv.slice(2);
@@ -207,14 +205,6 @@ async function dirname(filePath) {
 		return path.dirname(filePath);
 	} else {
 		return path.dirname(filePath);
-	}
-}
-
-async function getCDP() {
-	if (DENO_RUNTIME_DETECTED) {
-		return CDP;
-	} else {
-		return CDP;
 	}
 }
 

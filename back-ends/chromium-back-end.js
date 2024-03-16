@@ -25,7 +25,7 @@
 
 import { launchBrowser, closeBrowser } from "./chromium-browser.js";
 import { getScriptSource, getHookScriptSource } from "./single-file-script.js";
-import { getCDP } from "../deno-polyfill.js";
+import { CDP } from "simple-cdp";
 
 const LOAD_TIMEOUT_ERROR = "ERR_LOAD_TIMEOUT";
 const NETWORK_IDLE_STATE = "networkIdle";
@@ -42,7 +42,6 @@ async function initialize(options) {
 
 async function getPageData(options) {
 	let targetInfo;
-	const CDP = await getCDP();
 	try {
 		const targetInfo = await CDP.createTarget({ url: EMPTY_PAGE_URL });
 		const { Browser, Security, Page, Emulation, Fetch, Network, Runtime, Debugger } = new CDP(targetInfo);
