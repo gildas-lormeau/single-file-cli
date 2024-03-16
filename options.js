@@ -21,7 +21,7 @@
  *   Source.
  */
 
-import { exit, args } from "./deno-polyfill.js";
+import { Deno } from "./deno-polyfill.js";
 
 const USAGE_TEXT = `single-file [url] [output]
 
@@ -122,6 +122,7 @@ const OPTIONS_INFO = {
 	"output-directory": { description: "Path to where to save files, this path must exist.", type: "string" }
 };
 
+const { args, exit } = Deno;
 const options = getOptions();
 export default options;
 

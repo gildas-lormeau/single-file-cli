@@ -24,9 +24,11 @@
  */
 
 import { VALID_URL_TEST, initialize } from "./single-file-cli-api.js";
-import { initGlobalThisProperties, readTextFile, toFileUrl } from "./deno-polyfill.js";
+import { initGlobalThisProperties, Deno, path } from "./deno-polyfill.js";
 import options from "./options.js";
 
+const { readTextFile } = Deno;
+const { toFileUrl } = path;
 await initGlobalThisProperties();
 await run(options);
 

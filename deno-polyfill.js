@@ -39,8 +39,7 @@ const NODE_MODULES = {
 	"url": "node:url"
 };
 
-export {
-	initGlobalThisProperties,
+const DenoAPI = {
 	args,
 	readTextFile,
 	writeTextFile,
@@ -52,10 +51,15 @@ export {
 	exit,
 	build,
 	errors,
-	Command,
+	Command
+};
+
+const pathAPI = {
 	toFileUrl,
 	dirname
 };
+
+export { DenoAPI as Deno, pathAPI as path, initGlobalThisProperties };
 
 const args = DENO_RUNTIME_DETECTED ? Deno.args : process.argv.slice(2);
 

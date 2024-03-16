@@ -25,7 +25,7 @@
 
 import * as backend from "./back-ends/chromium-back-end.js";
 import { getZipScriptSource } from "./back-ends/single-file-script.js";
-import { readTextFile, writeTextFile, stdout, mkdir, stat, dirname } from "./deno-polyfill.js";
+import { Deno } from "./deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
@@ -76,6 +76,7 @@ const DEFAULT_OPTIONS = {
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
+const { readTextFile, writeTextFile, stdout, mkdir, stat, dirname } = Deno;
 let tasks = [], maxParallelWorkers, sessionFilename;
 
 export { DEFAULT_OPTIONS, VALID_URL_TEST, initialize };

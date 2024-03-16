@@ -22,10 +22,11 @@
  */
 
 import { BROWSER_PATHS, BROWSER_ARGS } from "./chromium-constants.js";
-import { build, makeTempDir, Command, errors, remove } from "../deno-polyfill.js";
+import { Deno } from "../deno-polyfill.js";
 
 const PIPED_STD_CONFIG = "piped";
 
+const { build, makeTempDir, Command, errors, remove } = Deno;
 let child, profilePath;
 export { launchBrowser, closeBrowser };
 
