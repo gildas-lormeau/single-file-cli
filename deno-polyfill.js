@@ -201,11 +201,7 @@ async function toFileUrl(filePath) {
 }
 
 async function dirname(filePath) {
-	if (DENO_RUNTIME_DETECTED) {
-		return path.dirname(filePath);
-	} else {
-		return path.dirname(filePath);
-	}
+	return path.dirname(filePath);
 }
 
 function getNPMModule(module) {
