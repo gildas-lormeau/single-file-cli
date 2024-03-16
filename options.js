@@ -53,6 +53,7 @@ const OPTIONS_INFO = {
 	"browser-debug": { description: "Enable debug mode", type: "boolean" },
 	"browser-script": { description: "Path of a script executed in the page (and all the frames) before it is loaded", type: "string[]" },
 	"browser-stylesheet": { description: "Path of a stylesheet file inserted into the page (and all the frames) after it is loaded", type: "string[]" },
+	"browser-arg": { description: "Argument passed to the browser", type: "string[]", alias: "browser-argument" },
 	"browser-args": { description: "Arguments provided as a JSON array and passed to the browser", type: "string" },
 	"browser-start-minimized": { description: "Minimize the browser", type: "boolean" },
 	"browser-cookie": { description: "Ordered list of cookie parameters separated by a comma (name,value,domain,path,expires,httpOnly,secure,sameSite,url)", type: "string[]" },
@@ -145,12 +146,10 @@ function getOptions() {
 		exit(0);
 	}
 	Object.keys(OPTIONS_INFO).forEach(optionName => {
-		const optionKey = getOptionKey(optionName);
-		if (options[optionKey] === undefined) {
-			const optionInfo = getOptionInfo(optionName);
-			if (optionInfo.defaultValue !== undefined) {
-				options[optionKey] = OPTIONS_INFO[optionName].defaultValue;
-			}
+		const optionInfo = getOptionInfo(optionName);
+		const optionKey = getOptionKey(optionName, optionInfo);
+		if (optionInfo.defaultValue !== undefined) {
+			options[optionKey] = OPTIONS_INFO[optionName].defaultValue;
 		}
 	});
 	options.acceptHeaders = {
@@ -160,6 +159,12 @@ function getOptions() {
 		script: options.acceptHeaderScript,
 		document: options.acceptHeaderDocument
 	};
+	if (options.browserArgs) {
+		const browserArguments = options.browserArguments || [];
+		browserArguments.push(...JSON.parse(options.browserArgs));
+		options.browserArgs = browserArguments;
+		delete options.browserArguments;
+	}
 	delete options.acceptHeaderFont;
 	delete options.acceptHeaderImage;
 	delete options.acceptHeaderStylesheet;
@@ -202,8 +207,8 @@ function parseArgs(args) {
 		argIndex++;
 	}
 	Object.keys(options).forEach(optionName => {
-		const optionKey = getOptionKey(optionName);
 		const optionInfo = getOptionInfo(optionName);
+		const optionKey = getOptionKey(optionName, optionInfo);
 		let optionValue = options[optionName];
 		const isArrayType = isArray(optionInfo.type);
 		if (optionInfo.type.startsWith("boolean")) {
@@ -226,16 +231,14 @@ function parseArgs(args) {
 	return result;
 }
 
-function getOptionKey(optionName) {
-	let optionKey;
-	const optionInfo = getOptionInfo(optionName);
+function getOptionKey(optionKeyName, optionInfo) {
 	if (optionInfo) {
+		const optionName = optionInfo.alias || optionKeyName;
 		if (isArray(optionInfo.type)) {
-			optionKey = kebabToCamelCase(optionName + "s");
+			return kebabToCamelCase(optionName + "s");
 		} else {
-			optionKey = kebabToCamelCase(optionName);
+			return kebabToCamelCase(optionName);
 		}
-		return optionKey;
 	}
 }
 
