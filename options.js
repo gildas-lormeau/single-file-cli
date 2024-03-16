@@ -126,7 +126,7 @@ const options = getOptions();
 export default options;
 
 function getOptions() {
-	const { positionals, options } = parseArgs();
+	const { positionals, options } = parseArgs(Array.from(args));
 	if ((!positionals.length && !Object.keys(options).length) || positionals.length > 2 || options.help) {
 		console.log(USAGE_TEXT + "\n"); // eslint-disable-line no-console
 		console.log("Options:"); // eslint-disable-line no-console
@@ -167,14 +167,13 @@ function getOptions() {
 	return { ...options, url: positionals[0], output: positionals[1] };
 }
 
-function parseArgs() {
-	const parsedArgs = Array.from(args);
+function parseArgs(args) {
 	const positionals = [];
 	const options = {};
 	const result = { positionals, options: {} };
 	let argIndex = 0;
-	while (argIndex < parsedArgs.length) {
-		const arg = parsedArgs[argIndex];
+	while (argIndex < args.length) {
+		const arg = args[argIndex];
 		const { argName, argValue, optionInfo } = parseArg(arg);
 		if (optionInfo) {
 			if (options[argName] === undefined) {
@@ -183,12 +182,12 @@ function parseArgs() {
 			let nextArgName;
 			if (argValue === undefined) {
 				while (
-					argIndex + 1 < parsedArgs.length &&
-					({ argName: nextArgName } = parseArg(parsedArgs[argIndex + 1])) &&
+					argIndex + 1 < args.length &&
+					({ argName: nextArgName } = parseArg(args[argIndex + 1])) &&
 					(nextArgName === undefined || !getOptionInfo(nextArgName)) &&
-					isValid(optionInfo.type, parsedArgs[argIndex + 1]) &&
+					isValid(optionInfo.type, args[argIndex + 1]) &&
 					(isArray(optionInfo.type) || !options[argName].length)) {
-					options[argName].push(parsedArgs[argIndex + 1]);
+					options[argName].push(args[argIndex + 1]);
 					argIndex++;
 				}
 			} else if (isValid(optionInfo.type, argValue) && (isArray(optionInfo.type) || !options[argName].length)) {
@@ -247,7 +246,7 @@ function parseArg(arg) {
 		const optionInfo = getOptionInfo(argName);
 		if (argValue !== undefined &&
 			((argValue.startsWith("\"") && argValue.endsWith("\"")) ||
-			(argValue.startsWith("'") && argValue.endsWith("'")))) {
+				(argValue.startsWith("'") && argValue.endsWith("'")))) {
 			argValue = argValue.substring(1, argValue.length - 1);
 		}
 		return { argName, argValue, optionInfo };
