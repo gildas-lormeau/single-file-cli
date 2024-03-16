@@ -64,7 +64,7 @@ const stdout = {
 };
 
 const build = {
-	os: DENO_RUNTIME_DETECTED ? Deno.build.os : process.platform
+	os: DENO_RUNTIME_DETECTED ? Deno.build.os : process.platform == "win32" ? "windows" : process.platform
 };
 
 const errors = {
