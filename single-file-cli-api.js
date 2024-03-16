@@ -23,9 +23,9 @@
 
 /* global URL */
 
-import * as backend from "./back-ends/chromium-back-end.js";
-import { getZipScriptSource } from "./back-ends/single-file-script.js";
-import { Deno } from "./deno-polyfill.js";
+import * as backend from "./lib/cdp-client.js";
+import { getZipScriptSource } from "./lib/single-file-script.js";
+import { Deno } from "./lib/deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
 

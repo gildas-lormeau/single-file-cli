@@ -21,7 +21,7 @@
  *   Source.
  */
 
-import { Deno } from "./deno-polyfill.js";
+import { Deno } from "./lib/deno-polyfill.js";
 
 const USAGE_TEXT = `single-file [url] [output]
 
