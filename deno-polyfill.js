@@ -39,26 +39,6 @@ const NODE_MODULES = {
 	"url": "node:url"
 };
 
-const DenoAPI = {
-	args,
-	readTextFile,
-	writeTextFile,
-	mkdir,
-	makeTempDir,
-	stat,
-	remove,
-	stdout,
-	exit,
-	build,
-	errors,
-	Command
-};
-
-const pathAPI = {
-	toFileUrl,
-	dirname
-};
-
 export { DenoAPI as Deno, pathAPI as path, initGlobalThisProperties };
 
 const args = DENO_RUNTIME_DETECTED ? Deno.args : process.argv.slice(2);
@@ -78,6 +58,65 @@ const errors = {
 			this.name = "NotFound";
 		}
 	}
+};
+
+const Command = DENO_RUNTIME_DETECTED ? Deno.Command : class Command {
+	constructor(path, options = {}) {
+		this.path = path;
+		this.options = options;
+	}
+	async spawn() {
+		const childProcess = await import(NODE_MODULES["child_process"]);
+		const child = childProcess.spawn(this.path, this.options.args);
+
+		await new Promise((resolve, reject) => {
+			child.on("spawn", () => resolve());
+			child.on("error", error => {
+				if (error.code == "ENOENT") {
+					reject(new errors.NotFound(error.message));
+				} else {
+					reject(error);
+				}
+			});
+		});
+		return {
+			status: new Promise((resolve, reject) => {
+				child.on("exit", code => {
+					if (code === 0 || code === 143) {
+						resolve();
+					} else {
+						reject(new Error(`Process exited with code ${code}`));
+					}
+				});
+			}),
+			kill() {
+				child.kill();
+			},
+			ref() {
+				// Do nothing
+			}
+		};
+	}
+};
+
+const DenoAPI = {
+	args,
+	readTextFile,
+	writeTextFile,
+	mkdir,
+	makeTempDir,
+	stat,
+	remove,
+	stdout,
+	exit,
+	build,
+	errors,
+	Command
+};
+
+const pathAPI = {
+	toFileUrl,
+	dirname
 };
 
 async function initGlobalThisProperties() {
@@ -155,45 +194,6 @@ function exit(code) {
 		process.exit(code);
 	}
 }
-
-const Command = DENO_RUNTIME_DETECTED ? Deno.Command : class Command {
-	constructor(path, options = {}) {
-		this.path = path;
-		this.options = options;
-	}
-	async spawn() {
-		const childProcess = await import(NODE_MODULES["child_process"]);
-		const child = childProcess.spawn(this.path, this.options.args);
-
-		await new Promise((resolve, reject) => {
-			child.on("spawn", () => resolve());
-			child.on("error", error => {
-				if (error.code == "ENOENT") {
-					reject(new errors.NotFound(error.message));
-				} else {
-					reject(error);
-				}
-			});
-		});
-		return {
-			status: new Promise((resolve, reject) => {
-				child.on("exit", code => {
-					if (code === 0 || code === 143) {
-						resolve();
-					} else {
-						reject(new Error(`Process exited with code ${code}`));
-					}
-				});
-			}),
-			kill() {
-				child.kill();
-			},
-			ref() {
-				// Do nothing
-			}
-		};
-	}
-};
 
 async function toFileUrl(filePath) {
 	if (DENO_RUNTIME_DETECTED) {
