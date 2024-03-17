@@ -25,7 +25,7 @@
 
 import * as backend from "./lib/cdp-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
-import { Deno } from "./lib/deno-polyfill.js";
+import { Deno, path } from "./lib/deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
@@ -254,7 +254,7 @@ async function capturePage(options) {
 			filename = await getFilename(pageData.filename, options);
 		}
 		if (filename) {
-			const directoryName = await dirname(filename);
+			const directoryName = await path.dirname(filename);
 			if (directoryName !== ".") {
 				await mkdir(directoryName, { recursive: true });
 			}
