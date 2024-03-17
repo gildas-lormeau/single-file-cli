@@ -76,7 +76,7 @@ const DEFAULT_OPTIONS = {
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
-const { readTextFile, writeTextFile, stdout, mkdir, stat, dirname } = Deno;
+const { readTextFile, writeTextFile, stdout, mkdir, stat } = Deno;
 let tasks = [], maxParallelWorkers, sessionFilename;
 
 export { DEFAULT_OPTIONS, VALID_URL_TEST, initialize };
