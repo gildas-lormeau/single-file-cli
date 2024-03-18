@@ -81,3 +81,4 @@ await Deno.remove('lib/single-file-hooks-frames.js');
 " |  deno run --allow-read --allow-write --allow-net --allow-run --allow-env --lock=node_modules/deno.lock.tmp -
 
 rm -rf node_modules
+rm -rf vendor
