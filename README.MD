@@ -6,7 +6,9 @@ SingleFile can be launched from the command line by running it into a (headless)
 
 It runs through Deno as a standalone script injected into the web page via the Chrome DevTools Protocol instead of being embedded into a WebExtension.
 
+## Installation
 
+SingleFile can be run without installing it, just download the executable file and save it in the directory of your choice here: https://github.com/gildas-lormeau/single-file-cli/releases
 
 ## Installation with Docker
 
@@ -61,7 +63,17 @@ It runs through Deno as a standalone script injected into the web page via the C
 
 - Install [Deno](https://deno.com/)
 
-- There are 2 ways to download the code of SingleFile, choose the one you prefer:
+- There are 3 ways to download the code of SingleFile, choose the one you prefer:
+  
+  - Download and install with `npm` (`npm` is installed with Node.js)
+  
+    ```sh
+    npm install "single-file-cli"
+    cd single-file-cli-master
+    npm install
+    ```
+
+    You can also install SingleFile globally with `-g` when running `npm install`.
 
   - Download and unzip manually the
     [master archive](https://github.com/gildas-lormeau/single-file-cli/archive/master.zip)
