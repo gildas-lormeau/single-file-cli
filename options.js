@@ -120,7 +120,8 @@ const OPTIONS_INFO = {
 	"create-root-directory": { description: "Create a root directory based on the timestamp", type: "boolean" },
 	"extract-data-from-page": { description: "Extract compressed data from the page instead of fetching the page in order to create universal self-extracting HTML files", type: "boolean", defaultValue: true },
 	"prevent-appended-data": { description: "Prevent appending data after the compressed data when creating self-extracting HTML files", type: "boolean" },
-	"output-directory": { description: "Path to where to save files, this path must exist.", type: "string" }
+	"output-directory": { description: "Path to where to save files, this path must exist.", type: "string" },
+	"version": { description: "Print the version number and exit.", type: "boolean" }
 };
 
 const { args, exit } = Deno;
@@ -143,6 +144,11 @@ function getOptions() {
 			console.log(`  --${optionName}: ${optionDescription} <${optionType}> ${optionDefaultValue}`); // eslint-disable-line no-console
 		});
 		console.log(""); // eslint-disable-line no-console
+		exit(0);
+	}
+	if (options.version) {
+		const version = require('./package.json').version;
+		console.log(version);
 		exit(0);
 	}
 	Object.keys(OPTIONS_INFO).forEach(optionName => {
