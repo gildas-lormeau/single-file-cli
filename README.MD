@@ -70,7 +70,6 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
     ```sh
     npm install "single-file-cli"
     cd single-file-cli-master
-    npm install
     ```
 
     You can also install SingleFile globally with `-g` when running `npm install`.
