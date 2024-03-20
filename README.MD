@@ -10,6 +10,8 @@ It runs through Deno as a standalone script injected into the web page via the C
 
 SingleFile can be run without installing it, just download the executable file and save it in the directory of your choice here: https://github.com/gildas-lormeau/single-file-cli/releases
 
+Make sure Chrome or a Chromium-based browser is installed in the default folder. Otherwise you might need to set the `--browser-executable-path` option to help SingleFile locating the path of the executable file.
+
 ## Installation with Docker
 
 - Installation from Docker Hub
@@ -58,8 +60,6 @@ SingleFile can be run without installing it, just download the executable file a
   pages from the command line interface or through an HTTP server.
 
 ## Manual installation
-
-- Make sure Chrome or a Chromium-based browser is installed. Otherwise you might need to set the `--browser-executable-path` option to help SingleFile locating the path of the executable file.
 
 - Install [Deno](https://deno.com/)
 
