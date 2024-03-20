@@ -146,6 +146,11 @@ function getOptions() {
 		console.log(""); // eslint-disable-line no-console
 		exit(0);
 	}
+	if (options.version) {
+		const version = require('./package.json').version;
+		console.log(version);
+		exit(0);
+	}
 	Object.keys(OPTIONS_INFO).forEach(optionName => {
 		const optionInfo = getOptionInfo(optionName);
 		const optionKey = getOptionKey(optionName, optionInfo);
