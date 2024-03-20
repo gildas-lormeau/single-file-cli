@@ -165,6 +165,10 @@ function getOptions() {
 		options.browserArgs = browserArguments;
 		delete options.browserArguments;
 	}
+	if (options.browserArguments) {
+		options.browserArgs = options.browserArguments;
+		delete options.browserArguments;
+	}
 	delete options.acceptHeaderFont;
 	delete options.acceptHeaderImage;
 	delete options.acceptHeaderStylesheet;
