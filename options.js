@@ -125,10 +125,10 @@ const OPTIONS_INFO = {
 };
 
 const { args, exit } = Deno;
-const options = getOptions();
+const options = await getOptions();
 export default options;
 
-function getOptions() {
+async function getOptions() {
 	const { positionals, options } = parseArgs(Array.from(args));
 	if ((!positionals.length && !Object.keys(options).length) || positionals.length > 2 || options.help) {
 		console.log(USAGE_TEXT + "\n"); // eslint-disable-line no-console
@@ -147,8 +147,8 @@ function getOptions() {
 		exit(0);
 	}
 	if (options.version) {
-		const version = require('./package.json').version;
-		console.log(version);
+		const version = JSON.parse(await Deno.readTextFile("./deno.json")).version;
+		console.log(version); // eslint-disable-line no-console
 		exit(0);
 	}
 	Object.keys(OPTIONS_INFO).forEach(optionName => {
