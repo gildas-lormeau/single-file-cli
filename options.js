@@ -21,6 +21,7 @@
  *   Source.
  */
 
+import { version } from "./lib/version.js";
 import { Deno } from "./lib/deno-polyfill.js";
 
 const USAGE_TEXT = `single-file [url] [output]
@@ -147,7 +148,6 @@ async function getOptions() {
 		exit(0);
 	}
 	if (options.version) {
-		const version = JSON.parse(await Deno.readTextFile("./deno.json")).version;
 		console.log(version); // eslint-disable-line no-console
 		exit(0);
 	}

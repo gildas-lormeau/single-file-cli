@@ -79,6 +79,8 @@ script += 'export { script, zipScript, hookScript };';
 await Deno.writeTextFile('lib/single-file-bundle.js', script)
 await Promise.all(SCRIPTS.map(script => Deno.remove(script)));
 await Deno.remove('lib/single-file-hooks-frames.js');
+const version = JSON.parse(await Deno.readTextFile('./deno.json')).version;
+await Deno.writeTextFile('lib/version.js', 'export const version = ' + JSON.stringify(version) + ';');
 " |  deno run --allow-read --allow-write --allow-net --allow-run --allow-env --lock=node_modules/deno.lock.tmp -
 
 rm -rf node_modules
