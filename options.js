@@ -154,7 +154,7 @@ async function getOptions() {
 	Object.keys(OPTIONS_INFO).forEach(optionName => {
 		const optionInfo = getOptionInfo(optionName);
 		const optionKey = getOptionKey(optionName, optionInfo);
-		if (optionInfo.defaultValue !== undefined) {
+		if (options[optionKey] === undefined && optionInfo.defaultValue !== undefined) {
 			options[optionKey] = OPTIONS_INFO[optionName].defaultValue;
 		}
 	});
