@@ -9,7 +9,9 @@
 		"node": ">=20"
 	},
 	"type": "module",
-	"bin": "./single-file",
+	"bin": {
+		"single-file": "./single-file-node.js"
+	},
 	"dependencies": {
 		"simple-cdp": "^1.8.2",
 		"ws": "^8.16.0"
