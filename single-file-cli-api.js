@@ -248,7 +248,7 @@ async function capturePage(options) {
 			if (options.compressContent) {
 				await stdout.write(pageData.content);
 			} else {
-				console.log(pageData.content); // eslint-disable-line no-console
+				console.log(pageData.content || ""); // eslint-disable-line no-console
 			}
 		} else {
 			filename = await getFilename(pageData.filename, options);
