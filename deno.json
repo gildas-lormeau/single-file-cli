@@ -1,6 +1,6 @@
 {
   "name": "@single-file/single-file-cli",
-  "version": "2.0.12",
+  "version": "2.0.13",
   "description": "SingleFile CLI",
   "nodeModulesDir": true,
   "exports": {
