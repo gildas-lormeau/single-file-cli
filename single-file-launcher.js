@@ -33,53 +33,57 @@ const { toFileUrl } = path;
 export { run };
 
 async function run() {
-	let urls;
-	if (options.url && !VALID_URL_TEST.test(options.url)) {
-		options.url = (await toFileUrl(new URL(options.url, import.meta.url).pathname)).href;
-	}
-	if (options.urlsFile) {
-		urls = (await readTextFile(options.urlsFile)).split("\n");
-	} else {
-		urls = [options.url];
-	}
-	if (options.browserCookies) {
-		const cookies = [];
-		for (const cookie of options.browserCookies) {
-			const [name, value, domain, path, expires, httpOnly, secure, sameSite, url] = cookie.split(",");
-			cookies.push({
-				name,
-				value,
-				url,
-				domain,
-				path,
-				secure,
-				httpOnly,
-				sameSite,
-				expires
-			});
+	try {
+		let urls;
+		if (options.url && !VALID_URL_TEST.test(options.url)) {
+			options.url = (await toFileUrl(new URL(options.url, import.meta.url).pathname)).href;
 		}
-		options.browserCookies = cookies;
-	}
-	if (options.browserCookiesFile) {
-		const cookiesContent = await readTextFile(options.browserCookiesFile);
-		try {
-			options.browserCookies = JSON.parse(cookiesContent);
-		} catch (error) {
-			options.browserCookies = parseCookies(cookiesContent);
+		if (options.urlsFile) {
+			urls = (await readTextFile(options.urlsFile)).split("\n");
+		} else {
+			urls = [options.url];
 		}
-	}
-	if (options.httpHeaders) {
-		const headers = {};
-		for (const header of options.httpHeaders) {
-			const [name, value] = header.split("=");
-			headers[name] = value.trim();
+		if (options.browserCookies) {
+			const cookies = [];
+			for (const cookie of options.browserCookies) {
+				const [name, value, domain, path, expires, httpOnly, secure, sameSite, url] = cookie.split(",");
+				cookies.push({
+					name,
+					value,
+					url,
+					domain,
+					path,
+					secure,
+					httpOnly,
+					sameSite,
+					expires
+				});
+			}
+			options.browserCookies = cookies;
 		}
-		options.httpHeaders = headers;
+		if (options.browserCookiesFile) {
+			const cookiesContent = await readTextFile(options.browserCookiesFile);
+			try {
+				options.browserCookies = JSON.parse(cookiesContent);
+			} catch (error) {
+				options.browserCookies = parseCookies(cookiesContent);
+			}
+		}
+		if (options.httpHeaders) {
+			const headers = {};
+			for (const header of options.httpHeaders) {
+				const [name, value] = header.split("=");
+				headers[name] = value.trim();
+			}
+			options.httpHeaders = headers;
+		}
+		options.retrieveLinks = true;
+		const singlefile = await initialize(options);
+		await singlefile.capture(urls);
+		await singlefile.finish();
+	} catch (error) {
+		console.error(error); // eslint-disable-line no-console
 	}
-	options.retrieveLinks = true;
-	const singlefile = await initialize(options);
-	await singlefile.capture(urls);
-	await singlefile.finish();
 }
 
 function parseCookies(textValue) {
