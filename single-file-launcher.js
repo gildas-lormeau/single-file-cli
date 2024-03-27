@@ -27,7 +27,7 @@ import { VALID_URL_TEST, initialize } from "./single-file-cli-api.js";
 import { Deno, path } from "./lib/deno-polyfill.js";
 import options from "./options.js";
 
-const { readTextFile } = Deno;
+const { readTextFile, exit } = Deno;
 const { toFileUrl } = path;
 
 export { run };
@@ -83,6 +83,7 @@ async function run() {
 		await singlefile.finish();
 	} catch (error) {
 		console.error(error.message || error); // eslint-disable-line no-console
+		exit(-1);
 	}
 }
 
