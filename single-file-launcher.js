@@ -82,7 +82,7 @@ async function run() {
 		await singlefile.capture(urls);
 		await singlefile.finish();
 	} catch (error) {
-		console.error(error); // eslint-disable-line no-console
+		console.error(error.message || error); // eslint-disable-line no-console
 	}
 }
 
