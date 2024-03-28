@@ -76,7 +76,7 @@ const DEFAULT_OPTIONS = {
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
-const { readTextFile, writeTextFile, stdout, mkdir, stat } = Deno;
+const { readTextFile, writeTextFile, writeFile, stdout, mkdir, stat } = Deno;
 let tasks = [], maxParallelWorkers, sessionFilename;
 
 export { DEFAULT_OPTIONS, VALID_URL_TEST, initialize };
@@ -258,7 +258,11 @@ async function capturePage(options) {
 			if (directoryName !== ".") {
 				await mkdir(directoryName, { recursive: true });
 			}
-			await writeTextFile(filename, pageData.content);
+			if (pageData.content instanceof Uint8Array) {
+				await writeFile(filename, pageData.content);
+			} else {
+				await writeTextFile(filename, pageData.content);
+			}
 		}
 		return pageData;
 	} catch (error) {
