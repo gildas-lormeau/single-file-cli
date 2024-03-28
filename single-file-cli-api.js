@@ -240,7 +240,7 @@ function getHostURL(url) {
 async function capturePage(options) {
 	try {
 		let filename;
-		options.zipScript = getZipScriptSource();
+		options.zipScript = await getZipScriptSource();
 		const pageData = await backend.getPageData(options);
 		if (options.output) {
 			filename = await getFilename(options.output, options);
