@@ -2,7 +2,7 @@
 
 ## Introduction
 
-SingleFile can be launched from the command line by running it into a (headless) browser. 
+[SingleFile](https://github.com/gildas-lormeau/SingleFile) can be launched from the command line by running it into a (headless) browser. 
 
 It runs through Deno as a standalone script injected into the web page via the Chrome DevTools Protocol instead of being embedded into a WebExtension.
 
