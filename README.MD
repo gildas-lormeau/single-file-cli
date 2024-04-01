@@ -130,13 +130,6 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file https://www.wikipedia.org wikipedia.html
   ```
 
-  - Save https://www.wikipedia.org into `wikipedia.html` in the current folder
-    with Firefox instead of Chrome
-
-  ```sh
-  single-file https://www.wikipedia.org wikipedia.html --back-end=webdriver-gecko
-  ```
-
   - Save a list of URLs stored into `list-urls.txt` in the current folder
 
   ```sh
