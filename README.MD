@@ -80,9 +80,6 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
 
     ```sh
     unzip master.zip .
-    ```
-
-    ```sh
     cd single-file-cli-master
     ```
 
@@ -90,9 +87,6 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
 
     ```sh
     git clone --depth 1 --recursive https://github.com/gildas-lormeau/single-file-cli.git
-    ```
-
-    ```sh
     cd single-file-cli
     ```
 
