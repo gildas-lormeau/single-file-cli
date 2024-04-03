@@ -2,15 +2,15 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "jsr:@simple-cdp/simple-cdp@^1.8.2": "jsr:@simple-cdp/simple-cdp@1.8.2",
+      "jsr:@simple-cdp/simple-cdp@^1.8.3": "jsr:@simple-cdp/simple-cdp@1.8.3",
       "jsr:@std/assert@^0.220.1": "jsr:@std/assert@0.220.1",
       "jsr:@std/path@^0.220.1": "jsr:@std/path@0.220.1",
-      "npm:simple-cdp@^1.8.2": "npm:simple-cdp@1.8.2",
+      "npm:simple-cdp@^1.8.3": "npm:simple-cdp@1.8.3",
       "npm:ws@^8.16.0": "npm:ws@8.16.0"
     },
     "jsr": {
-      "@simple-cdp/simple-cdp@1.8.2": {
-        "integrity": "171f82ef24c464c83f0ffc1148096a04fcd8256c6bb6b5454640614c53689165"
+      "@simple-cdp/simple-cdp@1.8.3": {
+        "integrity": "5ad1a4698a51f32b6a8e900eb515ed284a931adfca884f0e55fa53a543b4b6f3"
       },
       "@std/assert@0.220.1": {
         "integrity": "88710d54f3afdd7a5761e7805abba1f56cd14e4b212feffeb3e73a9f77482425"
@@ -23,8 +23,8 @@
       }
     },
     "npm": {
-      "simple-cdp@1.8.2": {
-        "integrity": "sha512-Ts4RpMMuJjdp+mLB2OJeJSUyTJZw3tUDc7ZWKytK6/4zSegwzKJEIqKv0Z2UgX0DPvma0eYg10MfaceM6CYQfA==",
+      "simple-cdp@1.8.3": {
+        "integrity": "sha512-aPrjPEtuC6HnkG1swTfSJKevUkSGUYGol/0Epi4w64pxWCoNqqbilLzG1eTDuk8gjXIfNIOeYFviFC/23/+maw==",
         "dependencies": {}
       },
       "ws@8.16.0": {
@@ -36,12 +36,12 @@
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@simple-cdp/simple-cdp@^1.8.2",
+      "jsr:@simple-cdp/simple-cdp@^1.8.3",
       "jsr:@std/path@^0.220.1"
     ],
     "packageJson": {
       "dependencies": [
-        "npm:simple-cdp@^1.8.2",
+        "npm:simple-cdp@^1.8.3",
         "npm:ws@^8.16.0"
       ]
     }
