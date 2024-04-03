@@ -13,7 +13,7 @@
 		"single-file": "./single-file-node.js"
 	},
 	"dependencies": {
-		"simple-cdp": "^1.8.3",
+		"simple-cdp": "^1.8.4",
 		"ws": "^8.16.0"
 	}
 }

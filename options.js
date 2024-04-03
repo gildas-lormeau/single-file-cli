@@ -60,6 +60,7 @@ const OPTIONS_INFO = {
 	"browser-cookie": { description: "Ordered list of cookie parameters separated by a comma (name,value,domain,path,expires,httpOnly,secure,sameSite,url)", type: "string[]" },
 	"browser-cookies-file": { description: "Path of the cookies file formatted as a JSON file or a Netscape text file", type: "string" },
 	"browser-ignore-insecure-certs": { description: "Ignore HTTPs errors", type: "boolean" },
+	"browser-remote-debugging-url": { description: "Remote debugging URL", type: "string" },
 	"compress-content": { description: "Compress the output file into a ZIP file", type: "boolean" },
 	"compress-CSS": { description: "Compress CSS stylesheets", type: "boolean" },
 	"compress-HTML": { description: "Compress HTML content", type: "boolean", defaultValue: true },
