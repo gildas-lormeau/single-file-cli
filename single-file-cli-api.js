@@ -76,7 +76,7 @@ const DEFAULT_OPTIONS = {
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
-const { readTextFile, writeTextFile, writeFile, stdout, mkdir, stat } = Deno;
+const { readTextFile, writeTextFile, writeFile, stdout, mkdir, stat, errors } = Deno;
 let tasks = [], maxParallelWorkers, sessionFilename;
 
 export { DEFAULT_OPTIONS, VALID_URL_TEST, initialize };
@@ -84,7 +84,21 @@ export { DEFAULT_OPTIONS, VALID_URL_TEST, initialize };
 async function initialize(options) {
 	options = Object.assign({}, DEFAULT_OPTIONS, options);
 	maxParallelWorkers = options.maxParallelWorkers || 8;
-	await backend.initialize(options);
+	try {
+		await backend.initialize(options);
+	} catch (error) {
+		if (error instanceof errors.NotFound) {
+			let message = "Chromium executable not found. ";
+			if (options.browserExecutablePath) {
+				message += "Make sure --browser-executable-path is correct.";
+			} else {
+				message += "Set the path using the --browser-executable-path option.";
+			}
+			throw new Error(message);
+		} else {
+			throw error;
+		}
+	}
 	if (options.crawlSyncSession || options.crawlLoadSession) {
 		try {
 			tasks = JSON.parse(await readTextFile(options.crawlSyncSession || options.crawlLoadSession));
