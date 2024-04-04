@@ -103,7 +103,7 @@ const OPTIONS_INFO = {
 	"max-resource-size-enabled": { description: "Enable removal of embedded resources exceeding a given size", type: "boolean" },
 	"max-resource-size": { description: "Maximum size of embedded resources in MB (i.e. images, stylesheets, scripts and iframes)", type: "number", defaultValue: 10 },
 	"move-styles-in-head": { description: "Move style elements outside the head element into the head element", type: "boolean" },
-	"password": { description: "Password of the zip file", type: "string" },
+	"password": { description: "Password of the zip file when using --compress-content or --self-extracting-archive", type: "string" },
 	"remove-frames": { description: "Remove frames", type: "boolean" },
 	"remove-hidden-elements": { description: "Remove HTML elements which are not displayed", type: "boolean", defaultValue: true },
 	"remove-unused-styles": { description: "Remove unused CSS rules and unneeded declarations", type: "boolean", defaultValue: true },
