@@ -151,7 +151,7 @@ async function finish(options) {
 			}
 		}
 	}
-	if (!options.browserDebug) {
+	if (!options.browserDebug && !options.browserRemoteDebuggingURL) {
 		return backend.closeBrowser();
 	}
 }
