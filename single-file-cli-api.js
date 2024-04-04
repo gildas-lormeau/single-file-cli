@@ -151,7 +151,7 @@ async function finish(options) {
 			}
 		}
 	}
-	if (!options.browserDebug) {
+	if (!options.browserDebug && backend.canCloseBrowser) {
 		return backend.closeBrowser();
 	}
 }
@@ -206,7 +206,7 @@ function createTask(url, options, parentTask, rootTask) {
 	if (!VALID_URL_TEST.test(url)) {
 		try {
 			url = url.replace(/\\/g, "/");
-			url = url.replace(/#/g, "%23"); 
+			url = url.replace(/#/g, "%23");
 			url = new URL(url, import.meta.url).href;
 		} catch (error) {
 			throw new Error("Invalid URL or file path: " + url);
