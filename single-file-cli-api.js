@@ -79,7 +79,7 @@ const STATE_PROCESSED = "processed";
 const { readTextFile, writeTextFile, writeFile, stdout, mkdir, stat, errors } = Deno;
 let tasks = [], maxParallelWorkers, sessionFilename;
 
-export { DEFAULT_OPTIONS, VALID_URL_TEST, initialize };
+export { initialize };
 
 async function initialize(options) {
 	options = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -203,21 +203,28 @@ function testMaxDepth(task) {
 
 function createTask(url, options, parentTask, rootTask) {
 	url = parentTask ? rewriteURL(url, options.crawlRemoveURLFragment, options.crawlRewriteRules) : url;
-	if (VALID_URL_TEST.test(url)) {
-		const isInnerLink = rootTask && url.startsWith(getHostURL(rootTask.url));
-		const rootBaseURIMatch = rootTask && rootTask.url.match(/(.*?)[^/]*$/);
-		const isChild = isInnerLink && rootBaseURIMatch && rootBaseURIMatch[1] && url.startsWith(rootBaseURIMatch[1]);
-		return {
-			url,
-			isInnerLink,
-			isChild,
-			originalUrl: url,
-			rootBaseURI: rootBaseURIMatch && rootBaseURIMatch[1],
-			depth: parentTask ? parentTask.depth + 1 : 0,
-			externalLinkDepth: isInnerLink ? -1 : parentTask ? parentTask.externalLinkDepth + 1 : -1,
-			options
-		};
+	if (!VALID_URL_TEST.test(url)) {
+		try {
+			url = url.replace(/\\/g, "/");
+			url = url.replace(/#/g, "%23"); 
+			url = new URL(url, import.meta.url).href;
+		} catch (error) {
+			throw new Error("Invalid URL or file path: " + url);
+		}
 	}
+	const isInnerLink = rootTask && url.startsWith(getHostURL(rootTask.url));
+	const rootBaseURIMatch = rootTask && rootTask.url.match(/(.*?)[^/]*$/);
+	const isChild = isInnerLink && rootBaseURIMatch && rootBaseURIMatch[1] && url.startsWith(rootBaseURIMatch[1]);
+	return {
+		url,
+		isInnerLink,
+		isChild,
+		originalUrl: url,
+		rootBaseURI: rootBaseURIMatch && rootBaseURIMatch[1],
+		depth: parentTask ? parentTask.depth + 1 : 0,
+		externalLinkDepth: isInnerLink ? -1 : parentTask ? parentTask.externalLinkDepth + 1 : -1,
+		options
+	};
 }
 
 async function saveTasks() {

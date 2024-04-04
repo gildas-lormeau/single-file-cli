@@ -23,21 +23,17 @@
 
 /* global URL */
 
-import { VALID_URL_TEST, initialize } from "./single-file-cli-api.js";
-import { Deno, path } from "./lib/deno-polyfill.js";
+import { initialize } from "./single-file-cli-api.js";
+import { Deno } from "./lib/deno-polyfill.js";
 import options from "./options.js";
 
 const { readTextFile, exit } = Deno;
-const { toFileUrl } = path;
 
 export { run };
 
 async function run() {
 	try {
 		let urls;
-		if (options.url && !VALID_URL_TEST.test(options.url)) {
-			options.url = (await toFileUrl(new URL(options.url, import.meta.url).pathname)).href;
-		}
 		if (options.urlsFile) {
 			urls = (await readTextFile(options.urlsFile)).split("\n");
 		} else {
