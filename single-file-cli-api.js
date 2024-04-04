@@ -151,7 +151,7 @@ async function finish(options) {
 			}
 		}
 	}
-	if (!options.browserDebug && !options.browserRemoteDebuggingURL && !(await backend.hasTargets())) {
+	if (!options.browserDebug && !options.browserRemoteDebuggingURL && !(await backend.hasPageTargets())) {
 		return backend.closeBrowser();
 	}
 }
