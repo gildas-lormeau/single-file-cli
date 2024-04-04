@@ -21,8 +21,6 @@
  *   Source.
  */
 
-/* global URL */
-
 import { initialize } from "./single-file-cli-api.js";
 import { Deno } from "./lib/deno-polyfill.js";
 import options from "./options.js";
