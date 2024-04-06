@@ -28,15 +28,8 @@ import options from "./options.js";
 
 const { readTextFile, exit, addSignalListener } = Deno;
 
-addSignalListener("SIGTERM", async () => {
-	await closeBrowser();
-	exit();
-});
-
-addSignalListener("SIGINT", async () => {
-	await closeBrowser();
-	exit();
-});
+addSignalListener("SIGTERM", closeBrowserAndExit);
+addSignalListener("SIGINT", closeBrowserAndExit);
 
 export { run };
 
@@ -115,4 +108,9 @@ function parseCookies(textValue) {
 			}
 		})
 		.filter(cookieData => cookieData);
+}
+
+async function closeBrowserAndExit() {
+	await closeBrowser();
+	exit();
 }
