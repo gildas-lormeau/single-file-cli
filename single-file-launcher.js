@@ -107,12 +107,12 @@ function parseCookies(textValue) {
 		.filter(cookieData => cookieData);
 }
 
-addSignalListener('SIGTERM', async () => {
+addSignalListener("SIGTERM", async () => {
 	await closeBrowser();
 	exit();
 });
 
-addSignalListener('SIGINT', async () => {
+addSignalListener("SIGINT", async () => {
 	await closeBrowser();
 	exit();
 });
