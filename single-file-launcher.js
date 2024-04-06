@@ -22,10 +22,11 @@
  */
 
 import { initialize } from "./single-file-cli-api.js";
+import { closeBrowser } from "./lib/browser.js";
 import { Deno } from "./lib/deno-polyfill.js";
 import options from "./options.js";
 
-const { readTextFile, exit } = Deno;
+const { readTextFile, exit, addSignalListener } = Deno;
 
 export { run };
 
@@ -105,3 +106,13 @@ function parseCookies(textValue) {
 		})
 		.filter(cookieData => cookieData);
 }
+
+addSignalListener('SIGTERM', async () => {
+	await closeBrowser();
+	exit();
+});
+
+addSignalListener('SIGINT', async () => {
+	await closeBrowser();
+	exit();
+});
