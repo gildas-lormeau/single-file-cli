@@ -29,13 +29,11 @@ import options from "./options.js";
 const { readTextFile, exit, addSignalListener } = Deno;
 
 addSignalListener("SIGTERM", async () => {
-	console.log("SIGTERM received"); // eslint-disable-line no-console
 	await closeBrowser();
 	exit();
 });
 
 addSignalListener("SIGINT", async () => {
-	console.log("SIGINT received"); // eslint-disable-line no-console
 	await closeBrowser();
 	exit();
 });
