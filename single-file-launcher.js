@@ -28,8 +28,16 @@ import options from "./options.js";
 
 const { readTextFile, exit, addSignalListener } = Deno;
 
-addSignalListener("SIGTERM", closeBrowserAndExit);
-addSignalListener("SIGINT", closeBrowserAndExit);
+try {
+	addSignalListener("SIGTERM", closeBrowserAndExit);
+} catch (_error) {
+	// ignored
+}
+try {
+	addSignalListener("SIGINT", closeBrowserAndExit);
+} catch (_error) {
+	// ignored
+}
 
 export { run };
 
