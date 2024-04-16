@@ -6,7 +6,7 @@ WORKDIR /usr/src/app/node_modules/single-file-cli
 
 ENTRYPOINT [ \
     "node", \
-    "./single-file", \
+    "./single-file-node.js", \
     "--browser-executable-path", "/usr/bin/chromium-browser", \
     "--output-directory", "./../../out/", \
     "--dump-content" ]
