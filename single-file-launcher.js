@@ -89,7 +89,7 @@ async function run() {
 		await singlefile.finish();
 	} catch (error) {
 		console.error(error.message || error); // eslint-disable-line no-console
-		closeBrowserAndExit(-1);
+		await closeBrowserAndExit(-1);
 	}
 }
 
