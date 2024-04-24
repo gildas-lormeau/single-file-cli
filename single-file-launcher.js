@@ -89,7 +89,7 @@ async function run() {
 		await singlefile.finish();
 	} catch (error) {
 		console.error(error.message || error); // eslint-disable-line no-console
-		exit(-1);
+		closeBrowserAndExit(-1);
 	}
 }
 
@@ -118,7 +118,7 @@ function parseCookies(textValue) {
 		.filter(cookieData => cookieData);
 }
 
-async function closeBrowserAndExit() {
+async function closeBrowserAndExit(code) {
 	await closeBrowser();
-	exit();
+	exit(code);
 }
