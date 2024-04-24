@@ -122,6 +122,7 @@ const OPTIONS_INFO = {
 	"create-root-directory": { description: "Create a root directory based on the timestamp", type: "boolean" },
 	"extract-data-from-page": { description: "Extract compressed data from the page instead of fetching the page in order to create universal self-extracting HTML files", type: "boolean", defaultValue: true },
 	"prevent-appended-data": { description: "Prevent appending data after the compressed data when creating self-extracting HTML files", type: "boolean" },
+	"embed-screenshot": { description: "Embed a screenshot of the page as a PNG file in the compressed file (self-extracting HTML or ZIP file). When enabled, the resulting file can be read as a ZIP file or a PNG image.", type: "boolean" },
 	"output-directory": { description: "Path to where to save files, this path must exist.", type: "string" },
 	"version": { description: "Print the version number and exit.", type: "boolean" }
 };
