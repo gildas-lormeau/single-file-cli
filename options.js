@@ -199,7 +199,7 @@ function parseArgs(args) {
 			}
 			let nextArgName;
 			if (argValue === undefined) {
-				while (
+				if (
 					argIndex + 1 < args.length &&
 					({ argName: nextArgName } = parseArg(args[argIndex + 1])) &&
 					(nextArgName === undefined || !getOptionInfo(nextArgName)) &&
