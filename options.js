@@ -61,6 +61,7 @@ const OPTIONS_INFO = {
 	"browser-cookies-file": { description: "Path of the cookies file formatted as a JSON file or a Netscape text file", type: "string" },
 	"browser-ignore-insecure-certs": { description: "Ignore HTTPs errors", type: "boolean" },
 	"browser-remote-debugging-URL": { description: "Remote debugging URL", type: "string" },
+	"browser-mobile-emulation": { description: "Emulate a mobile device", type: "boolean" },
 	"compress-CSS": { description: "Compress CSS stylesheets", type: "boolean" },
 	"compress-HTML": { description: "Compress HTML content", type: "boolean", defaultValue: true },
 	"crawl-links": { description: "Crawl and save pages found via inner links", type: "boolean" },
