@@ -132,7 +132,7 @@ async function finish(options) {
 			}
 		}
 	}
-	if (!options.browserDebug && !options.browserRemoteDebuggingURL) {
+	if (!options.browserDebug && !options.browserServer) {
 		return backend.closeBrowser();
 	}
 }
