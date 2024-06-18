@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cp ./package.json ./package.json.copy
 jq 'del(.dependencies)' ./package.json.copy > ./package.json

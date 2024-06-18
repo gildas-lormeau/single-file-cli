@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 mkdir -p node_modules/single-file-core
 cp -R ../single-file-core/* node_modules/single-file-core
