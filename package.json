@@ -1,6 +1,6 @@
 {
 	"name": "single-file-cli",
-	"version": "2.0.43",
+	"version": "2.0.44",
 	"description": "SingleFile CLI",
 	"author": "Gildas Lormeau",
 	"engines": {
