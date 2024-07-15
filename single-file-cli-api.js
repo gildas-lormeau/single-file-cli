@@ -101,7 +101,7 @@ async function initialize(options) {
 async function capture(urls, options) {
 	let newTasks;
 	const taskUrls = tasks.map(task => task.url);
-	newTasks = urls.map(url => createTask(url, options));
+	newTasks = await Promise.all(urls.map(url => createTask(url, options)));
 	newTasks = newTasks.filter(task => task && !taskUrls.includes(task.url));
 	if (newTasks.length) {
 		tasks = tasks.concat(newTasks);
@@ -161,13 +161,13 @@ async function runNextTask() {
 		if (pageData) {
 			task.filename = pageData.filename;
 			if (options.crawlLinks && testMaxDepth(task)) {
-				let newTasks = pageData.links
-					.map(urlLink => createTask(urlLink, options, task, tasks[0]))
-					.filter(task => task &&
-						testMaxDepth(task) &&
-						!tasks.find(otherTask => otherTask.url == task.url) &&
-						(!options.crawlInnerLinksOnly || task.isInnerLink) &&
-						(!options.crawlNoParent || (task.isChild || !task.isInnerLink)));
+				const urls = pageData.links;
+				let newTasks = await Promise.all(urls.map(url => createTask(url, options, task, tasks[0])));
+				newTasks = newTasks.filter(task => task &&
+					testMaxDepth(task) &&
+					!tasks.find(otherTask => otherTask.url == task.url) &&
+					(!options.crawlInnerLinksOnly || task.isInnerLink) &&
+					(!options.crawlNoParent || (task.isChild || !task.isInnerLink)));
 				tasks.splice(tasks.length, 0, ...newTasks);
 			}
 		}
@@ -182,13 +182,14 @@ function testMaxDepth(task) {
 		(options.crawlExternalLinksMaxDepth == 0 || task.externalLinkDepth < options.crawlExternalLinksMaxDepth);
 }
 
-function createTask(url, options, parentTask, rootTask) {
+async function createTask(url, options, parentTask, rootTask) {
 	url = parentTask ? rewriteURL(url, options.crawlRemoveURLFragment, options.crawlRewriteRules) : url;
 	if (!VALID_URL_TEST.test(url)) {
 		try {
 			url = url.replace(/\\/g, "/");
 			url = url.replace(/#/g, "%23");
-			url = new URL(url, import.meta.url).href;
+			const baseURL = await path.toFileUrl((await Deno.cwd()) + path.SEPARATOR);
+			url = new URL(url, baseURL).href;
 		} catch (error) {
 			throw new Error("Invalid URL or file path: " + url);
 		}
