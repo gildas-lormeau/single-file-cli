@@ -191,7 +191,7 @@ async function createTask(url, options, parentTask, rootTask) {
 			const baseURL = await path.toFileUrl((await Deno.cwd()) + path.SEPARATOR);
 			url = new URL(url, baseURL).href;
 		} catch (error) {
-			throw new Error("Invalid URL or file path: " + url);
+			throw new Error("Invalid URL or file path: " + url, { cause: error });
 		}
 	}
 	const isInnerLink = rootTask && url.startsWith(getHostURL(rootTask.url));
