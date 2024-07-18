@@ -269,7 +269,7 @@ async function capturePage(options) {
 		}
 		return pageData;
 	} catch (error) {
-		const message = "URL: " + options.url + "\nStack: " + error.stack + "\n";
+		const message = "URL: " + options.url + (options.errorTracesDisabled ? "" : "\nStack: " + error.stack) + "\n";
 		if (options.errorFile) {
 			await writeTextFile(options.errorFile, message, { append: true });
 		} else {
