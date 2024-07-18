@@ -184,29 +184,31 @@ function testMaxDepth(task) {
 
 async function createTask(url, options, parentTask, rootTask) {
 	url = parentTask ? rewriteURL(url, options.crawlRemoveURLFragment, options.crawlRewriteRules) : url;
-	if (!VALID_URL_TEST.test(url)) {
-		try {
-			url = url.replace(/\\/g, "/");
-			url = url.replace(/#/g, "%23");
-			const baseURL = await path.toFileUrl((await Deno.cwd()) + path.SEPARATOR);
-			url = new URL(url, baseURL).href;
-		} catch (error) {
-			throw new Error("Invalid URL or file path: " + url, { cause: error });
+	if (url) {
+		if (!VALID_URL_TEST.test(url)) {
+			try {
+				url = url.replace(/\\/g, "/");
+				url = url.replace(/#/g, "%23");
+				const baseURL = await path.toFileUrl((await Deno.cwd()) + path.SEPARATOR);
+				url = new URL(url, baseURL).href;
+			} catch (error) {
+				throw new Error("Invalid URL or file path: " + url, { cause: error });
+			}
 		}
+		const isInnerLink = rootTask && url.startsWith(getHostURL(rootTask.url));
+		const rootBaseURIMatch = rootTask && rootTask.url.match(/(.*?)[^/]*$/);
+		const isChild = isInnerLink && rootBaseURIMatch && rootBaseURIMatch[1] && url.startsWith(rootBaseURIMatch[1]);
+		return {
+			url,
+			isInnerLink,
+			isChild,
+			originalUrl: url,
+			rootBaseURI: rootBaseURIMatch && rootBaseURIMatch[1],
+			depth: parentTask ? parentTask.depth + 1 : 0,
+			externalLinkDepth: isInnerLink ? -1 : parentTask ? parentTask.externalLinkDepth + 1 : -1,
+			options
+		};
 	}
-	const isInnerLink = rootTask && url.startsWith(getHostURL(rootTask.url));
-	const rootBaseURIMatch = rootTask && rootTask.url.match(/(.*?)[^/]*$/);
-	const isChild = isInnerLink && rootBaseURIMatch && rootBaseURIMatch[1] && url.startsWith(rootBaseURIMatch[1]);
-	return {
-		url,
-		isInnerLink,
-		isChild,
-		originalUrl: url,
-		rootBaseURI: rootBaseURIMatch && rootBaseURIMatch[1],
-		depth: parentTask ? parentTask.depth + 1 : 0,
-		externalLinkDepth: isInnerLink ? -1 : parentTask ? parentTask.externalLinkDepth + 1 : -1,
-		options
-	};
 }
 
 async function saveTasks() {
