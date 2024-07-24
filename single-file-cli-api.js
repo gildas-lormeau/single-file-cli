@@ -21,7 +21,7 @@
  *   Source.
  */
 
-/* global URL */
+/* global URL, Blob, FileReader */
 
 import * as backend from "./lib/cdp-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
@@ -244,29 +244,48 @@ function getHostURL(url) {
 
 async function capturePage(options) {
 	try {
-		let filename;
+		let filename, content;
 		options.zipScript = getZipScriptSource();
 		const pageData = await backend.getPageData(options);
+		filename = pageData.filename;
+		content = pageData.content;
+		if (options.outputJson) {
+			if (content instanceof Uint8Array) {
+				const fileReader = new FileReader();
+				fileReader.readAsDataURL(new Blob([content]));
+				content = await new Promise(resolve => {
+					fileReader.onload = () => resolve(fileReader.result);
+				});
+				content = content.replace(/^data:.*?;base64,/, "");
+				pageData.content = undefined;
+				pageData.binaryContent = content;
+			}
+			pageData.doctype = undefined;
+			pageData.viewport = undefined;
+			pageData.comment = undefined;
+			filename += filename.endsWith(".json") ? "" : ".json";
+			content = JSON.stringify(pageData, null, 2);
+		}
 		if (options.output) {
 			filename = await getFilename(options.output, options);
 		} else if (options.dumpContent) {
 			if (options.compressContent) {
-				await stdout.write(pageData.content);
+				await stdout.write(content);
 			} else {
-				console.log(pageData.content || ""); // eslint-disable-line no-console
+				console.log(content || ""); // eslint-disable-line no-console
 			}
 		} else {
-			filename = await getFilename(pageData.filename, options);
+			filename = await getFilename(filename, options);
 		}
 		if (filename) {
 			const directoryName = await path.dirname(filename);
 			if (directoryName !== ".") {
 				await mkdir(directoryName, { recursive: true });
 			}
-			if (pageData.content instanceof Uint8Array) {
-				await writeFile(filename, pageData.content);
+			if (content instanceof Uint8Array) {
+				await writeFile(filename, content);
 			} else {
-				await writeTextFile(filename, pageData.content);
+				await writeTextFile(filename, content);
 			}
 		}
 		return pageData;
