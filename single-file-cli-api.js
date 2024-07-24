@@ -277,7 +277,7 @@ async function capturePage(options) {
 		} else {
 			filename = await getFilename(filename, options);
 		}
-		if (filename) {
+		if (filename && !options.dumpContent) {
 			const directoryName = await path.dirname(filename);
 			if (directoryName !== ".") {
 				await mkdir(directoryName, { recursive: true });
