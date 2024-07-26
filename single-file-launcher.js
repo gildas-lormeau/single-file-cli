@@ -59,10 +59,10 @@ async function run() {
 					url,
 					domain,
 					path,
-					secure,
-					httpOnly,
+					secure: secure === "true",
+					httpOnly: httpOnly === "true",
 					sameSite,
-					expires
+					expires: isNaN(Number(expires)) ? undefined : Number(expires)
 				});
 			}
 			options.browserCookies = cookies;
