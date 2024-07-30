@@ -98,6 +98,7 @@ const OPTIONS_INFO = {
 	"include-BOM": { description: "Include the UTF-8 BOM into the HTML page", type: "boolean" },
 	"include-infobar": { description: "Include the infobar", type: "boolean" },
 	"infobar-template": { description: "Template used to generate the infobar content (see help page of the extension for more info)", type: "string" },
+	"open-infobar": { description: "Keep the infobar open when using --include-infobar", type: "boolean" },
 	"insert-meta-CSP": { description: "Include a <meta> tag with a CSP to avoid potential requests to internet when viewing a page", type: "boolean", defaultValue: true },
 	"load-deferred-images": { description: "Load deferred (a.k.a. lazy-loaded) images", type: "boolean", defaultValue: true },
 	"load-deferred-images-dispatch-scroll-event": { description: "Dispatch 'scroll' event when loading deferred images", type: "boolean" },
