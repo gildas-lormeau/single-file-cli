@@ -10,7 +10,7 @@
 	},
 	"type": "module",
 	"bin": {
-		"single-file": "./single-file-node.js"
+		"single-file": "single-file-node.js"
 	},
 	"dependencies": {
 		"simple-cdp": "^1.8.5",
