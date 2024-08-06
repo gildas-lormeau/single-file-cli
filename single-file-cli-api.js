@@ -290,7 +290,12 @@ async function capturePage(options) {
 		}
 		return pageData;
 	} catch (error) {
-		const message = "URL: " + options.url + (options.errorTracesDisabled ? "" : "\nStack: " + error.stack) + "\n";
+		const date = new Date();
+		let message = `[${date.toISOString()}] URL: ${options.url}`;
+		if (!options.errorTracesDisabled) {
+			message += "\nStack: " + error.stack;
+		}
+		message += "\n";
 		if (options.errorFile) {
 			await writeTextFile(options.errorFile, message, { append: true });
 		} else {
