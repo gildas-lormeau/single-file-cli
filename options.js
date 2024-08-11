@@ -135,6 +135,7 @@ const OPTIONS_INFO = {
 	"output-directory": { description: "Path to where to save files, this path must exist.", type: "string" },
 	"version": { description: "Print the version number and exit.", type: "boolean" },
 	"output-json": { description: "Output the result as a JSON string containing the page and network info", type: "boolean" },
+	"insert-single-file-comment": { description: "Insert a comment in the HTML header with the URL of the page", type: "boolean", defaultValue: true },
 };
 
 const { args, exit } = Deno;
