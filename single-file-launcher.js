@@ -26,7 +26,7 @@ import { closeBrowser } from "./lib/browser.js";
 import { Deno } from "./lib/deno-polyfill.js";
 import options from "./options.js";
 
-const { readTextFile, exit, addSignalListener } = Deno;
+const { readTextFile, readFile, exit, addSignalListener } = Deno;
 
 try {
 	addSignalListener("SIGTERM", closeBrowserAndExit);
@@ -82,6 +82,9 @@ async function run() {
 				headers[name] = value.trim();
 			}
 			options.httpHeaders = headers;
+		}
+		if (options.embeddedImage) {
+			options.embeddedImage = Array.from(await readFile(options.embeddedImage));
 		}
 		options.retrieveLinks = true;
 		const singlefile = await initialize(options);
