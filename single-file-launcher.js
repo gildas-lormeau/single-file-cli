@@ -44,6 +44,15 @@ export { run };
 async function run() {
 	try {
 		let urls;
+		if (options.settingsFile) {
+			const settings = JSON.parse(await Deno.readTextFile(options.settingsFile));
+			let profileName = options.settingsProfile || "default";
+			if (profileName == "default" || !settings.profiles[profileName]) {
+				profileName = "__Default_Settings__";
+			}
+			Object.assign(options, settings.profiles[profileName]);
+			delete options.settingsFile;
+		}
 		if (options.urlsFile) {
 			urls = (await readTextFile(options.urlsFile)).split("\n");
 		} else {
