@@ -138,7 +138,7 @@ const OPTIONS_INFO = {
 	"output-json": { description: "Output the result as a JSON string containing the page and network info", type: "boolean" },
 	"insert-single-file-comment": { description: "Insert a comment in the HTML header with the URL of the page", type: "boolean", defaultValue: true },
 	"resolve-links": { description: "Resolve link URLs to absolute URLs", type: "boolean", defaultValue: true },
-	"settings-file": { description: "Path to a JSON file containing the settings", type: "string" },
+	"settings-file": { description: "Path to a JSON file containing the settings exported from the web extension", type: "string" },
 	"settings-file-profile": { description: "Name of the profile to use when using --settings-file", type: "string", defaultValue: "default" },
 };
 
