@@ -65,11 +65,11 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
 
 - There are 3 ways to download the code of SingleFile, choose the one you prefer:
   
-  - Download and install with `npm` (`npm` is installed with Node.js)
+  - Install with `npm` (`npm` is installed with Node.js) and run with `npx`
   
     ```sh
     npm install "single-file-cli"
-    cd node_modules/single-file-cli
+    npx single-file ...
     ```
 
     You can also install SingleFile globally with `-g` when running `npm install`.
