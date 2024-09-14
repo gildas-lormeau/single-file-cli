@@ -133,6 +133,7 @@ const OPTIONS_INFO = {
 	"prevent-appended-data": { description: "Prevent appending data after the compressed data when creating self-extracting HTML files", type: "boolean" },
 	"embed-screenshot": { description: "Embed a screenshot of the page as a PNG file in the compressed file (self-extracting HTML or ZIP file). When enabled, the resulting file can be read as a ZIP file or a PNG image.", type: "boolean" },
 	"embedded-image": { description: "Path to a PNG image to embed in the compressed file.", type: "string" },
+	"embed-pdf": { description: "Embed a PDF file in the self-extracting HTML file. When enabled, the resulting file can be read as a HTML, a ZIP file or a PDF file.", type: "boolean" },
 	"output-directory": { description: "Path to where to save files, this path must exist.", type: "string" },
 	"version": { description: "Print the version number and exit.", type: "boolean" },
 	"output-json": { description: "Output the result as a JSON string containing the page and network info", type: "boolean" },
