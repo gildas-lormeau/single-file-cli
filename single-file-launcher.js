@@ -95,6 +95,9 @@ async function run() {
 		if (options.embeddedImage) {
 			options.embeddedImage = Array.from(await readFile(options.embeddedImage));
 		}
+		if (options.embeddedPdf) {
+			options.embeddedPdf = Array.from(await readFile(options.embeddedPdf));
+		}
 		options.retrieveLinks = true;
 		const singlefile = await initialize(options);
 		await singlefile.capture(urls);

@@ -135,6 +135,7 @@ const OPTIONS_INFO = {
 	"embedded-image": { description: "Path to a PNG image to embed in the compressed file.", type: "string" },
 	"embed-pdf": { description: "Embed a PDF file in the ZIP or self-extracting file. When enabled, the resulting file can be read as a ZIP file or a PDF file.", type: "boolean" },
 	"embed-pdf-options": { description: "Options passed to the CDP method `Page.printToPDF()` given as a JSON string (e.g. { \"pageRanges\": \"1-1\", \"paperWidth\": 11, \"paperHeight\": 8.5 })", type: "string" },
+	"embedded-pdf": { description: "Path to a PDF file to embed in the compressed file.", type: "string" },
 	"output-directory": { description: "Path to where to save files, this path must exist.", type: "string" },
 	"version": { description: "Print the version number and exit.", type: "boolean" },
 	"output-json": { description: "Output the result as a JSON string containing the page and network info", type: "boolean" },
