@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-deno vendor "npm:single-file-core@1.5.29"
+deno vendor "npm:single-file-core@1.5.30"
 
 echo "
 import { build } from 'npm:esbuild';
