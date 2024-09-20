@@ -247,7 +247,6 @@ async function capturePage(options) {
 		let filename, content;
 		options.zipScript = getZipScriptSource();
 		const pageData = await backend.getPageData(options);
-		filename = pageData.filename;
 		content = pageData.content;
 		if (options.outputJson) {
 			if (content instanceof Uint8Array) {
@@ -263,7 +262,6 @@ async function capturePage(options) {
 			pageData.doctype = undefined;
 			pageData.viewport = undefined;
 			pageData.comment = undefined;
-			filename += filename.endsWith(".json") ? "" : ".json";
 			content = JSON.stringify(pageData, null, 2);
 		}
 		if (options.output) {
@@ -275,9 +273,12 @@ async function capturePage(options) {
 				console.log(content || ""); // eslint-disable-line no-console
 			}
 		} else {
-			filename = await getFilename(filename, options);
+			filename = await getFilename(pageData.filename, options);
 		}
-		if (filename && !options.dumpContent) {
+		if (filename) {
+			if (options.outputJson) {
+				filename += filename.endsWith(".json") ? "" : ".json";
+			}
 			const directoryName = await path.dirname(filename);
 			if (directoryName !== ".") {
 				await mkdir(directoryName, { recursive: true });
