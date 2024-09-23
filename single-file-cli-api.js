@@ -296,12 +296,12 @@ async function capturePage(options) {
 	} catch (error) {
 		const date = new Date();
 		let message = `[${date.toISOString()}] URL: ${options.url}`;
-		if (!options.errorTracesDisabled) {
+		if (!options.errorsTracesDisabled) {
 			message += "\nStack: " + error.stack;
 		}
 		message += "\n";
-		if (options.errorFile) {
-			await writeTextFile(options.errorFile, message, { append: true });
+		if (options.errorsFile) {
+			await writeTextFile(options.errorsFile, message, { append: true });
 		} else {
 			console.error(error.message || error, message); // eslint-disable-line no-console
 		}
