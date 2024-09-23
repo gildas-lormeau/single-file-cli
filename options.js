@@ -81,7 +81,7 @@ const OPTIONS_INFO = {
 	"crawl-rewrite-rule": { description: "Rewrite rule used to rewrite URLs of crawled pages", type: "string[]" },
 	"dump-content": { description: "Dump the content of the processed page in the console ('true' when running in Docker)", type: "boolean" },
 	"emulate-media-feature": { description: "Emulate a media feature. The syntax is <name>:<value>, e.g. \"prefers-color-scheme:dark\"", type: "string[]" },
-	"error-file": { description: "Path of the file where to save the error messages", type: "string" },
+	"errors-file": { description: "Path of the file where to save the error messages", type: "string", alias: "error-file" },
 	"error-traces-disabled": { description: "Remove error stack traces in the error messages", type: "boolean", defaultValue: true },
 	"filename-template": { description: "Template used to generate the output filename (see help page of the extension for more info)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
 	"filename-conflict-action": { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"", type: "string", defaultValue: "uniquify" },
@@ -293,7 +293,11 @@ function parseArg(arg) {
 }
 
 function getOptionInfo(optionName) {
-	return OPTIONS_INFO[Object.keys(OPTIONS_INFO).find(keyName => keyName.toLowerCase() == optionName.toLowerCase())];
+	for (const keyName in OPTIONS_INFO) {
+		if (keyName.toLowerCase() == optionName.toLowerCase() || OPTIONS_INFO[keyName].alias == optionName.toLowerCase()) {
+			return OPTIONS_INFO[keyName];
+		}
+	}
 }
 
 function kebabToCamelCase(optionName) {
