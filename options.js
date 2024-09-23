@@ -82,7 +82,7 @@ const OPTIONS_INFO = {
 	"dump-content": { description: "Dump the content of the processed page in the console ('true' when running in Docker)", type: "boolean" },
 	"emulate-media-feature": { description: "Emulate a media feature. The syntax is <name>:<value>, e.g. \"prefers-color-scheme:dark\"", type: "string[]" },
 	"errors-file": { description: "Path of the file where to save the error messages", type: "string", alias: "error-file" },
-	"error-traces-disabled": { description: "Remove error stack traces in the error messages", type: "boolean", defaultValue: true },
+	"errors-traces-disabled": { description: "Remove error stack traces in the error messages", type: "boolean", defaultValue: true, alias: "error-traces-disabled" },
 	"filename-template": { description: "Template used to generate the output filename (see help page of the extension for more info)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
 	"filename-conflict-action": { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"", type: "string", defaultValue: "uniquify" },
 	"filename-replacement-character": { description: "The character used for replacing invalid characters in filenames", type: "string", defaultValue: "_" },
