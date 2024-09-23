@@ -65,6 +65,7 @@ const OPTIONS_INFO = {
 	"browser-device-width": { description: "Width of the device viewport in pixels (default value is 360 when using --browser-mobile-emulation)", type: "number" },
 	"browser-device-height": { description: "Height of the device viewport in pixels (default value is 800 when using --browser-mobile-emulation)", type: "number" },
 	"browser-device-scale-factor": { description: "Scale factor of the device viewport (default value is 2 when using --browser-mobile-emulation)", type: "number" },
+	"console-messages-file": { description: "Path of the file where to save the console messages in JSON format", type: "string" },
 	"compress-CSS": { description: "Compress CSS stylesheets", type: "boolean" },
 	"compress-HTML": { description: "Compress HTML content", type: "boolean", defaultValue: true },
 	"crawl-links": { description: "Crawl and save pages found via inner links", type: "boolean" },

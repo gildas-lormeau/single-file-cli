@@ -248,6 +248,9 @@ async function capturePage(options) {
 		options.zipScript = getZipScriptSource();
 		const pageData = await backend.getPageData(options);
 		content = pageData.content;
+		if (options.consoleMessagesFile && pageData.consoleMessages) {
+			await writeTextFile(options.consoleMessagesFile, JSON.stringify(pageData.consoleMessages, null, 2));
+		}
 		if (options.outputJson) {
 			if (content instanceof Uint8Array) {
 				const fileReader = new FileReader();
