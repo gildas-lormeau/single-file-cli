@@ -198,6 +198,14 @@ async function getOptions() {
 		options.browserArgs = options.browserArguments;
 		delete options.browserArguments;
 	}
+	if (options.errorFile) {
+		options.errorsFile = options.errorFile;
+		delete options.errorFile;
+	}
+	if (options.errorTracesDisabled) {
+		options.errorsTracesDisabled = options.errorTracesDisabled;
+		delete options.errorTracesDisabled;
+	}
 	delete options.acceptHeaderFont;
 	delete options.acceptHeaderImage;
 	delete options.acceptHeaderStylesheet;
