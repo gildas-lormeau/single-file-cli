@@ -154,7 +154,14 @@ export default options;
 
 async function getOptions() {
 	const { positionals, options } = parseArgs(Array.from(args));
-	if ((!positionals.length && !Object.keys(options).length) || positionals.length > 2 || options.help) {
+	const unknownOptions = [];
+	positionals.forEach(positional => {
+		if (positional.startsWith("--")) {
+			unknownOptions.push(positional);
+			positionals.splice(positionals.indexOf(positional), 1);
+		}
+	});
+	if ((!positionals.length && !Object.keys(options).length) || positionals.length > 2 || options.help || unknownOptions.length) {
 		console.log(USAGE_TEXT + "\n"); // eslint-disable-line no-console
 		console.log("Options:"); // eslint-disable-line no-console
 		Object.keys(OPTIONS_INFO).forEach(optionName => {
@@ -167,6 +174,10 @@ async function getOptions() {
 			const optionDefaultValue = optionInfo.defaultValue === undefined ? "" : `(default: ${JSON.stringify(optionInfo.defaultValue)})`;
 			console.log(`  --${optionName}: ${optionDescription} <${optionType}> ${optionDefaultValue}`); // eslint-disable-line no-console
 		});
+		if (unknownOptions.length) {
+			console.log(""); // eslint-disable-line no-console
+			console.log(`Error: Unknown option${unknownOptions.length > 1 ? "s" : ""} ${unknownOptions.join(", ")}`); // eslint-disable-line no-console
+		}
 		console.log(""); // eslint-disable-line no-console
 		exit(0);
 	}
