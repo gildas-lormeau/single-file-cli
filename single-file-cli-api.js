@@ -223,7 +223,7 @@ async function saveTasks() {
 	}
 }
 
-function rewriteURL(url, crawlRemoveURLFragment, crawlRewriteRules) {
+function rewriteURL(url, crawlRemoveURLFragment, crawlRewriteRules = []) {
 	url = url.trim();
 	if (crawlRemoveURLFragment) {
 		url = url.replace(/^(.*?)#.*$/, "$1");
