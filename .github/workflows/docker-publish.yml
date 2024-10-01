@@ -26,4 +26,4 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/singlefile:latest
-          platforms: linux/amd64,linux/arm64doc
+          platforms: linux/amd64,linux/arm64
