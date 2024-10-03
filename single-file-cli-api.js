@@ -162,7 +162,7 @@ async function runNextTask() {
 			task.filename = pageData.filename;
 			if (options.crawlLinks && testMaxDepth(task)) {
 				const urls = pageData.links;
-				let newTasks = await Promise.all(urls.map(url => createTask(url, options, task, tasks[0])));
+				let newTasks = await Promise.all(urls.map(url => createTask(url, options, task, task.rootTaskURL || task.url)));
 				newTasks = newTasks.filter(task => task &&
 					testMaxDepth(task) &&
 					!tasks.find(otherTask => otherTask.url == task.url) &&
@@ -182,7 +182,7 @@ function testMaxDepth(task) {
 		(options.crawlExternalLinksMaxDepth == 0 || task.externalLinkDepth < options.crawlExternalLinksMaxDepth);
 }
 
-async function createTask(url, options, parentTask, rootTask) {
+async function createTask(url, options, parentTask, rootTaskURL) {
 	url = parentTask ? rewriteURL(url, options.crawlRemoveURLFragment, options.crawlRewriteRules) : url;
 	if (url) {
 		if (!VALID_URL_TEST.test(url)) {
@@ -195,15 +195,15 @@ async function createTask(url, options, parentTask, rootTask) {
 				throw new Error("Invalid URL or file path: " + url, { cause: error });
 			}
 		}
-		const isInnerLink = rootTask && url.startsWith(getHostURL(rootTask.url));
-		const rootBaseURIMatch = rootTask && rootTask.url.match(/(.*?)[^/]*$/);
+		const isInnerLink = rootTaskURL && url.startsWith(getHostURL(rootTaskURL));
+		const rootBaseURIMatch = rootTaskURL && rootTaskURL.match(/(.*?)[^/]*$/);
 		const isChild = isInnerLink && rootBaseURIMatch && rootBaseURIMatch[1] && url.startsWith(rootBaseURIMatch[1]);
 		return {
 			url,
 			isInnerLink,
 			isChild,
 			originalUrl: url,
-			rootBaseURI: rootBaseURIMatch && rootBaseURIMatch[1],
+			rootTaskURL,
 			depth: parentTask ? parentTask.depth + 1 : 0,
 			externalLinkDepth: isInnerLink ? -1 : parentTask ? parentTask.externalLinkDepth + 1 : -1,
 			options
