@@ -127,7 +127,7 @@ async function finish(options) {
 					}
 				});
 				await writeTextFile(task.filename, pageContent);
-			} catch (error) {
+			} catch {
 				// ignored
 			}
 		}
@@ -137,7 +137,7 @@ async function finish(options) {
 	}
 }
 
-async function runTasks() {
+function runTasks() {
 	const availableTasks = tasks.filter(task => !task.status).length;
 	const processingTasks = tasks.filter(task => task.status == STATE_PROCESSING).length;
 	const promisesTasks = [];
@@ -151,7 +151,7 @@ async function runNextTask() {
 	const task = tasks.find(task => !task.status);
 	if (task) {
 		const options = task.options;
-		let taskOptions = JSON.parse(JSON.stringify(options));
+		const taskOptions = JSON.parse(JSON.stringify(options));
 		taskOptions.url = task.url;
 		task.status = STATE_PROCESSING;
 		await saveTasks();
@@ -282,7 +282,7 @@ async function capturePage(options) {
 			if (options.outputJson) {
 				filename += filename.endsWith(".json") ? "" : ".json";
 			}
-			const directoryName = await path.dirname(filename);
+			const directoryName = path.dirname(filename);
 			if (directoryName !== ".") {
 				await mkdir(directoryName, { recursive: true });
 			}
@@ -338,7 +338,7 @@ async function getFilename(filename, options, index = 1) {
 		if (options.filenameConflictAction != "skip") {
 			return getFilename(filename, options, index + 1);
 		}
-	} catch (_) {
+	} catch {
 		return newFilename;
 	}
 }

@@ -80,7 +80,7 @@ async function run() {
 			const cookiesContent = await readTextFile(options.browserCookiesFile);
 			try {
 				options.browserCookies = JSON.parse(cookiesContent);
-			} catch (error) {
+			} catch {
 				options.browserCookies = parseCookies(cookiesContent);
 			}
 		}

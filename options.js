@@ -149,10 +149,10 @@ const OPTIONS_INFO = {
 };
 
 const { args, exit } = Deno;
-const options = await getOptions();
+const options = getOptions();
 export default options;
 
-async function getOptions() {
+function getOptions() {
 	const { positionals, options } = parseArgs(Array.from(args));
 	const unknownOptions = [];
 	positionals.forEach(positional => {
