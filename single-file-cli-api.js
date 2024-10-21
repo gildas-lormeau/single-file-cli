@@ -166,6 +166,7 @@ async function runNextTask() {
 				newTasks = newTasks.filter(task => task &&
 					testMaxDepth(task) &&
 					!tasks.find(otherTask => otherTask.url == task.url) &&
+					!newTasks.find(otherTask => otherTask != task && otherTask.url == task.url) &&
 					(!options.crawlInnerLinksOnly || task.isInnerLink) &&
 					(!options.crawlNoParent || (task.isChild || !task.isInnerLink)));
 				tasks.splice(tasks.length, 0, ...newTasks);
