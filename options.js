@@ -150,7 +150,7 @@ const OPTIONS_INFO = {
 
 const { args, exit } = Deno;
 const options = getOptions();
-export default options;
+export { options, parseArgs };
 
 function getOptions() {
 	const { positionals, options } = parseArgs(Array.from(args));
@@ -185,43 +185,6 @@ function getOptions() {
 		console.log(version); // eslint-disable-line no-console
 		exit(0);
 	}
-	Object.keys(OPTIONS_INFO).forEach(optionName => {
-		const optionInfo = getOptionInfo(optionName);
-		const optionKey = getOptionKey(optionName, optionInfo);
-		if (options[optionKey] === undefined && optionInfo.defaultValue !== undefined) {
-			options[optionKey] = OPTIONS_INFO[optionName].defaultValue;
-		}
-	});
-	options.acceptHeaders = {
-		font: options.acceptHeaderFont,
-		image: options.acceptHeaderImage,
-		stylesheet: options.acceptHeaderStylesheet,
-		script: options.acceptHeaderScript,
-		document: options.acceptHeaderDocument
-	};
-	if (options.browserArgs) {
-		const browserArguments = options.browserArguments || [];
-		browserArguments.push(...JSON.parse(options.browserArgs));
-		options.browserArgs = browserArguments;
-		delete options.browserArguments;
-	}
-	if (options.browserArguments) {
-		options.browserArgs = options.browserArguments;
-		delete options.browserArguments;
-	}
-	if (options.errorFile) {
-		options.errorsFile = options.errorFile;
-		delete options.errorFile;
-	}
-	if (options.errorTracesDisabled) {
-		options.errorsTracesDisabled = options.errorTracesDisabled;
-		delete options.errorTracesDisabled;
-	}
-	delete options.acceptHeaderFont;
-	delete options.acceptHeaderImage;
-	delete options.acceptHeaderStylesheet;
-	delete options.acceptHeaderScript;
-	delete options.acceptHeaderDocument;
 	return { ...options, url: positionals[0], output: positionals[1] };
 }
 
@@ -280,6 +243,43 @@ function parseArgs(args) {
 		}
 		result.options[optionKey] = optionValue;
 	});
+	Object.keys(OPTIONS_INFO).forEach(optionName => {
+		const optionInfo = getOptionInfo(optionName);
+		const optionKey = getOptionKey(optionName, optionInfo);
+		if (result.options[optionKey] === undefined && optionInfo.defaultValue !== undefined) {
+			result.options[optionKey] = OPTIONS_INFO[optionName].defaultValue;
+		}
+	});
+	result.options.acceptHeaders = {
+		font: result.options.acceptHeaderFont,
+		image: result.options.acceptHeaderImage,
+		stylesheet: result.options.acceptHeaderStylesheet,
+		script: result.options.acceptHeaderScript,
+		document: result.options.acceptHeaderDocument
+	};
+	if (result.options.browserArgs) {
+		const browserArguments = result.options.browserArguments || [];
+		browserArguments.push(...JSON.parse(result.options.browserArgs));
+		result.options.browserArgs = browserArguments;
+		delete result.options.browserArguments;
+	}
+	if (result.options.browserArguments) {
+		result.options.browserArgs = result.options.browserArguments;
+		delete result.options.browserArguments;
+	}
+	if (result.options.errorFile) {
+		result.options.errorsFile = result.options.errorFile;
+		delete result.options.errorFile;
+	}
+	if (result.options.errorTracesDisabled) {
+		result.options.errorsTracesDisabled = result.options.errorTracesDisabled;
+		delete result.options.errorTracesDisabled;
+	}
+	delete result.options.acceptHeaderFont;
+	delete result.options.acceptHeaderImage;
+	delete result.options.acceptHeaderStylesheet;
+	delete result.options.acceptHeaderScript;
+	delete result.options.acceptHeaderDocument;
 	return result;
 }
 

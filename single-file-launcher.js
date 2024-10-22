@@ -24,7 +24,7 @@
 import { initialize } from "./single-file-cli-api.js";
 import { closeBrowser } from "./lib/browser.js";
 import { Deno } from "./lib/deno-polyfill.js";
-import options from "./options.js";
+import { options } from "./options.js";
 
 const { readTextFile, readFile, exit, addSignalListener } = Deno;
 
