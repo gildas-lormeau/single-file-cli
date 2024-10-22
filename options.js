@@ -50,7 +50,7 @@ const OPTIONS_INFO = {
 	"browser-load-max-time": { description: "Maximum delay of time to wait for page loading in ms", type: "number", defaultValue: 60000 },
 	"browser-wait-delay": { description: "Time to wait before capturing the page in ms", type: "number" },
 	"browser-wait-until": { description: "When to consider the page is loaded (InteractiveTime, networkIdle, networkAlmostIdle, load, domContentLoaded)", type: "string", defaultValue: "networkIdle" },
-	"browser-wait-until-timeout": { description: "Delay of time in ms to wait before considering the page is loaded when the value of --browser-wait-until is reached", type: "number", defaultValue: 1000 },
+	"browser-wait-until-delay": { description: "Delay of time in ms to wait before considering the page is loaded when the value of --browser-wait-until is reached", type: "number", defaultValue: 1000 },
 	"browser-wait-until-fallback": { description: "Retry with the next value of --browser-wait-until when a timeout error is thrown", type: "boolean", defaultValue: true },
 	"browser-debug": { description: "Enable debug mode", type: "boolean" },
 	"browser-script": { description: "Path of a script executed in the page (and all the frames) before it is loaded", type: "string[]" },
