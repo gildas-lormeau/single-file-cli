@@ -121,7 +121,7 @@ const OPTIONS_INFO = {
 	"remove-alternative-images": { description: "Remove images for alternative sizes of screen", type: "boolean", defaultValue: true },
 	"save-original-URLs": { description: "Save the original URLS in the embedded contents", type: "boolean" },
 	"save-raw-page": { description: "Save the original page without interpreting it into the browser", type: "boolean" },
-	"urls-file": { description: "Path to a text file containing a list of URLs (separated by a newline) to save", type: "string" },
+	"urls-file": { description: "Path to a text file containing a list of URLs (separated by a newline) to save. You can also pass the options after each URL (e.g. 'https://www.example.com --filename-template={page-title}.html')", type: "string" },
 	"user-agent": { description: "User-agent of the browser", type: "string" },
 	"accept-language": { description: "Accept language of the browser", type: "string" },
 	"platform": { description: "Platform of the browser (default value is \"Android\" when using --browser-mobile-emulation)", type: "string" },

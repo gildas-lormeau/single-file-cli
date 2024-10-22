@@ -101,7 +101,17 @@ async function initialize(options) {
 async function capture(urls, options) {
 	let newTasks;
 	const taskUrls = tasks.map(task => task.url);
-	newTasks = await Promise.all(urls.map(url => createTask(url, options)));
+	newTasks = await Promise.all(urls.map(value => {
+		let url, taskOptions;
+		if (Array.isArray(value)) {
+			url = value[0];
+			taskOptions = Object.assign({}, options, value[1]);
+		} else {
+			url = value;
+			taskOptions = options;
+		}
+		return createTask(url, taskOptions);
+	}));
 	newTasks = newTasks.filter(task => task && !taskUrls.includes(task.url));
 	if (newTasks.length) {
 		tasks = tasks.concat(newTasks);
