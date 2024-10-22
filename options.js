@@ -276,6 +276,34 @@ function parseArgs(args) {
 		result.options.errorsTracesDisabled = result.options.errorTracesDisabled;
 		delete result.options.errorTracesDisabled;
 	}
+	if (result.options.crawlReplaceUrls) {
+		result.options.crawlReplaceURLs = result.options.crawlReplaceUrls;
+		delete result.options.crawlReplaceUrls;
+	}
+	if (result.options.saveOriginalUrls) {
+		result.options.saveOriginalURLs = result.options.saveOriginalUrls;
+		delete result.options.saveOriginalUrls;
+	}
+	if (result.options.browserRemoteDebuggingUrl) {
+		result.options.browserRemoteDebuggingURL = result.options.browserRemoteDebuggingUrl;
+		delete result.options.browserRemoteDebuggingUrl;
+	}
+	if (result.options.crawlRemoveUrlFragment) {
+		result.options.crawlRemoveURLFragment = result.options.crawlRemoveUrlFragment;
+		delete result.options.crawlRemoveUrlFragment;
+	}
+	if (result.options.compressCss) {
+		result.options.compressCSS = result.options.compressCss;
+		delete result.options.compressCss;
+	}
+	if (result.options.compressHtml) {
+		result.options.compressHTML = result.options.compressHtml;
+		delete result.options.compressHtml;
+	}
+	if (result.options.insertMetaCsp) {
+		result.options.insertMetaCSP = result.options.insertMetaCsp;
+		delete result.options.insertMetaCsp;
+	}
 	delete result.options.acceptHeaderFont;
 	delete result.options.acceptHeaderImage;
 	delete result.options.acceptHeaderStylesheet;
