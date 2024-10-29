@@ -42,6 +42,7 @@ const OPTIONS_INFO = {
 	"block-scripts": { description: "Block scripts", type: "boolean", defaultValue: true },
 	"block-videos": { description: "Block videos", type: "boolean", defaultValue: true },
 	"block-mixed-content": { description: "Block mixed contents", type: "boolean" },
+	"blocked-URL-pattern": { description: "Regular expression matching URLs to block (e.g. 'annoying-banners\\.com')", type: "string[]" },
 	"browser-server": { description: "Server to connect to", type: "string" },
 	"browser-headless": { description: "Run the browser in headless mode", type: "boolean", defaultValue: true },
 	"browser-executable-path": { description: "Path to chrome/chromium executable", type: "string" },
@@ -303,6 +304,10 @@ function parseArgs(args) {
 	if (result.options.insertMetaCsp) {
 		result.options.insertMetaCSP = result.options.insertMetaCsp;
 		delete result.options.insertMetaCsp;
+	}
+	if (result.options.blockedUrlPatterns) {
+		result.options.blockedURLPatterns = result.options.blockedUrlPatterns;
+		delete result.options.blockedUrlPatterns;
 	}
 	delete result.options.acceptHeaderFont;
 	delete result.options.acceptHeaderImage;
