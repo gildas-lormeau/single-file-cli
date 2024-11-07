@@ -324,7 +324,8 @@ async function capturePage(options) {
 			await writeTextFile(options.consoleMessagesFile, JSON.stringify(error.consoleMessages, null, 2));
 		}
 		if (options.debugMessagesFile && error.debugMessages) {
-			await writeTextFile(options.debugMessagesFile, JSON.stringify(error.debugMessages, null, 2));
+			await writeTextFile(options.debugMessagesFile, error.debugMessages.map(([timestamp, message]) =>
+				`[${new Date(timestamp).toISOString()}] ${message.join(" ")}`).join("\n"));
 		}
 	}
 }
