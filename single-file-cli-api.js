@@ -262,6 +262,10 @@ async function capturePage(options) {
 		if (options.consoleMessagesFile && pageData.consoleMessages) {
 			await writeTextFile(options.consoleMessagesFile, JSON.stringify(pageData.consoleMessages, null, 2));
 		}
+		if (options.debugMessagesFile && pageData.debugMessages) {
+			await writeTextFile(options.debugMessagesFile, pageData.debugMessages.map(([timestamp, message]) =>
+				`[${new Date(timestamp).toISOString()}] ${message.join(" ")}`).join("\n"));
+		}
 		if (options.outputJson) {
 			if (content instanceof Uint8Array) {
 				const fileReader = new FileReader();
@@ -315,6 +319,12 @@ async function capturePage(options) {
 			await writeTextFile(options.errorsFile, message, { append: true });
 		} else {
 			console.error(error.message || error, message); // eslint-disable-line no-console
+		}
+		if (options.consoleMessagesFile && error.consoleMessages) {
+			await writeTextFile(options.consoleMessagesFile, JSON.stringify(error.consoleMessages, null, 2));
+		}
+		if (options.debugMessagesFile && error.debugMessages) {
+			await writeTextFile(options.debugMessagesFile, JSON.stringify(error.debugMessages, null, 2));
 		}
 	}
 }
