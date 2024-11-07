@@ -2,7 +2,7 @@
   "name": "@single-file/single-file-cli",
   "version": "2.0.69",
   "description": "SingleFile CLI",
-  "nodeModulesDir": true,
+  "nodeModulesDir": "auto",
   "exports": {
     ".": "./single-file-cli-api.js"
   },
