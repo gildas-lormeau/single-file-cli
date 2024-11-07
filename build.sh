@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-deno vendor "npm:single-file-core@1.5.36"
+mv package.json package.json.tmp
+mv deno.json deno.json.tmp
+mv deno.lock deno.lock.tmp
+deno install --vendor "npm:single-file-core@1.5.37"
+mv package.json.tmp package.json
+mv deno.json.tmp deno.json
+mv deno.lock.tmp deno.lock
 
 echo "
 import { build } from 'npm:esbuild';
