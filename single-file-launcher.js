@@ -182,7 +182,7 @@ async function getUrlsFile(urlsFile) {
 			if (lastCharIndex < argsString.length) {
 				args.push(argsString.substring(lastCharIndex).trim());
 			}
-			const { options } = parseArgs(args);
+			const { options } = parseArgs(args, false);
 			return [url, options];
 		} else {
 			return value;

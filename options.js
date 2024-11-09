@@ -191,7 +191,7 @@ function getOptions() {
 	return { ...options, url: positionals[0], output: positionals[1] };
 }
 
-function parseArgs(args) {
+function parseArgs(args, setDefaultValues = true) {
 	const positionals = [];
 	const options = {};
 	const result = { positionals, options: {} };
@@ -246,20 +246,33 @@ function parseArgs(args) {
 		}
 		result.options[optionKey] = optionValue;
 	});
-	Object.keys(OPTIONS_INFO).forEach(optionName => {
-		const optionInfo = getOptionInfo(optionName);
-		const optionKey = getOptionKey(optionName, optionInfo);
-		if (result.options[optionKey] === undefined && optionInfo.defaultValue !== undefined) {
-			result.options[optionKey] = OPTIONS_INFO[optionName].defaultValue;
-		}
-	});
-	result.options.acceptHeaders = {
-		font: result.options.acceptHeaderFont,
-		image: result.options.acceptHeaderImage,
-		stylesheet: result.options.acceptHeaderStylesheet,
-		script: result.options.acceptHeaderScript,
-		document: result.options.acceptHeaderDocument
-	};
+	if (setDefaultValues) {
+		Object.keys(OPTIONS_INFO).forEach(optionName => {
+			const optionInfo = getOptionInfo(optionName);
+			const optionKey = getOptionKey(optionName, optionInfo);
+			if (result.options[optionKey] === undefined && optionInfo.defaultValue !== undefined) {
+				result.options[optionKey] = OPTIONS_INFO[optionName].defaultValue;
+			}
+		});
+	}
+	if (result.options.acceptHeaderFont ||
+		result.options.acceptHeaderImage ||
+		result.options.acceptHeaderStylesheet ||
+		result.options.acceptHeaderScript ||
+		result.options.acceptHeaderDocument) {
+		result.options.acceptHeaders = {
+			font: result.options.acceptHeaderFont,
+			image: result.options.acceptHeaderImage,
+			stylesheet: result.options.acceptHeaderStylesheet,
+			script: result.options.acceptHeaderScript,
+			document: result.options.acceptHeaderDocument
+		};
+		delete result.options.acceptHeaderFont;
+		delete result.options.acceptHeaderImage;
+		delete result.options.acceptHeaderStylesheet;
+		delete result.options.acceptHeaderScript;
+		delete result.options.acceptHeaderDocument;
+	}
 	if (result.options.browserArgs) {
 		const browserArguments = result.options.browserArguments || [];
 		browserArguments.push(...JSON.parse(result.options.browserArgs));
@@ -310,11 +323,6 @@ function parseArgs(args) {
 		result.options.blockedURLPatterns = result.options.blockedUrlPatterns;
 		delete result.options.blockedUrlPatterns;
 	}
-	delete result.options.acceptHeaderFont;
-	delete result.options.acceptHeaderImage;
-	delete result.options.acceptHeaderStylesheet;
-	delete result.options.acceptHeaderScript;
-	delete result.options.acceptHeaderDocument;
 	return result;
 }
 
