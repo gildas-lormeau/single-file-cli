@@ -1,6 +1,6 @@
 {
   "name": "@single-file/single-file-cli",
-  "version": "2.0.70",
+  "version": "2.0.71",
   "description": "SingleFile CLI",
   "nodeModulesDir": "auto",
   "exports": {
@@ -8,6 +8,6 @@
   },
   "imports": {
     "simple-cdp": "jsr:@simple-cdp/simple-cdp@^1.8.5",
-    "path": "jsr:@std/path@^0.220.1"
+    "path": "jsr:@std/path@^0.224.0"
   }
 }

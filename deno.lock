@@ -1,43 +1,38 @@
 {
-  "version": "3",
-  "packages": {
-    "specifiers": {
-      "jsr:@simple-cdp/simple-cdp@^1.8.5": "jsr:@simple-cdp/simple-cdp@1.8.5",
-      "jsr:@std/assert@^0.220.1": "jsr:@std/assert@0.220.1",
-      "jsr:@std/path@^0.220.1": "jsr:@std/path@0.220.1",
-      "npm:simple-cdp@^1.8.5": "npm:simple-cdp@1.8.5",
-      "npm:ws@^8.16.0": "npm:ws@8.16.0"
+  "version": "4",
+  "specifiers": {
+    "jsr:@simple-cdp/simple-cdp@^1.8.5": "1.8.5",
+    "jsr:@std/assert@0.224": "0.224.0",
+    "jsr:@std/path@0.224": "0.224.0",
+    "npm:simple-cdp@^1.8.5": "1.8.5",
+    "npm:ws@^8.16.0": "8.16.0"
+  },
+  "jsr": {
+    "@simple-cdp/simple-cdp@1.8.5": {
+      "integrity": "7386ca561cd6293bb3115eadf14b8c98d1c41c35a69c79774ea70e5101159413"
     },
-    "jsr": {
-      "@simple-cdp/simple-cdp@1.8.5": {
-        "integrity": "7386ca561cd6293bb3115eadf14b8c98d1c41c35a69c79774ea70e5101159413"
-      },
-      "@std/assert@0.220.1": {
-        "integrity": "88710d54f3afdd7a5761e7805abba1f56cd14e4b212feffeb3e73a9f77482425"
-      },
-      "@std/path@0.220.1": {
-        "integrity": "cc63c1b5e5192e2f718dc2f365a3514fffb26cc0380959bab0f8fb5988a52f0c",
-        "dependencies": [
-          "jsr:@std/assert@^0.220.1"
-        ]
-      }
+    "@std/assert@0.224.0": {
+      "integrity": "8643233ec7aec38a940a8264a6e3eed9bfa44e7a71cc6b3c8874213ff401967f"
     },
-    "npm": {
-      "simple-cdp@1.8.5": {
-        "integrity": "sha512-bpXoeCk0mwFrr+8C8vVkhCug5h4HO49GI+MZdnyLQcFVKzTlokrimTjEoc69X2Y2n7mtjzDHTriq6B/kgUeUcA==",
-        "dependencies": {}
-      },
-      "ws@8.16.0": {
-        "integrity": "sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==",
-        "dependencies": {}
-      }
+    "@std/path@0.224.0": {
+      "integrity": "55bca6361e5a6d158b9380e82d4981d82d338ec587de02951e2b7c3a24910ee6",
+      "dependencies": [
+        "jsr:@std/assert"
+      ]
     }
   },
-  "remote": {},
+  "npm": {
+    "simple-cdp@1.8.5": {
+      "integrity": "sha512-bpXoeCk0mwFrr+8C8vVkhCug5h4HO49GI+MZdnyLQcFVKzTlokrimTjEoc69X2Y2n7mtjzDHTriq6B/kgUeUcA=="
+    },
+    "ws@8.16.0": {
+      "integrity": "sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ=="
+    }
+  },
   "workspace": {
     "dependencies": [
       "jsr:@simple-cdp/simple-cdp@^1.8.5",
-      "jsr:@std/path@^0.220.1"
+      "jsr:@std/path@0.224"
     ],
     "packageJson": {
       "dependencies": [
