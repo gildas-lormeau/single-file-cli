@@ -195,6 +195,7 @@ function testMaxDepth(task) {
 }
 
 async function createTask(url, options, parentTask, rootTaskURL) {
+	options.originalUrl = url;
 	url = parentTask ? rewriteURL(url, options.crawlRemoveURLFragment, options.crawlRewriteRules) : url;
 	if (url) {
 		if (!VALID_URL_TEST.test(url)) {
