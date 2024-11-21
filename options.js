@@ -90,6 +90,7 @@ const OPTIONS_INFO = {
 	"filename-template": { description: "Template used to generate the output filename (see help page of the extension for more info)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
 	"filename-conflict-action": { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"", type: "string", defaultValue: "uniquify" },
 	"filename-replacement-character": { description: "The character used for replacing invalid characters in filenames", type: "string", defaultValue: "_" },
+	"filename-replaced-character": { description: "The replaced character and the character(s) used for replacing the replacement character in filenames separated by a space, e.g. --filename-replaced-character \">\" _GT_ to replace \">\" with _GT_", type: "string[]", defaultValue: ["~ ～", "+ ＋", "? ？", "% ％", "* ＊", ": ：", "| ｜", "\" ＂", "< ＜", "> ＞", "\\\\ ＼", "\\x00-\\x1f _", "\x7F _"] },
 	"filename-max-length": { description: "Specify the maximum length of the filename", type: "number", defaultValue: 192 },
 	"filename-max-length-unit": { description: "Specify the unit of the maximum length of the filename ('bytes' or 'chars')", type: "string", defaultValue: "bytes" },
 	"replace-emojis-in-filename": { description: "Replace emojis in the filename with their unicode text representation", type: "boolean" },
@@ -323,6 +324,28 @@ function parseArgs(args, setDefaultValues = true) {
 	if (result.options.blockedUrlPatterns) {
 		result.options.blockedURLPatterns = result.options.blockedUrlPatterns;
 		delete result.options.blockedUrlPatterns;
+	}
+	if (result.options.filenameReplacedCharacters) {
+		const filenameReplacedCharacters = result.options.filenameReplacedCharacters;
+		result.options.filenameReplacedCharacters = [];
+		result.options.filenameReplacementCharacters = [];
+		filenameReplacedCharacters.forEach(replacement => {
+			let [replacedCharacter, replacementCharacter] = replacement.split(" ");
+			try {
+				replacedCharacter = JSON.parse(replacedCharacter);
+			} catch (error) {
+				// ignored
+			}
+			result.options.filenameReplacedCharacters.push(replacedCharacter);
+			if (replacementCharacter !== undefined) {
+				try {
+					replacementCharacter = JSON.parse(replacementCharacter);
+				} catch (error) {
+					// ignored
+				}
+				result.options.filenameReplacementCharacters.push(replacementCharacter);
+			}
+		});
 	}
 	return result;
 }
