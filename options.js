@@ -333,14 +333,14 @@ function parseArgs(args, setDefaultValues = true) {
 			let [replacedCharacter, replacementCharacter] = replacement.split(" ");
 			try {
 				replacedCharacter = JSON.parse(replacedCharacter);
-			} catch (error) {
+			} catch (_error) {
 				// ignored
 			}
 			result.options.filenameReplacedCharacters.push(replacedCharacter);
 			if (replacementCharacter !== undefined) {
 				try {
 					replacementCharacter = JSON.parse(replacementCharacter);
-				} catch (error) {
+				} catch (_error) {
 					// ignored
 				}
 				result.options.filenameReplacementCharacters.push(replacementCharacter);
