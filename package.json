@@ -13,7 +13,7 @@
 		"single-file": "single-file-node.js"
 	},
 	"dependencies": {
-		"eslint": "^9.20.1",
+		"@eslint/js": "^9.20.0",
 		"simple-cdp": "^1.8.5",
 		"ws": "^8.16.0"
 	}
