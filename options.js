@@ -338,6 +338,7 @@ function parseArgs(args, setDefaultValues = true) {
 			let [replacedCharacter, replacementCharacter] = replacement.split(" ");
 			try {
 				replacedCharacter = JSON.parse(replacedCharacter);
+				// eslint-disable-next-line no-unused-vars
 			} catch (_error) {
 				// ignored
 			}
@@ -345,6 +346,7 @@ function parseArgs(args, setDefaultValues = true) {
 			if (replacementCharacter !== undefined) {
 				try {
 					replacementCharacter = JSON.parse(replacementCharacter);
+					// eslint-disable-next-line no-unused-vars
 				} catch (_error) {
 					// ignored
 				}
