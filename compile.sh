@@ -2,7 +2,8 @@
 
 cp ./package.json ./package.json.copy
 jq 'del(.dependencies)' ./package.json.copy > ./package.json
-rm -rf node_modules
+mv node_modules node_modules.copy
+mv deno.lock deno.lock.copy
 
 deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --ext=js --output=./dist/single-file-aarch64-apple-darwin --target=aarch64-apple-darwin ./single-file
 deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --ext=js --output=./dist/single-file-x86_64-apple-darwin --target=x86_64-apple-darwin ./single-file
@@ -15,3 +16,5 @@ codesign -f -s $dev_id ./dist/single-file-aarch64-apple-darwin
 codesign -f -s $dev_id ./dist/single-file-x86_64-apple-darwin
 
 mv ./package.json.copy ./package.json
+mv node_modules.copy node_modules
+mv deno.lock.copy deno.lock
