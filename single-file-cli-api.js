@@ -21,7 +21,7 @@
  *   Source.
  */
 
-/* global URL, Blob, FileReader */
+/* global URL, Blob, FileReader, console */
 
 import * as backend from "./lib/cdp-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
@@ -53,7 +53,12 @@ const DEFAULT_OPTIONS = {
 	insertSingleFileComment: true,
 	blockScripts: true,
 	blockVideos: true,
-	blockAudios: true
+	blockAudios: true,
+	// New screenshot options
+	outputFormat: "html", // 'html', 'jpeg', 'png'
+	screenshotQuality: 90, // For 'jpeg' format
+	screenshotFullPage: true,
+	screenshotClip: null // e.g. { x: 0, y: 0, width: 800, height: 600 }
 };
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
@@ -257,59 +262,142 @@ function getHostURL(url) {
 
 async function capturePage(options) {
 	try {
-		let filename, content;
-		options.zipScript = getZipScriptSource();
-		const pageData = await backend.getPageData(options);
-		content = pageData.content;
-		if (options.consoleMessagesFile && pageData.consoleMessages) {
-			await writeTextFile(options.consoleMessagesFile, JSON.stringify(pageData.consoleMessages, null, 2));
-		}
-		if (options.debugMessagesFile && pageData.debugMessages) {
-			await writeTextFile(options.debugMessagesFile, pageData.debugMessages.map(([timestamp, message]) =>
-				`[${new Date(timestamp).toISOString()}] ${message.join(" ")}`).join("\n"));
-		}
-		if (options.outputJson) {
-			if (content instanceof Uint8Array) {
-				const fileReader = new FileReader();
-				fileReader.readAsDataURL(new Blob([content]));
-				content = await new Promise(resolve => {
-					fileReader.onload = () => resolve(fileReader.result);
-				});
-				content = content.replace(/^data:.*?;base64,/, "");
-				pageData.content = undefined;
-				pageData.binaryContent = content;
-			}
-			pageData.doctype = undefined;
-			pageData.viewport = undefined;
-			pageData.comment = undefined;
-			content = JSON.stringify(pageData, null, 2);
-		}
-		if (options.output) {
-			filename = await getFilename(options.output, options);
-		} else if (options.dumpContent) {
-			if (options.compressContent) {
-				await stdout.write(content);
+		if (options.outputFormat === "jpeg" || options.outputFormat === "png") {
+			const screenshotOptions = {
+				url: options.url,
+				format: options.outputFormat,
+				quality: options.screenshotQuality,
+				fullPage: options.screenshotFullPage,
+				clip: options.screenshotClip,
+				// Pass through relevant browser/network options
+				browserExecutablePath: options.browserExecutablePath,
+				browserArgs: options.browserArgs,
+				browserHeadless: options.browserHeadless,
+				browserWidth: options.browserWidth,
+				browserHeight: options.browserHeight,
+				browserLoadMaxTime: options.browserLoadMaxTime,
+				browserWaitUntil: options.browserWaitUntil,
+				browserWaitUntilDelay: options.browserWaitUntilDelay,
+				browserDebug: options.browserDebug,
+				browserDisableWebSecurity: options.browserDisableWebSecurity,
+				browserIgnoreHTTPSErrors: options.browserIgnoreHTTPSErrors,
+				browserStartMinimized: options.browserStartMinimized,
+				browserMobileEmulation: options.browserMobileEmulation,
+				browserDeviceWidth: options.browserDeviceWidth,
+				browserDeviceHeight: options.browserDeviceHeight,
+				browserDeviceScaleFactor: options.browserDeviceScaleFactor,
+				userAgent: options.userAgent,
+				acceptLanguage: options.acceptLanguage,
+				platform: options.platform,
+				httpProxyServer: options.httpProxyServer,
+				httpProxyUsername: options.httpProxyUsername,
+				httpProxyPassword: options.httpProxyPassword,
+				httpHeaders: options.httpHeaders,
+				debugMessagesFile: options.debugMessagesFile, // For captureScreenshot internal logging
+				// Note: Some options like 'crawl*' or 'filename*' are not directly relevant to captureScreenshot's CDP call
+				// but are used by single-file-cli-api for task management or file naming.
+			};
+			const imageBuffer = await backend.captureScreenshot(screenshotOptions);
+			let filename;
+			if (options.output) {
+				// If options.output is provided, use it directly but ensure correct extension
+				const baseOutput = options.output.replace(/\.(jpeg|jpg|png|html)$/i, "");
+				filename = await getFilename(`${baseOutput}.${options.outputFormat}`, options);
 			} else {
-				console.log(content || ""); // eslint-disable-line no-console
+				// Generate a filename using filenameTemplate if options.output is not set
+				let baseFilename = options.filenameTemplate || DEFAULT_OPTIONS.filenameTemplate;
+				// Replace placeholders in template (simplified: only {page-title}, {date-locale}, {time-locale} for now)
+				// More robust placeholder replacement would be needed for full compatibility.
+				// For screenshots, "page-title" might be less relevant or could be derived from URL.
+				// Let's use a simplified title from URL if pageData isn't available for screenshots.
+				const urlObject = new URL(options.url);
+				const pageTitleFromURL = (urlObject.hostname + urlObject.pathname.replace(/\//g, '_')).replace(/[^a-zA-Z0-9_.-]/g, '_').substring(0, 100);
+				baseFilename = baseFilename.replace(/\{page-title\}/g, pageTitleFromURL);
+				const now = new Date();
+				baseFilename = baseFilename.replace(/\{date-locale\}/g, now.toLocaleDateString());
+				baseFilename = baseFilename.replace(/\{time-locale\}/g, now.toLocaleTimeString());
+				
+				// Ensure correct extension
+				const desiredExtension = options.outputFormat === "jpeg" ? "jpg" : options.outputFormat;
+				baseFilename = baseFilename.replace(/\.html$/i, "." + desiredExtension);
+				if (!baseFilename.toLowerCase().endsWith("." + desiredExtension)) {
+					baseFilename += "." + desiredExtension;
+				}
+				filename = await getFilename(baseFilename, options);
 			}
-		} else {
-			filename = await getFilename(pageData.filename, options);
-		}
-		if (filename) {
+
+			if (filename) {
+				const directoryName = path.dirname(filename);
+				if (directoryName !== "." && directoryName !== "") {
+					await mkdir(directoryName, { recursive: true });
+				}
+				await writeFile(filename, imageBuffer);
+				return { filename, content: imageBuffer, links: [] }; // links is usually for HTML crawling
+			}
+			// If no filename (e.g. dumpContent for image? Or skip conflict)
+			// This path needs clarification if images are to be dumped to stdout.
+			// For now, assuming images are always saved to a file if not skipped.
+			return { content: imageBuffer, links: [] };
+
+
+		} else { // Default to HTML or other formats
+			options.zipScript = getZipScriptSource();
+			const pageData = await backend.getPageData(options);
+			let content = pageData.content;
+			if (options.consoleMessagesFile && pageData.consoleMessages) {
+				await writeTextFile(options.consoleMessagesFile, JSON.stringify(pageData.consoleMessages, null, 2));
+			}
+			if (options.debugMessagesFile && pageData.debugMessages) {
+				await writeTextFile(options.debugMessagesFile, pageData.debugMessages.map(([timestamp, message]) =>
+					`[${new Date(timestamp).toISOString()}] ${message.join(" ")}`).join("\n"));
+			}
 			if (options.outputJson) {
-				filename += filename.endsWith(".json") ? "" : ".json";
+				if (content instanceof Uint8Array) {
+					const fileReader = new FileReader();
+					fileReader.readAsDataURL(new Blob([content]));
+					content = await new Promise(resolve => {
+						fileReader.onload = () => resolve(fileReader.result);
+					});
+					content = content.replace(/^data:.*?;base64,/, "");
+					pageData.content = undefined;
+					pageData.binaryContent = content;
+				}
+				pageData.doctype = undefined;
+				pageData.viewport = undefined;
+				pageData.comment = undefined;
+				content = JSON.stringify(pageData, null, 2);
 			}
-			const directoryName = path.dirname(filename);
-			if (directoryName !== ".") {
-				await mkdir(directoryName, { recursive: true });
-			}
-			if (content instanceof Uint8Array) {
-				await writeFile(filename, content);
+			let filename;
+			if (options.output) {
+				filename = await getFilename(options.output, options);
+			} else if (options.dumpContent) {
+				if (options.compressContent && content instanceof Uint8Array) { // Ensure content is Uint8Array for stdout.write
+					await stdout.write(content);
+				} else if (options.compressContent && typeof content === 'string') { // If it's a string (e.g. after JSON stringify)
+					await stdout.write(new TextEncoder().encode(content));
+				}
+				 else {
+					console.log(content || ""); 
+				}
 			} else {
-				await writeTextFile(filename, content);
+				filename = await getFilename(pageData.filename, options);
 			}
+			if (filename) {
+				if (options.outputJson) {
+					filename += filename.endsWith(".json") ? "" : ".json";
+				}
+				const directoryName = path.dirname(filename);
+				if (directoryName !== "." && directoryName !== "") {
+					await mkdir(directoryName, { recursive: true });
+				}
+				if (content instanceof Uint8Array) {
+					await writeFile(filename, content);
+				} else {
+					await writeTextFile(filename, content);
+				}
+			}
+			return pageData;
 		}
-		return pageData;
 	} catch (error) {
 		const date = new Date();
 		let message = `[${date.toISOString()}] URL: ${options.url}`;
@@ -332,38 +420,69 @@ async function capturePage(options) {
 	}
 }
 
-async function getFilename(filename, options, index = 1) {
+async function getFilename(baseFilename, options, index = 1) {
+	// Ensure baseFilename has the correct extension based on outputFormat
+	const currentExtensionMatch = baseFilename.match(/\.([^.]+)$/);
+	const currentExtension = currentExtensionMatch ? currentExtensionMatch[1].toLowerCase() : "";
+	const desiredExtension = options.outputFormat === "jpeg" ? "jpg" : options.outputFormat; // Use jpg for jpeg
+
+	if (options.outputFormat === "jpeg" || options.outputFormat === "png") {
+		if (currentExtension !== desiredExtension && desiredExtension !== "html" /* ensure not to change .html if that was intended for some reason */) {
+			baseFilename = baseFilename.replace(/\.[^.]+$/, "") + "." + desiredExtension;
+		} else if (!currentExtension && desiredExtension !== "html") {
+			baseFilename += "." + desiredExtension;
+		}
+	}
+
+
 	if (Array.isArray(options.outputDirectory)) {
-		const outputDirectory = options.outputDirectory.pop();
-		if (outputDirectory.startsWith("/")) {
-			options.outputDirectory = outputDirectory;
+		const outputDirectoryConfig = options.outputDirectory.pop(); // This logic seems complex, assuming it's for specific use cases.
+		if (outputDirectoryConfig.startsWith("/")) {
+			options.outputDirectory = outputDirectoryConfig;
 		} else {
-			options.outputDirectory = options.outputDirectory[0] + outputDirectory;
+			// This assumes options.outputDirectory was an array with a base path at [0]
+			// For safety, ensure options.outputDirectory[0] is a string.
+			const basePath = Array.isArray(options.outputDirectory) && typeof options.outputDirectory[0] === 'string' ? options.outputDirectory[0] : "";
+			options.outputDirectory = basePath + outputDirectoryConfig;
 		}
 	}
 	let outputDirectory = options.outputDirectory || "";
-	if (outputDirectory && !outputDirectory.endsWith("/")) {
+	if (outputDirectory && !outputDirectory.endsWith("/") && outputDirectory !== ".") {
 		outputDirectory += "/";
 	}
-	let newFilename = outputDirectory + filename;
+	if (outputDirectory === "./") outputDirectory = "";
+
+
+	let newFilename = outputDirectory + baseFilename;
+
 	if (options.filenameConflictAction == "overwrite") {
-		return filename;
+		// For "overwrite", we return the path including the directory.
+		// The original code returned just `filename` (which was `baseFilename` here),
+		// but to be consistent with other branches, it should be the full path.
+		return newFilename;
 	} else if (options.filenameConflictAction == "uniquify" && index > 1) {
 		const regExpMatchExtension = /(\.[^.]+)$/;
-		const matchExtension = newFilename.match(regExpMatchExtension);
+		const matchExtension = baseFilename.match(regExpMatchExtension); // Use baseFilename for adding index
 		if (matchExtension && matchExtension[1]) {
-			newFilename = newFilename.replace(regExpMatchExtension, " (" + index + ")" + matchExtension[1]);
+			newFilename = outputDirectory + baseFilename.replace(regExpMatchExtension, " (" + index + ")" + matchExtension[1]);
 		} else {
-			newFilename += " (" + index + ")";
+			newFilename = outputDirectory + baseFilename + " (" + index + ")";
 		}
 	}
 	try {
 		await stat(newFilename);
 		if (options.filenameConflictAction != "skip") {
-			return getFilename(filename, options, index + 1);
+			// Pass baseFilename, not newFilename, to the recursive call
+			return getFilename(baseFilename, options, index + 1);
+		} else {
+			// If skip and file exists, return undefined or signal to skip
+			return undefined; 
 		}
-	} catch {
-		return newFilename;
+	} catch (error) {
+		if (error instanceof Deno.errors.NotFound) {
+			return newFilename;
+		}
+		throw error; // Re-throw other errors
 	}
 }
 

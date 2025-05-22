@@ -155,7 +155,11 @@ const OPTIONS_INFO = {
 	"resolve-links": { description: "Resolve link URLs to absolute URLs", type: "boolean", defaultValue: true },
 	"settings-file": { description: "Path to a JSON file containing the settings exported from the web extension", type: "string" },
 	"settings-file-profile": { description: "Name of the profile to use when using --settings-file", type: "string", defaultValue: "default" },
-	"group-duplicate-stylesheets": { description: "Group duplicate inline stylesheets into a single stylesheet in order to reduce the size of the page", type: "boolean", defaultValue: false }
+	"group-duplicate-stylesheets": { description: "Group duplicate inline stylesheets into a single stylesheet in order to reduce the size of the page", type: "boolean", defaultValue: false },
+	"output-format": { description: "Output format ('html', 'jpeg', 'png')", type: "string", defaultValue: "html" },
+	"screenshot-quality": { description: "Screenshot quality for JPEG format (0-100)", type: "number", defaultValue: 90 },
+	"screenshot-full-page": { description: "Capture the full scrollable page for screenshots", type: "boolean", defaultValue: true },
+	"screenshot-clip": { description: "JSON string defining the screenshot clipping region (e.g. '{\"x\":0,\"y\":0,\"width\":800,\"height\":600}')", type: "string" }
 };
 
 const { args, exit } = Deno;
