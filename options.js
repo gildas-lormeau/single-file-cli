@@ -131,6 +131,7 @@ const OPTIONS_INFO = {
 	"remove-alternative-fonts": { description: "Remove alternative fonts to the ones displayed", type: "boolean", defaultValue: true },
 	"remove-alternative-medias": { description: "Remove alternative CSS stylesheets", type: "boolean", defaultValue: true },
 	"remove-alternative-images": { description: "Remove images for alternative sizes of screen", type: "boolean", defaultValue: true },
+	"remove-no-script-tags": { description: "Remove <noscript> tags", type: "boolean", defaultValue: true },
 	"save-original-URLs": { description: "Save the original URLS in the embedded contents", type: "boolean" },
 	"save-raw-page": { description: "Save the original page without interpreting it into the browser", type: "boolean" },
 	"urls-file": { description: "Path to a text file containing a list of URLs (separated by a newline) to save. You can also pass the options after each URL (e.g. 'https://www.example.com --filename-template={page-title}.html')", type: "string" },
