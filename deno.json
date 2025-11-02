@@ -7,7 +7,7 @@
     ".": "./single-file-cli-api.js"
   },
   "imports": {
-    "simple-cdp": "jsr:@simple-cdp/simple-cdp@^1.8.5",
-    "path": "jsr:@std/path@^0.224.0"
+    "simple-cdp": "jsr:@simple-cdp/simple-cdp@^1.8.6",
+    "path": "jsr:@std/path@^1.1.2"
   }
 }
