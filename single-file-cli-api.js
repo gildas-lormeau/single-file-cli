@@ -36,7 +36,7 @@ const DEFAULT_OPTIONS = {
 	compressHTML: true,
 	loadDeferredImages: true,
 	loadDeferredImagesMaxIdleTime: 1500,
-	filenameTemplate: "{page-title} ({date-locale} {time-locale}).html",
+	filenameTemplate: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}",
 	filenameMaxLength: 192,
 	filenameMaxLengthUnit: "bytes",
 	filenameReplacedCharacters: ["~", "+", "?", "%", "*", ":", "|", "\"", "<", ">", "\\\\", "\x00-\x1f", "\x7F"],
