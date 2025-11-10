@@ -5,7 +5,7 @@
     "jsr:@simple-cdp/simple-cdp@^1.8.6": "1.8.6",
     "jsr:@std/internal@^1.0.10": "1.0.12",
     "jsr:@std/path@^1.1.2": "1.1.2",
-    "npm:@eslint/js@^9.39.0": "9.39.0",
+    "npm:@eslint/js@^9.39.1": "9.39.1",
     "npm:simple-cdp@^1.8.6": "1.8.6",
     "npm:ws@^8.18.3": "8.18.3"
   },
@@ -27,8 +27,8 @@
     }
   },
   "npm": {
-    "@eslint/js@9.39.0": {
-      "integrity": "sha512-BIhe0sW91JGPiaF1mOuPy5v8NflqfjIcDNpC+LbW9f609WVRX1rArrhi6Z2ymvrAry9jw+5POTj4t2t62o8Bmw=="
+    "@eslint/js@9.39.1": {
+      "integrity": "sha512-S26Stp4zCy88tH94QbBv3XCuzRQiZ9yXofEILmglYTh/Ug/a9/umqvgFtYBAo3Lp0nsI/5/qH1CCrbdK3AP1Tw=="
     },
     "simple-cdp@1.8.6": {
       "integrity": "sha512-c33zKvBOOIBfdfDCr++N8Dv6kY03wD+cGuu3MEiBJHC4LtHE5aSwjw5E+dOSeuXolS+8MoDzYuWrJdT+IFp8bw=="
@@ -75,7 +75,7 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@eslint/js@^9.39.0",
+        "npm:@eslint/js@^9.39.1",
         "npm:simple-cdp@^1.8.6",
         "npm:ws@^8.18.3"
       ]
