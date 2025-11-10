@@ -1,6 +1,6 @@
 {
 	"name": "single-file-cli",
-	"version": "2.0.77",
+	"version": "2.0.78",
 	"description": "SingleFile CLI",
 	"author": "Gildas Lormeau",
 	"engines": {
@@ -17,6 +17,6 @@
 		"ws": "^8.18.3"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.39.0"
+		"@eslint/js": "^9.39.1"
 	}
 }
