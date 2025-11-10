@@ -232,8 +232,8 @@ function getOptions() {
 			console.log(""); // eslint-disable-line no-console
 		});
 		if (unknownOptions.length) {
-			console.log(""); // eslint-disable-line no-console
 			console.log(`Error: Unknown option${unknownOptions.length > 1 ? "s" : ""} ${unknownOptions.join(", ")}`); // eslint-disable-line no-console
+			console.log(""); // eslint-disable-line no-console
 		}
 		exit(0);
 	}
