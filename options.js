@@ -213,7 +213,7 @@ function getOptions() {
 			positionals.splice(positionals.indexOf(positional), 1);
 		}
 	});
-	if ((!positionals.length || positionals.length > 2 || options.help || unknownOptions.length) && !options.version) {
+	if ((!positionals.length || positionals.length > 2 || options.help || unknownOptions.length) && (!options.version && !options.urlsFile)) {
 		console.log(USAGE_TEXT + "\n"); // eslint-disable-line no-console
 		console.log("Options:"); // eslint-disable-line no-console
 		OPTIONS_INFO.forEach(category => {
