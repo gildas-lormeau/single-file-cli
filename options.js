@@ -31,7 +31,7 @@ Positionals:
   output  Output filename  [string]`;
 
 const CATEGORIES = [
-	"Browser configuration",
+	"Browser Configuration",
 	"Browser Loading & Timing",
 	"Device Emulation",
 	"Network & HTTP",
