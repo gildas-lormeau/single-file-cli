@@ -112,6 +112,7 @@ const OPTIONS_INFO = [{
 	"compress-HTML": { description: "Compress HTML content", type: "boolean", defaultValue: true },
 	"remove-frames": { description: "Remove frames", type: "boolean" },
 	"remove-hidden-elements": { description: "Remove HTML elements which are not displayed", type: "boolean", defaultValue: true },
+	"removed-elements-selector": { description: "Remove specific HTML elements matching the given CSS selectors (comma separated)", type: "string" },
 	"remove-unused-styles": { description: "Remove unused CSS rules and unneeded declarations", type: "boolean", defaultValue: true },
 	"remove-unused-fonts": { description: "Remove unused CSS font rules", type: "boolean", defaultValue: true },
 	"remove-alternative-fonts": { description: "Remove alternative fonts to the ones displayed", type: "boolean", defaultValue: true },
