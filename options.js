@@ -138,7 +138,7 @@ const OPTIONS_INFO = [{
 	"embed-pdf-options": { description: "Options passed to the CDP method `Page.printToPDF()` given as a JSON string (e.g. { \"pageRanges\": \"1-1\", \"paperWidth\": 11, \"paperHeight\": 8.5 })", type: "string" },
 	"embedded-pdf": { description: "Path to a PDF file to embed in the compressed file.", type: "string" }
 }, {
-	"filename-template": { description: "Template used to generate the output filename (see help page of the extension for more info)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
+	"filename-template": { description: "Template used to generate the output filename (see https://github.com/gildas-lormeau/SingleFile/wiki/Template-variables-and-functions)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
 	"filename-conflict-action": { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"", type: "string", defaultValue: "uniquify" },
 	"filename-replacement-character": { description: "The character used for replacing invalid characters in filenames", type: "string", defaultValue: "_" },
 	"filename-replaced-character": { description: "The replaced character and the character(s) used for replacing the replacement character in filenames separated by a space, e.g. --filename-replaced-character \">\" _GT_ to replace \">\" with _GT_", type: "string[]", defaultValue: ["~ ～", "+ ＋", "? ？", "% ％", "* ＊", ": ：", "| ｜", "\" ＂", "< ＜", "> ＞", "\\\\ ＼", "\\x00-\\x1f _", "\x7F _"] },
