@@ -1,6 +1,6 @@
 FROM zenika/alpine-chrome:with-node
 
-RUN npm install --omit=dev single-file-cli
+RUN npm install --omit=dev single-file-cli@2.0.75
 
 WORKDIR /usr/src/app
 
