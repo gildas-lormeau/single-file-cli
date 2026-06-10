@@ -2,7 +2,7 @@
 
 ## Introduction
 
-[SingleFile](https://www.getsinglefile.com) can be launched from the command line by running it into a (headless) browser. 
+[SingleFile](https://www.getsinglefile.com) can be launched from the command line by running it into a (headless) browser.
 
 It runs through Deno as a standalone script injected into the web page via the Chrome DevTools Protocol instead of being embedded into a WebExtension.
 
@@ -11,6 +11,22 @@ It runs through Deno as a standalone script injected into the web page via the C
 SingleFile can be run without installing it, just download the executable file and save it in the directory of your choice here: https://github.com/gildas-lormeau/single-file-cli/releases
 
 Make sure Chrome or a Chromium-based browser is installed in the default folder. Otherwise you might need to set the `--browser-executable-path` option to help SingleFile locating the path of the executable file.
+
+## Building with Podman
+
+You should have a Podman farm available for building the image.
+
+```bash
+podman farm build --local=false \
+  --farm ts-test-agent-farm \
+  --platforms linux/amd64,linux/arm64/v8 \
+  --jobs 8 \
+  --disable-compression=false \
+  --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+  --build-arg GIT_COMMIT="$(command -v git >/dev/null 2>&1 && git rev-parse HEAD 2>/dev/null || echo unknown)" \
+  --file Dockerfile \
+  --tag docker.io/voereir/singlefile
+```
 
 ## Installation with Docker
 
@@ -64,9 +80,9 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
 - Install [Deno](https://deno.com/)
 
 - There are 3 ways to download the code of SingleFile, choose the one you prefer:
-  
+
   - Install with `npm` and run `single-file` via `npx` (`npm` and `npx` are installed with Node.js)
-  
+
     ```sh
     npm install "single-file-cli"
     npx single-file ...
