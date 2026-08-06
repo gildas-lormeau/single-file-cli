@@ -2,19 +2,19 @@
   "version": "5",
   "specifiers": {
     "jsr:@b-fuze/deno-dom@*": "0.1.56",
-    "jsr:@simple-cdp/simple-cdp@^1.8.6": "1.8.6",
+    "jsr:@simple-cdp/simple-cdp@^1.10.0": "1.10.0",
     "jsr:@std/internal@^1.0.10": "1.0.12",
     "jsr:@std/path@^1.1.2": "1.1.2",
     "npm:@eslint/js@^9.39.1": "9.39.1",
-    "npm:simple-cdp@^1.8.6": "1.8.6",
-    "npm:ws@^8.18.3": "8.18.3"
+    "npm:simple-cdp@^1.10.0": "1.10.0",
+    "npm:ws@^8.21.2": "8.21.2"
   },
   "jsr": {
     "@b-fuze/deno-dom@0.1.56": {
       "integrity": "8030e2dc1d8750f1682b53462ab893d9c3470f2287feecbe22f44a88c54ab148"
     },
-    "@simple-cdp/simple-cdp@1.8.6": {
-      "integrity": "beabfb0dd8cb8c964f09249b94ef23334d65a583f622f43d6302222b25ee3af8"
+    "@simple-cdp/simple-cdp@1.10.0": {
+      "integrity": "3f8c91e22598c3e15a680f14ee3d2aa174c21b9b528caad5ec8552e3df0c3897"
     },
     "@std/internal@1.0.12": {
       "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
@@ -30,11 +30,11 @@
     "@eslint/js@9.39.1": {
       "integrity": "sha512-S26Stp4zCy88tH94QbBv3XCuzRQiZ9yXofEILmglYTh/Ug/a9/umqvgFtYBAo3Lp0nsI/5/qH1CCrbdK3AP1Tw=="
     },
-    "simple-cdp@1.8.6": {
-      "integrity": "sha512-c33zKvBOOIBfdfDCr++N8Dv6kY03wD+cGuu3MEiBJHC4LtHE5aSwjw5E+dOSeuXolS+8MoDzYuWrJdT+IFp8bw=="
+    "simple-cdp@1.10.0": {
+      "integrity": "sha512-UXDAaiges1GqNKtBy39po+CD4hXDJxQEDtR1GF9bK2J9MNN0epTo2GpoSmEc8o5ofW8dutpHafBjowEchSNgig=="
     },
-    "ws@8.18.3": {
-      "integrity": "sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg=="
+    "ws@8.21.2": {
+      "integrity": "sha512-54dMVAo4WIe6SKy3vBgN+9bJZqqQ8IMRevAkOLQALhi49qkkQDQfWdAZ8KQlXiEabw88ARXXdUrlvtbKQX+aKw=="
     }
   },
   "remote": {
@@ -70,14 +70,14 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@simple-cdp/simple-cdp@^1.8.6",
+      "jsr:@simple-cdp/simple-cdp@^1.10.0",
       "jsr:@std/path@^1.1.2"
     ],
     "packageJson": {
       "dependencies": [
         "npm:@eslint/js@^9.39.1",
-        "npm:simple-cdp@^1.8.6",
-        "npm:ws@^8.18.3"
+        "npm:simple-cdp@^1.10.0",
+        "npm:ws@^8.21.2"
       ]
     }
   }

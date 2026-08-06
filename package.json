@@ -13,8 +13,8 @@
 		"single-file": "single-file-node.js"
 	},
 	"dependencies": {
-		"simple-cdp": "^1.8.6",
-		"ws": "^8.18.3"
+		"simple-cdp": "^1.10.0",
+		"ws": "^8.21.2"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1"
