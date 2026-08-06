@@ -99,6 +99,18 @@ async function run() {
 			options.embeddedPdf = Array.from(await readFile(options.embeddedPdf));
 		}
 		options.retrieveLinks = true;
+		if (Array.isArray(options.outputDirectory)) {
+			const outputDirectory = options.outputDirectory.pop();
+			if (outputDirectory.startsWith("/")) {
+				options.outputDirectory = outputDirectory;
+			} else {
+				options.outputDirectory = options.outputDirectory[0] + outputDirectory;
+			}
+		}
+		options.outputDirectory = options.outputDirectory || "./"
+		if (!options.outputDirectory.endsWith("/")) {
+			options.outputDirectory += "/";
+		}
 		const singlefile = await initialize(options);
 		await singlefile.capture(urls);
 		await singlefile.finish();
