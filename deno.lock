@@ -6,8 +6,7 @@
     "jsr:@std/internal@^1.0.10": "1.0.12",
     "jsr:@std/path@^1.1.2": "1.1.2",
     "npm:@eslint/js@^9.39.1": "9.39.1",
-    "npm:simple-cdp@^1.10.0": "1.10.0",
-    "npm:ws@^8.21.2": "8.21.2"
+    "npm:simple-cdp@^1.10.0": "1.10.0"
   },
   "jsr": {
     "@b-fuze/deno-dom@0.1.56": {
@@ -32,9 +31,6 @@
     },
     "simple-cdp@1.10.0": {
       "integrity": "sha512-UXDAaiges1GqNKtBy39po+CD4hXDJxQEDtR1GF9bK2J9MNN0epTo2GpoSmEc8o5ofW8dutpHafBjowEchSNgig=="
-    },
-    "ws@8.21.2": {
-      "integrity": "sha512-54dMVAo4WIe6SKy3vBgN+9bJZqqQ8IMRevAkOLQALhi49qkkQDQfWdAZ8KQlXiEabw88ARXXdUrlvtbKQX+aKw=="
     }
   },
   "remote": {
@@ -76,8 +72,7 @@
     "packageJson": {
       "dependencies": [
         "npm:@eslint/js@^9.39.1",
-        "npm:simple-cdp@^1.10.0",
-        "npm:ws@^8.21.2"
+        "npm:simple-cdp@^1.10.0"
       ]
     }
   }
