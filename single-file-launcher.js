@@ -24,7 +24,7 @@
 import { initialize } from "./single-file-cli-api.js";
 import { closeBrowser } from "./lib/browser.js";
 import { Deno } from "./lib/deno-polyfill.js";
-import { options, parseArgs } from "./options.js";
+import { getOptions, parseArgs } from "./options.js";
 
 const { readTextFile, readFile, exit, addSignalListener } = Deno;
 
@@ -43,6 +43,7 @@ export { run };
 
 async function run() {
 	try {
+		const options = getOptions();
 		let urls;
 		if (options.settingsFile) {
 			const settings = JSON.parse(await Deno.readTextFile(options.settingsFile));

@@ -203,8 +203,7 @@ const OPTIONS_INFO = [{
 }];
 
 const { args, exit } = Deno;
-const options = getOptions();
-export { options, parseArgs };
+export { getOptions, parseArgs };
 
 function getOptions() {
 	const { positionals, options } = parseArgs(Array.from(args));
