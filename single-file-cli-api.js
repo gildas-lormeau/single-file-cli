@@ -178,10 +178,10 @@ async function runNextTask() {
 			if (options.crawlLinks && testMaxDepth(task)) {
 				const urls = pageData.links;
 				let newTasks = await Promise.all(urls.map(url => createTask(url, options, task, task.rootTaskURL || task.url)));
-				newTasks = newTasks.filter(task => task &&
+				newTasks = newTasks.filter((task, taskIndex) => task &&
 					testMaxDepth(task) &&
 					!tasks.find(otherTask => otherTask.url == task.url) &&
-					!newTasks.find(otherTask => otherTask != task && otherTask.url == task.url) &&
+					newTasks.findIndex(otherTask => otherTask && otherTask.url == task.url) == taskIndex &&
 					(!options.crawlInnerLinksOnly || task.isInnerLink) &&
 					(!options.crawlNoParent || (task.isChild || !task.isInnerLink)));
 				tasks.splice(tasks.length, 0, ...newTasks);
