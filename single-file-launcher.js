@@ -30,12 +30,12 @@ const { readTextFile, readFile, exit, addSignalListener } = Deno;
 
 try {
 	addSignalListener("SIGTERM", closeBrowserAndExit);
-} catch (_error) {
+} catch {
 	// ignored
 }
 try {
 	addSignalListener("SIGINT", closeBrowserAndExit);
-} catch (_error) {
+} catch {
 	// ignored
 }
 
