@@ -1,0 +1,43 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { createServer } from "node:http";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
+
+const execFileAsync = promisify(execFile);
+const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+
+test("load timeout is reported when the page never loads", { timeout: 120000 }, async () => {
+	const server = createServer(() => { });
+	await new Promise(resolve => server.listen(0, "localhost", resolve));
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const url = "http://localhost:" + server.address().port + "/";
+		const { stderr } = await runCli([
+			url, join(directory, "out.html"),
+			"--browser-load-max-time", "5000",
+			"--browser-wait-until-fallback", "false"
+		]);
+		assert.ok(stderr.includes("Load timeout"), "stderr: " + stderr);
+	} finally {
+		await rm(directory, { recursive: true });
+		server.closeAllConnections();
+		server.close();
+	}
+});
+
+async function runCli(args) {
+	try {
+		return await execFileAsync(process.execPath, ["single-file-node.js", ...args], { cwd: cliDirectory, timeout: 90000, killSignal: "SIGKILL" });
+	} catch (error) {
+		if (error.killed) {
+			throw new Error("the process did not exit before the timeout");
+		}
+		return { stdout: error.stdout, stderr: error.stderr };
+	}
+}
