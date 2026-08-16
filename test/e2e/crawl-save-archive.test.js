@@ -71,6 +71,19 @@ test("--crawl-save-archive-dedup requires --crawl-save-archive", { timeout: TEST
 		error => error.stderr.includes("--crawl-save-archive-dedup requires --crawl-save-archive"));
 });
 
+test("--crawl-save-archive-mark-unarchived-links sets the manifest flag", { timeout: TEST_TIMEOUT }, async () => {
+	const { manifest } = await getCrawlResult(true);
+	assert.equal(manifest.markUnarchivedLinks, true);
+	const { manifest: defaultManifest } = await getCrawlResult();
+	assert.equal(defaultManifest.markUnarchivedLinks, undefined);
+});
+
+test("--crawl-save-archive-mark-unarchived-links requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
+	await assert.rejects(
+		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-mark-unarchived-links"], { cwd: cliDirectory }),
+		error => error.stderr.includes("--crawl-save-archive-mark-unarchived-links requires --crawl-save-archive"));
+});
+
 test("--crawl-save-archive requires --compress-content", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
 		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--crawl-save-archive"], { cwd: cliDirectory }),
@@ -111,7 +124,7 @@ async function runCrawl(dedup) {
 			"--crawl-save-archive",
 			"--compress-content",
 			"--max-parallel-workers", "1",
-			...(dedup ? ["--crawl-save-archive-dedup"] : [])
+			...(dedup ? ["--crawl-save-archive-dedup", "--crawl-save-archive-mark-unarchived-links"] : [])
 		], { cwd: cliDirectory });
 		const filenames = await readdir(directory);
 		const data = new Uint8Array(await readFile(join(directory, "archive.html")));

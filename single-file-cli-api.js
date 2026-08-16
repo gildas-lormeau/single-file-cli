@@ -73,6 +73,9 @@ async function initialize(options) {
 	if (options.crawlSaveArchiveDedup && !options.crawlSaveArchive) {
 		throw new Error("--crawl-save-archive-dedup requires --crawl-save-archive");
 	}
+	if (options.crawlSaveArchiveMarkUnarchivedLinks && !options.crawlSaveArchive) {
+		throw new Error("--crawl-save-archive-mark-unarchived-links requires --crawl-save-archive");
+	}
 	if (options.crawlSaveArchive) {
 		if (!options.compressContent) {
 			throw new Error("--crawl-save-archive requires --compress-content");
@@ -184,6 +187,7 @@ async function savePagesArchive(options) {
 		const content = await createPagesArchive(pages, {
 			zipScript: getZipScriptSource(),
 			dedupPages: options.crawlSaveArchiveDedup,
+			markUnarchivedLinks: options.crawlSaveArchiveMarkUnarchivedLinks,
 			selfExtractingArchive: options.selfExtractingArchive,
 			extractDataFromPage: options.extractDataFromPage,
 			preventAppendedData: options.preventAppendedData,
