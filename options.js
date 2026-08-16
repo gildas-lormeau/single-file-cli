@@ -348,7 +348,11 @@ function parseArgs(args, setDefaultValues = true) {
 	}
 	if (result.options.browserArgs) {
 		const browserArguments = result.options.browserArguments || [];
-		browserArguments.push(...JSON.parse(result.options.browserArgs));
+		try {
+			browserArguments.push(...JSON.parse(result.options.browserArgs));
+		} catch {
+			invalidOptions.push({ name: "browser-args", value: result.options.browserArgs });
+		}
 		result.options.browserArgs = browserArguments;
 		delete result.options.browserArguments;
 	}
@@ -386,6 +390,49 @@ function parseArgs(args, setDefaultValues = true) {
 				}
 				result.options.filenameReplacementCharacters.push(replacementCharacter);
 			}
+		});
+	}
+	if (result.options.httpHeaders) {
+		const headers = {};
+		result.options.httpHeaders.forEach(header => {
+			const separatorIndex = header.indexOf("=");
+			if (separatorIndex <= 0) {
+				invalidOptions.push({ name: "http-header", value: header });
+			} else {
+				headers[header.substring(0, separatorIndex).trim()] = header.substring(separatorIndex + 1).trim();
+			}
+		});
+		result.options.httpHeaders = headers;
+	}
+	if (result.options.emulateMediaFeatures) {
+		result.options.emulateMediaFeatures = result.options.emulateMediaFeatures
+			.map(feature => {
+				const separatorIndex = feature.indexOf(":");
+				if (separatorIndex <= 0) {
+					invalidOptions.push({ name: "emulate-media-feature", value: feature });
+				} else {
+					return {
+						name: feature.substring(0, separatorIndex),
+						value: feature.substring(separatorIndex + 1)
+					};
+				}
+			})
+			.filter(feature => feature);
+	}
+	if (result.options.browserCookies) {
+		result.options.browserCookies = result.options.browserCookies.map(cookie => {
+			const [name, value, domain, path, expires, httpOnly, secure, sameSite, url] = cookie.split(",");
+			return {
+				name,
+				value,
+				url,
+				domain,
+				path,
+				secure: secure === "true",
+				httpOnly: httpOnly === "true",
+				sameSite,
+				expires: expires && !isNaN(Number(expires)) ? Number(expires) : undefined
+			};
 		});
 	}
 	return result;

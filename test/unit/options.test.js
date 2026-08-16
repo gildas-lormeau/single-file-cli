@@ -59,6 +59,37 @@ test("the last value wins when a scalar option is repeated", () => {
 	assert.equal(parse(["--browser-width=100", "--browser-width=200"]).browserWidth, 200);
 });
 
+test("http headers keep characters after the first equals sign", () => {
+	const options = parse(["--http-header", "authorization=Basic dGVzdA==", "--http-header", " x-test = value "]);
+	assert.deepEqual(options.httpHeaders, { authorization: "Basic dGVzdA==", "x-test": "value" });
+	assert.deepEqual(parseArgs(["--http-header", "no-separator"]).invalidOptions, [{ name: "http-header", value: "no-separator" }]);
+});
+
+test("media features are split on the first colon", () => {
+	assert.deepEqual(parse(["--emulate-media-feature", "prefers-color-scheme:dark"]).emulateMediaFeatures, [{ name: "prefers-color-scheme", value: "dark" }]);
+	assert.deepEqual(parseArgs(["--emulate-media-feature", "no-separator"]).invalidOptions, [{ name: "emulate-media-feature", value: "no-separator" }]);
+});
+
+test("browser cookies are parsed into objects", () => {
+	const options = parse(["--browser-cookie", "name,value,example.com,/,,true,true,None,https://example.com"]);
+	assert.deepEqual(options.browserCookies, [{
+		name: "name",
+		value: "value",
+		url: "https://example.com",
+		domain: "example.com",
+		path: "/",
+		secure: true,
+		httpOnly: true,
+		sameSite: "None",
+		expires: undefined
+	}]);
+	assert.equal(parse(["--browser-cookie", "name,value,example.com,/,1893456000,false,false,Lax,https://example.com"]).browserCookies[0].expires, 1893456000);
+});
+
+test("invalid browser args json is reported", () => {
+	assert.deepEqual(parseArgs(["--browser-args", "not json"]).invalidOptions, [{ name: "browser-args", value: "not json" }]);
+});
+
 test("values are parsed from both spaced and equal forms", () => {
 	assert.equal(parse(["--browser-width", "1024"]).browserWidth, 1024);
 	assert.equal(parse(["--browser-width=1024"]).browserWidth, 1024);

@@ -59,24 +59,6 @@ async function run() {
 		} else {
 			urls = [options.url];
 		}
-		if (options.browserCookies) {
-			const cookies = [];
-			for (const cookie of options.browserCookies) {
-				const [name, value, domain, path, expires, httpOnly, secure, sameSite, url] = cookie.split(",");
-				cookies.push({
-					name,
-					value,
-					url,
-					domain,
-					path,
-					secure: secure === "true",
-					httpOnly: httpOnly === "true",
-					sameSite,
-					expires: isNaN(Number(expires)) ? undefined : Number(expires)
-				});
-			}
-			options.browserCookies = cookies;
-		}
 		if (options.browserCookiesFile) {
 			const cookiesContent = await readTextFile(options.browserCookiesFile);
 			try {
@@ -84,23 +66,6 @@ async function run() {
 			} catch {
 				options.browserCookies = parseCookies(cookiesContent);
 			}
-		}
-		if (options.emulateMediaFeatures) {
-			options.emulateMediaFeatures = options.emulateMediaFeatures.map(feature => {
-				const colonIndex = feature.indexOf(":");
-				return {
-					name: feature.substring(0, colonIndex),
-					value: feature.substring(colonIndex + 1)
-				};
-			});
-		}
-		if (options.httpHeaders) {
-			const headers = {};
-			for (const header of options.httpHeaders) {
-				const [name, value] = header.split("=");
-				headers[name] = value.trim();
-			}
-			options.httpHeaders = headers;
 		}
 		if (options.embeddedImage) {
 			options.embeddedImage = Array.from(await readFile(options.embeddedImage));
