@@ -16,7 +16,7 @@ const execFileAsync = promisify(execFile);
 const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const TEST_TIMEOUT = 120000;
 
-let crawlPromise;
+const crawlPromises = new Map();
 
 test("crawled pages are merged into a single self-extracting archive", { timeout: TEST_TIMEOUT }, async () => {
 	const { filenames, entryNames, data, stderr } = await getCrawlResult();
@@ -49,20 +49,42 @@ test("merged page entries can be extracted", { timeout: TEST_TIMEOUT }, async ()
 	assert.ok(content.includes("Linked Page"));
 });
 
+test("--crawl-save-archive-dedup replaces duplicate resources with symlink aliases", { timeout: TEST_TIMEOUT }, async () => {
+	const { manifest, entries } = await getCrawlResult(true);
+	const aliasNames = Object.keys(manifest.aliases || {});
+	assert.equal(aliasNames.length, 2);
+	for (const aliasName of aliasNames) {
+		const canonicalFilename = manifest.aliases[aliasName];
+		assert.ok(!canonicalFilename.startsWith("pages/"));
+		assert.ok(entries.find(entry => entry.filename == canonicalFilename));
+		const aliasEntry = entries.find(entry => entry.filename == aliasName);
+		assert.equal(aliasEntry.unixMode & 0o170000, 0o120000);
+		assert.equal(aliasEntry.versionMadeBy >> 8, 3);
+		const target = await aliasEntry.getData(new TextWriter());
+		assert.equal(resolvePath(aliasName, target), canonicalFilename);
+	}
+});
+
+test("--crawl-save-archive-dedup requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
+	await assert.rejects(
+		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-dedup"], { cwd: cliDirectory }),
+		error => error.stderr.includes("--crawl-save-archive-dedup requires --crawl-save-archive"));
+});
+
 test("--crawl-save-archive requires --compress-content", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
 		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--crawl-save-archive"], { cwd: cliDirectory }),
 		error => error.stderr.includes("--crawl-save-archive requires --compress-content"));
 });
 
-function getCrawlResult() {
-	if (!crawlPromise) {
-		crawlPromise = runCrawl();
+function getCrawlResult(dedup = false) {
+	if (!crawlPromises.has(dedup)) {
+		crawlPromises.set(dedup, runCrawl(dedup));
 	}
-	return crawlPromise;
+	return crawlPromises.get(dedup);
 }
 
-async function runCrawl() {
+async function runCrawl(dedup) {
 	const server = createServer((request, response) => {
 		const { pathname } = new URL(request.url, "http://localhost");
 		if (pathname === "/") {
@@ -73,6 +95,8 @@ async function runCrawl() {
 			servePage(response, "Linked Page");
 		} else if (pathname === "/other.html") {
 			servePage(response, "Other Page");
+		} else if (pathname === "/shared.css") {
+			response.writeHead(200, { "content-type": "text/css" }).end("body { background-color: aliceblue; }");
 		} else {
 			response.writeHead(404).end();
 		}
@@ -86,7 +110,8 @@ async function runCrawl() {
 			"--crawl-links",
 			"--crawl-save-archive",
 			"--compress-content",
-			"--max-parallel-workers", "1"
+			"--max-parallel-workers", "1",
+			...(dedup ? ["--crawl-save-archive-dedup"] : [])
 		], { cwd: cliDirectory });
 		const filenames = await readdir(directory);
 		const data = new Uint8Array(await readFile(join(directory, "archive.html")));
@@ -103,7 +128,19 @@ async function runCrawl() {
 	}
 }
 
+function resolvePath(baseFilename, relativePath) {
+	const segments = baseFilename.split("/").slice(0, -1);
+	for (const segment of relativePath.split("/")) {
+		if (segment == "..") {
+			segments.pop();
+		} else {
+			segments.push(segment);
+		}
+	}
+	return segments.join("/");
+}
+
 function servePage(response, title, body = "") {
 	response.writeHead(200, { "content-type": "text/html" })
-		.end(`<html><head><title>${title}</title></head><body>${body}</body></html>`);
+		.end(`<html><head><title>${title}</title><link rel="stylesheet" href="/shared.css"></head><body>${body}</body></html>`);
 }

@@ -70,6 +70,9 @@ async function initialize(options) {
 	if ((options.embedPdf || options.embeddedPdf || options.embedScreenshot || options.embeddedImage) && !options.compressContent) {
 		throw new Error("--embed-pdf, --embedded-pdf, --embed-screenshot and --embedded-image require --compress-content");
 	}
+	if (options.crawlSaveArchiveDedup && !options.crawlSaveArchive) {
+		throw new Error("--crawl-save-archive-dedup requires --crawl-save-archive");
+	}
 	if (options.crawlSaveArchive) {
 		if (!options.compressContent) {
 			throw new Error("--crawl-save-archive requires --compress-content");
@@ -180,6 +183,7 @@ async function savePagesArchive(options) {
 		}));
 		const content = await createPagesArchive(pages, {
 			zipScript: getZipScriptSource(),
+			dedupPages: options.crawlSaveArchiveDedup,
 			selfExtractingArchive: options.selfExtractingArchive,
 			extractDataFromPage: options.extractDataFromPage,
 			preventAppendedData: options.preventAppendedData,

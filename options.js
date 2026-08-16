@@ -160,6 +160,7 @@ const OPTIONS_INFO = [{
 	"crawl-replace-URLs": { description: "Replace URLs of saved pages with relative paths of saved pages on the filesystem", type: "boolean" },
 	"crawl-rewrite-rule": { description: "Rewrite rule used to rewrite URLs of crawled pages", type: "string[]" },
 	"crawl-save-archive": { description: "Save all the crawled pages into a single (self-extracting) ZIP file, requires --compress-content", type: "boolean" },
+	"crawl-save-archive-dedup": { description: "Deduplicate identical resources shared between pages when using --crawl-save-archive", type: "boolean" },
 }, {
 	"browser-script": { description: "Path of a script executed in the page (and all the frames) before it is loaded", type: "string[]" },
 	"browser-stylesheet": { description: "Path of a stylesheet file inserted into the page (and all the frames) after it is loaded", type: "string[]" },
