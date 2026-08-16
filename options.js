@@ -206,49 +206,61 @@ const { args, exit } = Deno;
 export { getOptions, parseArgs };
 
 function getOptions() {
-	const { positionals, options } = parseArgs(Array.from(args));
-	const unknownOptions = [];
-	positionals.forEach(positional => {
-		if (positional.startsWith("--")) {
-			unknownOptions.push(positional);
-			positionals.splice(positionals.indexOf(positional), 1);
-		}
-	});
-	if ((!positionals.length || positionals.length > 2 || options.help || unknownOptions.length) && (!options.version && !options.urlsFile)) {
-		console.log(USAGE_TEXT + "\n"); // eslint-disable-line no-console
-		console.log("Options:"); // eslint-disable-line no-console
-		OPTIONS_INFO.forEach(category => {
-			const categoryName = CATEGORIES[OPTIONS_INFO.indexOf(category)];
-			console.log(`  * ${categoryName}:`); // eslint-disable-line no-console
-			Object.keys(category).forEach(optionName => {
-				const optionInfo = category[optionName];
-				let optionType = optionInfo.type;
-				if (isArray(optionType)) {
-					optionType = optionType.replace("[]", "*");
-				}
-				const optionDescription = optionInfo.description;
-				const optionDefaultValue = optionInfo.defaultValue === undefined ? "" : `(default: ${JSON.stringify(optionInfo.defaultValue)})`;
-				console.log(`    --${optionName}: ${optionDescription} <${optionType}> ${optionDefaultValue}`); // eslint-disable-line no-console
-			});
-			console.log(""); // eslint-disable-line no-console
-		});
-		if (unknownOptions.length) {
-			console.log(`Error: Unknown option${unknownOptions.length > 1 ? "s" : ""} ${unknownOptions.join(", ")}`); // eslint-disable-line no-console
-			console.log(""); // eslint-disable-line no-console
-		}
+	const { positionals, options, invalidOptions } = parseArgs(Array.from(args));
+	const unknownOptions = positionals.filter(positional => positional.startsWith("--"));
+	const urls = positionals.filter(positional => !positional.startsWith("--"));
+	if (options.help) {
+		printUsage();
 		exit(0);
 	}
 	if (options.version) {
 		console.log(version); // eslint-disable-line no-console
 		exit(0);
 	}
-	return { ...options, url: positionals[0], output: positionals[1] };
+	const errorMessages = [];
+	unknownOptions.forEach(option => errorMessages.push(`Unknown option ${option}`));
+	invalidOptions.forEach(({ name, value }) => errorMessages.push(value === undefined ?
+		`Missing value for --${name}` :
+		`Invalid value for --${name}: ${JSON.stringify(value)}`));
+	if (!urls.length && !options.urlsFile) {
+		errorMessages.push("The URL or path of the page to save is required");
+	}
+	if (urls.length > 2) {
+		errorMessages.push(`Unexpected arguments: ${urls.slice(2).join(", ")}`);
+	}
+	if (errorMessages.length) {
+		printUsage();
+		errorMessages.forEach(message => console.error(`Error: ${message}`)); // eslint-disable-line no-console
+		exit(1);
+	}
+	return { ...options, url: urls[0], output: urls[1] };
+}
+
+function printUsage() {
+	console.log(USAGE_TEXT + "\n"); // eslint-disable-line no-console
+	console.log("Options:"); // eslint-disable-line no-console
+	OPTIONS_INFO.forEach(category => {
+		const categoryName = CATEGORIES[OPTIONS_INFO.indexOf(category)];
+		console.log(`  * ${categoryName}:`); // eslint-disable-line no-console
+		Object.keys(category).forEach(optionName => {
+			const optionInfo = category[optionName];
+			let optionType = optionInfo.type;
+			if (isArray(optionType)) {
+				optionType = optionType.replace("[]", "*");
+			}
+			const optionDescription = optionInfo.description;
+			const optionDefaultValue = optionInfo.defaultValue === undefined ? "" : `(default: ${JSON.stringify(optionInfo.defaultValue)})`;
+			console.log(`    --${optionName}: ${optionDescription} <${optionType}> ${optionDefaultValue}`); // eslint-disable-line no-console
+		});
+		console.log(""); // eslint-disable-line no-console
+	});
 }
 
 function parseArgs(args, setDefaultValues = true) {
 	const positionals = [];
 	const options = {};
-	const result = { positionals, options: {} };
+	const invalidOptions = [];
+	const result = { positionals, options: {}, invalidOptions };
 	let argIndex = 0;
 	while (argIndex < args.length) {
 		const arg = args[argIndex];
@@ -259,18 +271,20 @@ function parseArgs(args, setDefaultValues = true) {
 				options[optionName] = [];
 			}
 			if (argValue === undefined) {
-				if (
-					argIndex + 1 < args.length &&
-					!parseArg(args[argIndex + 1]).option &&
-					isValid(option.info.type, args[argIndex + 1]) &&
-					(isArray(option.info.type) || !options[optionName].length)) {
-					options[optionName].push(args[argIndex + 1]);
-					argIndex++;
+				if (argIndex + 1 < args.length && !parseArg(args[argIndex + 1]).option) {
+					const nextArg = args[argIndex + 1];
+					if (isValid(option.info.type, nextArg)) {
+						options[optionName].push(nextArg);
+						argIndex++;
+					} else if (option.info.type.startsWith("number")) {
+						invalidOptions.push({ name: optionName, value: nextArg });
+						argIndex++;
+					}
 				}
-			} else if (isValid(option.info.type, argValue) && (isArray(option.info.type) || !options[optionName].length)) {
+			} else if (isValid(option.info.type, argValue)) {
 				options[optionName].push(argValue);
 			} else {
-				positionals.push(arg);
+				invalidOptions.push({ name: optionName, value: argValue });
 			}
 		} else {
 			positionals.push(arg);
@@ -282,20 +296,24 @@ function parseArgs(args, setDefaultValues = true) {
 		const optionKey = getOptionKey(optionName, optionInfo);
 		let optionValue = options[optionName];
 		const isArrayType = isArray(optionInfo.type);
+		if (!optionInfo.type.startsWith("boolean") && !optionValue.length &&
+			!invalidOptions.some(invalidOption => invalidOption.name == optionName)) {
+			invalidOptions.push({ name: optionName });
+		}
 		if (optionInfo.type.startsWith("boolean")) {
 			optionValue = optionValue.map(value => value == "true");
 			optionValue = isArrayType ?
 				optionValue.length ? optionValue : true :
-				optionValue.length ? optionValue[0] : true;
+				optionValue.length ? optionValue[optionValue.length - 1] : true;
 		} else if (optionInfo.type.startsWith("number")) {
 			optionValue = optionValue.map(value => Number(value));
 			optionValue = isArrayType ?
 				optionValue.length ? optionValue : optionInfo.defaultValue || 0 :
-				optionValue.length ? optionValue[0] : optionInfo.defaultValue || 0;
+				optionValue.length ? optionValue[optionValue.length - 1] : optionInfo.defaultValue || 0;
 		} else {
 			optionValue = isArrayType ?
 				optionValue.length ? optionValue : optionInfo.defaultValue || "" :
-				optionValue.length ? optionValue[0] : optionInfo.defaultValue || "";
+				optionValue.length ? optionValue[optionValue.length - 1] : optionInfo.defaultValue || "";
 		}
 		result.options[optionKey] = optionValue;
 	});
@@ -421,7 +439,7 @@ function isValid(type, value) {
 	if (type.startsWith("boolean")) {
 		return value == "true" || value == "false";
 	} else if (type.startsWith("number")) {
-		return !isNaN(value);
+		return value.trim() != "" && !isNaN(value);
 	} else {
 		return true;
 	}

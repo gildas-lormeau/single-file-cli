@@ -43,6 +43,22 @@ test("default values are applied under canonical keys", () => {
 	assert.equal(options.browserWidth, 1280);
 });
 
+test("invalid and missing values are reported", () => {
+	assert.deepEqual(parseArgs(["--browser-width", "abc"]).invalidOptions, [{ name: "browser-width", value: "abc" }]);
+	assert.deepEqual(parseArgs(["--browser-width=abc"]).invalidOptions, [{ name: "browser-width", value: "abc" }]);
+	assert.deepEqual(parseArgs(["--browser-height="]).invalidOptions, [{ name: "browser-height", value: "" }]);
+	assert.deepEqual(parseArgs(["--output-directory"]).invalidOptions, [{ name: "output-directory" }]);
+	assert.deepEqual(parseArgs(["--browser-width", "abc"]).positionals, []);
+	assert.deepEqual(parseArgs(["--browser-debug"]).invalidOptions, []);
+});
+
+test("the last value wins when a scalar option is repeated", () => {
+	const { options, positionals } = parseArgs(["--browser-width", "100", "--browser-width", "200"]);
+	assert.equal(options.browserWidth, 200);
+	assert.deepEqual(positionals, []);
+	assert.equal(parse(["--browser-width=100", "--browser-width=200"]).browserWidth, 200);
+});
+
 test("values are parsed from both spaced and equal forms", () => {
 	assert.equal(parse(["--browser-width", "1024"]).browserWidth, 1024);
 	assert.equal(parse(["--browser-width=1024"]).browserWidth, 1024);
