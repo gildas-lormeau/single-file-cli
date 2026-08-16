@@ -84,6 +84,15 @@ async function run() {
 				options.browserCookies = parseCookies(cookiesContent);
 			}
 		}
+		if (options.emulateMediaFeatures) {
+			options.emulateMediaFeatures = options.emulateMediaFeatures.map(feature => {
+				const colonIndex = feature.indexOf(":");
+				return {
+					name: feature.substring(0, colonIndex),
+					value: feature.substring(colonIndex + 1)
+				};
+			});
+		}
 		if (options.httpHeaders) {
 			const headers = {};
 			for (const header of options.httpHeaders) {
