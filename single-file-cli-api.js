@@ -21,7 +21,7 @@
  *   Source.
  */
 
-/* global URL, Blob, FileReader */
+/* global URL */
 
 import * as backend from "./lib/cdp-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
@@ -274,14 +274,8 @@ async function capturePage(options) {
 		}
 		if (options.outputJson) {
 			if (content instanceof Uint8Array) {
-				const fileReader = new FileReader();
-				fileReader.readAsDataURL(new Blob([content]));
-				content = await new Promise(resolve => {
-					fileReader.onload = () => resolve(fileReader.result);
-				});
-				content = content.replace(/^data:.*?;base64,/, "");
 				pageData.content = undefined;
-				pageData.binaryContent = content;
+				pageData.binaryContent = content.toBase64();
 			}
 			pageData.doctype = undefined;
 			pageData.viewport = undefined;
