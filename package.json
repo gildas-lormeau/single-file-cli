@@ -17,11 +17,11 @@
 		"single-file": "single-file-node.js"
 	},
 	"dependencies": {
-		"simple-cdp": "^1.10.0"
+		"simple-cdp": "^1.10.1"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.39.1",
-		"esbuild": "^0.27.4",
+		"@eslint/js": "^9.39.5",
+		"esbuild": "^0.27.7",
 		"eslint": "^10.8.1"
 	}
 }
