@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseArgs } from "../../options.js";
+import { parseArgs, applySettings } from "../../options.js";
 
 const parse = args => parseArgs(args).options;
 
@@ -88,6 +88,27 @@ test("browser cookies are parsed into objects", () => {
 
 test("invalid browser args json is reported", () => {
 	assert.deepEqual(parseArgs(["--browser-args", "not json"]).invalidOptions, [{ name: "browser-args", value: "not json" }]);
+});
+
+test("explicit options win over settings file profiles", () => {
+	const options = parse(["--settings-file-profile", "custom", "--browser-width", "1024"]);
+	const settings = { profiles: { custom: { compressHTML: false, browserWidth: 800 } } };
+	applySettings(options, settings, { browserWidth: 1024 });
+	assert.equal(options.compressHTML, false);
+	assert.equal(options.browserWidth, 1024);
+});
+
+test("the default profile maps to the default settings", () => {
+	const options = parse([]);
+	applySettings(options, { profiles: { __Default_Settings__: { compressHTML: false } } }, {});
+	assert.equal(options.compressHTML, false);
+});
+
+test("an unknown settings profile is reported", () => {
+	const options = parse(["--settings-file-profile", "missing"]);
+	assert.throws(
+		() => applySettings(options, { profiles: { __Default_Settings__: {}, work: {} } }, {}),
+		/Unknown profile "missing", available profiles: work/);
 });
 
 test("values are parsed from both spaced and equal forms", () => {

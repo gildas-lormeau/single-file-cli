@@ -203,7 +203,20 @@ const OPTIONS_INFO = [{
 }];
 
 const { args, exit } = Deno;
-export { getOptions, parseArgs };
+export { getOptions, parseArgs, applySettings };
+
+function applySettings(options, settings, explicitOptions = parseArgs(Array.from(args), false).options) {
+	const profiles = settings.profiles || {};
+	let profileName = options.settingsFileProfile;
+	if (profileName == "default" || profileName === undefined) {
+		profileName = "__Default_Settings__";
+	} else if (!profiles[profileName]) {
+		const profileNames = Object.keys(profiles).filter(name => name != "__Default_Settings__");
+		throw new Error(`Unknown profile ${JSON.stringify(profileName)}, available profiles: ${profileNames.join(", ")}`);
+	}
+	Object.assign(options, profiles[profileName], explicitOptions);
+	delete options.settingsFile;
+}
 
 function getOptions() {
 	const { positionals, options, invalidOptions } = parseArgs(Array.from(args));
