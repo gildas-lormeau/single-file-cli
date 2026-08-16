@@ -9,6 +9,9 @@
 		"node": ">=24.0.0"
 	},
 	"type": "module",
+	"scripts": {
+		"test": "node --test \"test/**/*.test.js\""
+	},
 	"bin": {
 		"single-file": "single-file-node.js"
 	},
