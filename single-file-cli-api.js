@@ -299,30 +299,20 @@ async function capturePage(options) {
 			pageData.comment = undefined;
 			content = JSON.stringify(pageData, null, 2);
 		}
-		if (options.output) {
-			filename = await getFilename(options.output, options);
-		} else if (options.dumpContent) {
+		if (options.dumpContent && !options.output) {
 			if (options.compressContent) {
 				await stdout.write(content);
 			} else {
 				console.log(content || ""); // eslint-disable-line no-console
 			}
 		} else {
-			filename = await getFilename(pageData.filename, options);
+			let outputFilename = options.output || pageData.filename;
+			if (options.outputJson && !outputFilename.endsWith(".json")) {
+				outputFilename += ".json";
+			}
+			filename = await writeOutputFile(outputFilename, content, options);
 		}
 		if (filename) {
-			if (options.outputJson) {
-				filename += filename.endsWith(".json") ? "" : ".json";
-			}
-			const directoryName = path.dirname(filename);
-			if (directoryName !== ".") {
-				await mkdir(directoryName, { recursive: true });
-			}
-			if (content instanceof Uint8Array) {
-				await writeFile(filename, content);
-			} else {
-				await writeTextFile(filename, content);
-			}
 			const outputDirectory = getOutputDirectory(options);
 			pageData.filename = filename.startsWith(outputDirectory) ? filename.substring(outputDirectory.length) : filename;
 		}
@@ -363,6 +353,37 @@ function getOutputDirectory(options) {
 		outputDirectory += "/";
 	}
 	return outputDirectory;
+}
+
+async function writeOutputFile(outputFilename, content, options) {
+	while (true) {
+		const filename = await getFilename(outputFilename, options);
+		if (!filename) {
+			return;
+		}
+		const directoryName = path.dirname(filename);
+		if (directoryName !== ".") {
+			await mkdir(directoryName, { recursive: true });
+		}
+		// exclusive creation prevents parallel tasks writing the same filename
+		// from silently overwriting each other
+		const writeOptions = { createNew: options.filenameConflictAction != "overwrite" };
+		try {
+			if (content instanceof Uint8Array) {
+				await writeFile(filename, content, writeOptions);
+			} else {
+				await writeTextFile(filename, content, writeOptions);
+			}
+			return filename;
+		} catch (error) {
+			if (!(error instanceof errors.AlreadyExists)) {
+				throw error;
+			}
+			if (options.filenameConflictAction == "skip") {
+				return;
+			}
+		}
+	}
 }
 
 async function getFilename(filename, options, index = 1) {
