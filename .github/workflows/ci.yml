@@ -23,6 +23,16 @@ jobs:
         name: Install dependencies
         run: npm ci
       -
+        name: Probe browsers
+        run: |
+          ls -la /usr/bin/chromium /usr/bin/chromium-browser /usr/bin/google-chrome /opt/google/chrome/google-chrome 2>&1 || true
+          google-chrome --version || true
+          timeout 15 google-chrome --headless --single-process --no-first-run --remote-debugging-port=9223 about:blank > single.log 2>&1 || true &
+          timeout 15 google-chrome --headless --no-first-run --remote-debugging-port=9224 about:blank > multi.log 2>&1 || true &
+          sleep 8
+          curl -sf http://127.0.0.1:9223/json/version && echo OK-single-process || { echo FAIL-single-process; cat single.log; }
+          curl -sf http://127.0.0.1:9224/json/version && echo OK-multi-process || { echo FAIL-multi-process; cat multi.log; }
+      -
         name: Run linter
         run: npm run lint
       -
