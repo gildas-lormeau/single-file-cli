@@ -9,7 +9,6 @@ trap 'rm -rf "$stage_dir"' EXIT
 cp ./single-file ./single-file-launcher.js ./single-file-cli-api.js ./options.js ./deno.json "$stage_dir"
 cp -R ./lib "$stage_dir/lib"
 cp -R ./resources "$stage_dir/resources"
-jq 'del(.dependencies, .devDependencies)' ./package.json > "$stage_dir/package.json"
 mkdir -p "$dist_dir"
 cd "$stage_dir"
 
