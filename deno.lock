@@ -1,9 +1,25 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@simple-cdp/simple-cdp@^1.10.0": "1.10.0",
+    "jsr:@std/internal@^1.0.14": "1.0.14",
+    "jsr:@std/path@^1.1.2": "1.1.6",
     "npm:@eslint/js@^9.39.1": "9.39.5",
-    "npm:simple-cdp@^1.10.0": "1.10.0",
-    "npm:single-file-core@1.5.85": "1.5.85"
+    "npm:simple-cdp@^1.10.0": "1.10.0"
+  },
+  "jsr": {
+    "@simple-cdp/simple-cdp@1.10.0": {
+      "integrity": "3f8c91e22598c3e15a680f14ee3d2aa174c21b9b528caad5ec8552e3df0c3897"
+    },
+    "@std/internal@1.0.14": {
+      "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
+    },
+    "@std/path@1.1.6": {
+      "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    }
   },
   "npm": {
     "@eslint/js@9.39.5": {
@@ -18,14 +34,14 @@
   },
   "workspace": {
     "dependencies": [
-      "npm:single-file-core@1.5.85"
+      "jsr:@simple-cdp/simple-cdp@^1.10.0",
+      "jsr:@std/path@^1.1.2"
     ],
     "packageJson": {
       "dependencies": [
         "npm:@eslint/js@^9.39.1",
         "npm:esbuild@~0.27.4",
-        "npm:simple-cdp@^1.10.0",
-        "npm:single-file-core@1.5.85"
+        "npm:simple-cdp@^1.10.0"
       ]
     }
   }
