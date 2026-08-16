@@ -352,7 +352,7 @@ function getOutputDirectory(options) {
 async function getFilename(filename, options, index = 1) {
 	let newFilename = getOutputDirectory(options) + filename;
 	if (options.filenameConflictAction == "overwrite") {
-		return filename;
+		return newFilename;
 	} else if (options.filenameConflictAction == "uniquify" && index > 1) {
 		const regExpMatchExtension = /(\.[^.]+)$/;
 		const matchExtension = newFilename.match(regExpMatchExtension);
