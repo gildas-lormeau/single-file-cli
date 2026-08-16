@@ -43,6 +43,12 @@ test("invalid option values are reported as errors", async () => {
 	assert.ok(stderr.includes("Invalid value for --browser-width: \"abc\""));
 });
 
+test("a wrong browser executable path is reported with the path", async () => {
+	const { code, stderr } = await runCli(["https://localhost:1/", "out.html", "--browser-executable-path", "/nonexistent/chrome"]);
+	assert.notEqual(code, 0);
+	assert.ok(stderr.includes("The browser executable was not found at \"/nonexistent/chrome\""));
+});
+
 test("unexpected extra arguments are reported as errors", async () => {
 	const { code, stderr } = await runCli(["https://example.com", "out.html", "extra.html"]);
 	assert.equal(code, 1);
