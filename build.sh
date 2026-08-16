@@ -66,6 +66,20 @@ await build({
   plugins: [],
 });
 
+await build({
+  stdin: {
+    contents: \"export * from './processors/compression/compression.js'; export * from './vendor/zip/zip.js';\",
+    resolveDir: 'node_modules/single-file-core',
+  },
+  bundle: true,
+  outfile: 'lib/single-file-archive.js',
+  platform: 'neutral',
+  sourcemap: false,
+  minify: true,
+  format: 'esm',
+  plugins: [],
+});
+
 const SCRIPTS = [
 	'lib/single-file.js',
 	'lib/single-file-bootstrap.js',

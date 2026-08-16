@@ -143,6 +143,12 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file https://www.wikipedia.org --crawl-links=true --crawl-inner-links-only=false --crawl-external-links-max-depth=1 --crawl-rewrite-rule="^.*wikipedia.*$"
   ```
 
+  - Save https://www.wikipedia.org and its internal links into a single self-extracting ZIP file
+
+  ```sh
+  single-file https://www.wikipedia.org wikipedia.html --crawl-links=true --crawl-save-archive=true --compress-content=true
+  ```
+
 ## Compile executables
 
  - Compile executables into `/dist`

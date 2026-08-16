@@ -26,6 +26,7 @@
 import { Buffer } from "node:buffer";
 import * as backend from "./lib/cdp-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
+import { createPagesArchive } from "./lib/archive-packager.js";
 import { Deno, path } from "./lib/deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
@@ -59,8 +60,8 @@ const DEFAULT_OPTIONS = {
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
-const { readTextFile, writeTextFile, writeFile, stdout, mkdir, stat, errors } = Deno;
-let tasks = [], maxParallelWorkers, sessionFilename;
+const { readTextFile, writeTextFile, readFile, writeFile, stdout, mkdir, makeTempDir, remove, stat, errors } = Deno;
+let tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory;
 
 export { initialize };
 
@@ -68,6 +69,16 @@ async function initialize(options) {
 	options = Object.assign({}, DEFAULT_OPTIONS, options);
 	if ((options.embedPdf || options.embeddedPdf || options.embedScreenshot || options.embeddedImage) && !options.compressContent) {
 		throw new Error("--embed-pdf, --embedded-pdf, --embed-screenshot and --embedded-image require --compress-content");
+	}
+	if (options.crawlSaveArchive) {
+		if (!options.compressContent) {
+			throw new Error("--crawl-save-archive requires --compress-content");
+		}
+		if (options.embedPdf || options.embeddedPdf || options.embedScreenshot || options.embeddedImage ||
+			options.outputJson || options.insertTextBody || options.password) {
+			throw new Error("--crawl-save-archive is not compatible with --embed-pdf, --embedded-pdf, --embed-screenshot, --embedded-image, --output-json, --insert-text-body and --password");
+		}
+		archiveTempDirectory = await makeTempDir();
 	}
 	maxParallelWorkers = options.maxParallelWorkers || 8;
 	try {
@@ -128,6 +139,9 @@ async function capture(urls, options) {
 async function finish(options) {
 	const promiseTasks = tasks.map(task => task.promise);
 	await Promise.all(promiseTasks);
+	if (options.crawlSaveArchive) {
+		await savePagesArchive(options);
+	}
 	if (options.crawlReplaceURLs && !options.compressContent) {
 		for (const task of tasks) {
 			try {
@@ -155,6 +169,40 @@ async function finish(options) {
 	}
 }
 
+async function savePagesArchive(options) {
+	const archiveTasks = tasks.filter(task => task.archiveFilename);
+	if (archiveTasks.length) {
+		const pages = archiveTasks.map(task => ({
+			url: task.url,
+			originalUrls: task.originalUrls,
+			title: task.title,
+			getData: () => readFile(task.archiveFilename)
+		}));
+		const content = await createPagesArchive(pages, {
+			zipScript: getZipScriptSource(),
+			selfExtractingArchive: options.selfExtractingArchive,
+			extractDataFromPage: options.extractDataFromPage,
+			preventAppendedData: options.preventAppendedData,
+			includeBOM: options.includeBOM,
+			insertMetaCSP: options.insertMetaCSP,
+			insertCanonicalLink: options.insertCanonicalLink,
+			insertMetaNoIndex: options.insertMetaNoIndex,
+			insertSingleFileComment: options.insertSingleFileComment,
+			removeSavedDate: options.removeSavedDate
+		});
+		if (options.dumpContent && !options.output) {
+			await stdout.write(content);
+		} else {
+			let outputFilename = options.output || archiveTasks[0].filename || "archive.html";
+			if (options.selfExtractingArchive) {
+				outputFilename = outputFilename.replace(/\.zip$/, ".html");
+			}
+			await writeOutputFile(outputFilename, content, options);
+		}
+	}
+	await remove(archiveTempDirectory, { recursive: true });
+}
+
 function runTasks() {
 	const availableTasks = tasks.filter(task => !task.status).length;
 	const processingTasks = tasks.filter(task => task.status == STATE_PROCESSING).length;
@@ -171,6 +219,12 @@ async function runNextTask() {
 		const options = task.options;
 		const taskOptions = JSON.parse(JSON.stringify(options));
 		taskOptions.url = task.url;
+		if (taskOptions.crawlSaveArchive) {
+			taskOptions.selfExtractingArchive = false;
+			taskOptions.extractDataFromPage = false;
+			taskOptions.createRootDirectory = false;
+			taskOptions.archiveFilename = archiveTempDirectory + "/" + tasks.indexOf(task) + ".zip";
+		}
 		task.status = STATE_PROCESSING;
 		await saveTasks();
 		task.promise = capturePage(taskOptions);
@@ -178,6 +232,8 @@ async function runNextTask() {
 		task.status = STATE_PROCESSED;
 		if (pageData) {
 			task.filename = pageData.filename;
+			task.title = pageData.title;
+			task.archiveFilename = pageData.archiveFilename;
 			if (options.crawlLinks && testMaxDepth(task)) {
 				const urls = pageData.links;
 				let newTasks = await Promise.all(urls.map(url => createTask(url, options, task, task.rootTaskURL || task.url)));
@@ -288,6 +344,11 @@ async function capturePage(options) {
 		if (options.debugMessagesFile && pageData.debugMessages) {
 			await writeTextFile(options.debugMessagesFile, pageData.debugMessages.map(([timestamp, message]) =>
 				`[${new Date(timestamp).toISOString()}] ${message.join(" ")}`).join("\n"));
+		}
+		if (options.archiveFilename) {
+			await writeFile(options.archiveFilename, content);
+			pageData.archiveFilename = options.archiveFilename;
+			return pageData;
 		}
 		if (options.outputJson) {
 			if (content instanceof Uint8Array) {
