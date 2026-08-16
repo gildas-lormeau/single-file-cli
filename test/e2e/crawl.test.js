@@ -42,6 +42,12 @@ test("fragment links are rewritten to the captured filename", { timeout: TEST_TI
 	assert.ok(pages["Top Page.html"].includes("=Fragment%20Page.html>"));
 });
 
+test("all link variants of a deduplicated page are rewritten", { timeout: TEST_TIMEOUT }, async () => {
+	const { pages } = await getCrawlResult();
+	assert.ok(!pages["Top Page.html"].includes("page.html#section"));
+	assert.equal((pages["Top Page.html"].match(/=Linked%20Page\.html>/g) || []).length, 2);
+});
+
 test("mail and script links are not crawled as external links", { timeout: TEST_TIMEOUT }, async () => {
 	const server = createServer((_, response) => servePage(response, "Mail Top", `
 		<a href="mailto:contact@example.net">mail</a>

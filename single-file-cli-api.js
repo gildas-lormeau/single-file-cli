@@ -86,7 +86,8 @@ async function initialize(options) {
 	}
 	if (options.crawlSyncSession || options.crawlLoadSession) {
 		try {
-			tasks = JSON.parse(await readTextFile(options.crawlSyncSession || options.crawlLoadSession));
+			tasks = JSON.parse(await readTextFile(options.crawlSyncSession || options.crawlLoadSession))
+				.map(task => Object.assign({ originalUrls: [task.url] }, task));
 		} catch (error) {
 			if (options.crawlLoadSession) {
 				throw error;
@@ -134,11 +135,13 @@ async function finish(options) {
 				let pageContent = await readTextFile(outputFilename);
 				tasks.forEach(otherTask => {
 					if (otherTask.filename) {
-						pageContent = pageContent.replace(new RegExp(escapeRegExp("\"" + otherTask.originalUrl + "\""), "gi"), "\"" + otherTask.filename + "\"");
-						pageContent = pageContent.replace(new RegExp(escapeRegExp("'" + otherTask.originalUrl + "'"), "gi"), "'" + otherTask.filename + "'");
-						const filename = otherTask.filename.replace(/ /g, "%20");
-						pageContent = pageContent.replace(new RegExp(escapeRegExp("=" + otherTask.originalUrl + " "), "gi"), "=" + filename + " ");
-						pageContent = pageContent.replace(new RegExp(escapeRegExp("=" + otherTask.originalUrl + ">"), "gi"), "=" + filename + ">");
+						otherTask.originalUrls.forEach(originalUrl => {
+							pageContent = pageContent.replace(new RegExp(escapeRegExp("\"" + originalUrl + "\""), "gi"), "\"" + otherTask.filename + "\"");
+							pageContent = pageContent.replace(new RegExp(escapeRegExp("'" + originalUrl + "'"), "gi"), "'" + otherTask.filename + "'");
+							const filename = otherTask.filename.replace(/ /g, "%20");
+							pageContent = pageContent.replace(new RegExp(escapeRegExp("=" + originalUrl + " "), "gi"), "=" + filename + " ");
+							pageContent = pageContent.replace(new RegExp(escapeRegExp("=" + originalUrl + ">"), "gi"), "=" + filename + ">");
+						});
 					}
 				});
 				await writeTextFile(outputFilename, pageContent);
@@ -180,15 +183,26 @@ async function runNextTask() {
 				let newTasks = await Promise.all(urls.map(url => createTask(url, options, task, task.rootTaskURL || task.url)));
 				newTasks = newTasks.filter((task, taskIndex) => task &&
 					testMaxDepth(task) &&
-					!tasks.find(otherTask => otherTask.url == task.url) &&
-					newTasks.findIndex(otherTask => otherTask && otherTask.url == task.url) == taskIndex &&
 					(!options.crawlInnerLinksOnly || task.isInnerLink) &&
-					(!options.crawlNoParent || (task.isChild || !task.isInnerLink)));
+					(!options.crawlNoParent || (task.isChild || !task.isInnerLink)) &&
+					!mergeDuplicateTask(task, tasks.concat(newTasks.slice(0, taskIndex))));
 				tasks.splice(tasks.length, 0, ...newTasks);
 			}
 		}
 		await saveTasks();
 		await runTasks();
+	}
+}
+
+function mergeDuplicateTask(task, otherTasks) {
+	const duplicateTask = otherTasks.find(otherTask => otherTask && otherTask.url == task.url);
+	if (duplicateTask) {
+		task.originalUrls.forEach(url => {
+			if (!duplicateTask.originalUrls.includes(url)) {
+				duplicateTask.originalUrls.push(url);
+			}
+		});
+		return true;
 	}
 }
 
@@ -222,7 +236,7 @@ async function createTask(url, options, parentTask, rootTaskURL) {
 			url,
 			isInnerLink,
 			isChild,
-			originalUrl,
+			originalUrls: [originalUrl],
 			rootTaskURL,
 			depth: parentTask ? parentTask.depth + 1 : 0,
 			externalLinkDepth: isInnerLink ? -1 : parentTask ? parentTask.externalLinkDepth + 1 : -1,
