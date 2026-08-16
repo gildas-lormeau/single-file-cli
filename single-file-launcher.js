@@ -30,12 +30,12 @@ const { readTextFile, readFile, exit, addSignalListener } = Deno;
 
 try {
 	addSignalListener("SIGTERM", closeBrowserAndExit);
-} catch (_error) {
+} catch {
 	// ignored
 }
 try {
 	addSignalListener("SIGINT", closeBrowserAndExit);
-} catch (_error) {
+} catch {
 	// ignored
 }
 
@@ -83,6 +83,15 @@ async function run() {
 			} catch {
 				options.browserCookies = parseCookies(cookiesContent);
 			}
+		}
+		if (options.emulateMediaFeatures) {
+			options.emulateMediaFeatures = options.emulateMediaFeatures.map(feature => {
+				const colonIndex = feature.indexOf(":");
+				return {
+					name: feature.substring(0, colonIndex),
+					value: feature.substring(colonIndex + 1)
+				};
+			});
 		}
 		if (options.httpHeaders) {
 			const headers = {};

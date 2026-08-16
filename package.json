@@ -1,22 +1,22 @@
 {
 	"name": "single-file-cli",
-	"version": "2.0.83",
+	"version": "2.1.0",
 	"description": "SingleFile CLI",
 	"author": "Gildas Lormeau",
 	"engines": {
-		"deno": ">=1.4",
-		"bun": ">=1.0",
-		"node": ">=20"
+		"deno": ">=2.2",
+		"bun": ">=1.2",
+		"node": ">=24.0.0"
 	},
 	"type": "module",
 	"bin": {
 		"single-file": "single-file-node.js"
 	},
 	"dependencies": {
-		"simple-cdp": "^1.8.6",
-		"ws": "^8.18.3"
+		"simple-cdp": "^1.10.0"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.39.1"
+		"@eslint/js": "^9.39.1",
+		"esbuild": "^0.27.4"
 	}
 }
