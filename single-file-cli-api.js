@@ -306,6 +306,8 @@ async function capturePage(options) {
 			} else {
 				await writeTextFile(filename, content);
 			}
+			const outputDirectory = getOutputDirectory(options);
+			pageData.filename = filename.startsWith(outputDirectory) ? filename.substring(outputDirectory.length) : filename;
 		}
 		return pageData;
 	} catch (error) {

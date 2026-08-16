@@ -23,6 +23,14 @@ test("a page linked with and without fragment is captured once", { timeout: TEST
 	assert.equal(filenames.filter(filename => filename.startsWith("Linked Page")).length, 1);
 });
 
+test("links to pages with the same title are rewritten to distinct filenames", { timeout: TEST_TIMEOUT }, async () => {
+	const { filenames, pages } = await getCrawlResult();
+	assert.ok(filenames.includes("Same Title.html"));
+	assert.ok(filenames.includes("Same Title (2).html"));
+	assert.ok(pages["Top Page.html"].includes("=Same%20Title.html>"));
+	assert.ok(pages["Top Page.html"].includes("=Same%20Title%20(2).html>"));
+});
+
 function getCrawlResult() {
 	if (!crawlPromise) {
 		crawlPromise = runCrawl();
