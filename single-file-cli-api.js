@@ -65,6 +65,9 @@ export { initialize };
 
 async function initialize(options) {
 	options = Object.assign({}, DEFAULT_OPTIONS, options);
+	if ((options.embedPdf || options.embeddedPdf || options.embedScreenshot || options.embeddedImage) && !options.compressContent) {
+		throw new Error("--embed-pdf, --embedded-pdf, --embed-screenshot and --embedded-image require --compress-content");
+	}
 	maxParallelWorkers = options.maxParallelWorkers || 8;
 	try {
 		await backend.initialize(options);
