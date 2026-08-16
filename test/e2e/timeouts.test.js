@@ -1,9 +1,12 @@
+/* global setInterval, clearInterval */
+
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, rm } from "node:fs/promises";
+import { Buffer } from "node:buffer";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,6 +27,30 @@ test("load timeout is reported when the page never loads", { timeout: 120000 }, 
 			"--browser-wait-until-fallback", "false"
 		]);
 		assert.ok(stderr.includes("Load timeout"), "stderr: " + stderr);
+	} finally {
+		await rm(directory, { recursive: true });
+		server.closeAllConnections();
+		server.close();
+	}
+});
+
+test("capture timeout is reported when capturing an endless download", { timeout: 120000 }, async () => {
+	const chunk = Buffer.alloc(65536);
+	const server = createServer((_, response) => {
+		response.writeHead(200, { "content-type": "application/octet-stream", "content-disposition": "attachment; filename=big.bin" });
+		const intervalId = setInterval(() => response.write(chunk), 50);
+		response.on("close", () => clearInterval(intervalId));
+	});
+	await new Promise(resolve => server.listen(0, "localhost", resolve));
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const url = "http://localhost:" + server.address().port + "/";
+		const { stderr } = await runCli([
+			url, join(directory, "out.html"),
+			"--browser-load-max-time", "5000",
+			"--browser-capture-max-time", "10000"
+		]);
+		assert.ok(stderr.includes("Capture timeout") || stderr.includes("Load timeout"), "stderr: " + stderr);
 	} finally {
 		await rm(directory, { recursive: true });
 		server.closeAllConnections();
