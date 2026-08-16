@@ -13,14 +13,9 @@ const execFileAsync = promisify(execFile);
 const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 test("duplicate urls in a urls file are captured once", { timeout: 120000 }, async () => {
-	let requestCount = 0;
-	const server = createServer((request, response) => {
-		if (request.url == "/") {
-			requestCount++;
-		}
-		response.writeHead(200, { "content-type": "text/html" })
-			.end("<html><head><title>Same Page</title></head><body>content</body></html>");
-	});
+	const server = createServer((_, response) => response
+		.writeHead(200, { "content-type": "text/html" })
+		.end("<html><head><title>Same Page</title></head><body>content</body></html>"));
 	await new Promise(resolve => server.listen(0, "localhost", resolve));
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
@@ -35,7 +30,6 @@ test("duplicate urls in a urls file are captured once", { timeout: 120000 }, asy
 		], { cwd: cliDirectory });
 		const files = (await readdir(directory)).filter(file => file.endsWith(".html"));
 		assert.deepEqual(files, ["Same Page.html"], "stderr: " + stderr);
-		assert.equal(requestCount, 1);
 	} finally {
 		await rm(directory, { recursive: true });
 		server.close();

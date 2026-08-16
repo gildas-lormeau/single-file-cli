@@ -51,7 +51,8 @@ test("capture waits for the top frame, not a fast iframe", { timeout: 120000 }, 
 		await execFileAsync(process.execPath, [
 			"single-file-node.js", url, outputPath,
 			"--browser-wait-until", "networkIdle",
-			"--browser-wait-until-delay", "1000"
+			"--browser-wait-until-delay", "1000",
+			"--browser-wait-until-fallback", "false"
 		], { cwd: cliDirectory });
 		const content = await readFile(outputPath, "utf8");
 		assert.ok(content.includes(LOAD_MARKER), "page was captured before the top frame finished loading");
