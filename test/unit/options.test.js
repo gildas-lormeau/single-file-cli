@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseArgs, applySettings } from "../../options.js";
+import { parseArgs, applySettings, parseUrlsFile } from "../../options.js";
 
 const parse = args => parseArgs(args).options;
 
@@ -109,6 +109,23 @@ test("an unknown settings profile is reported", () => {
 	assert.throws(
 		() => applySettings(options, { profiles: { __Default_Settings__: {}, work: {} } }, {}),
 		/Unknown profile "missing", available profiles: work/);
+});
+
+test("blank lines in urls files are skipped", () => {
+	assert.deepEqual(parseUrlsFile("https://a.example\n\n \nhttps://b.example\r\n"), ["https://a.example", "https://b.example"]);
+});
+
+test("single character values in urls file options are kept", () => {
+	const [url, options] = parseUrlsFile("https://a.example --crawl-max-depth 2 --browser-width 100")[0];
+	assert.equal(url, "https://a.example");
+	assert.equal(options.crawlMaxDepth, 2);
+	assert.equal(options.browserWidth, 100);
+});
+
+test("quoted and equal form values in urls files are parsed", () => {
+	const [, options] = parseUrlsFile("https://a.example --filename-template \"My Page.html\" --browser-height=600")[0];
+	assert.equal(options.filenameTemplate, "My Page.html");
+	assert.equal(options.browserHeight, 600);
 });
 
 test("values are parsed from both spaced and equal forms", () => {

@@ -203,7 +203,61 @@ const OPTIONS_INFO = [{
 }];
 
 const { args, exit } = Deno;
-export { getOptions, parseArgs, applySettings };
+export { getOptions, parseArgs, applySettings, parseUrlsFile };
+
+function parseUrlsFile(content) {
+	return content.split("\n")
+		.map(line => line.trim())
+		.filter(line => line)
+		.map(line => {
+			let optionPosition = line.indexOf(" --");
+			if (optionPosition < 0) {
+				optionPosition = line.indexOf("\t--");
+			}
+			if (optionPosition > 0) {
+				const url = line.substring(0, optionPosition).trim();
+				const { options, positionals, invalidOptions } = parseArgs(tokenizeArgs(line.substring(optionPosition + 1).trim()), false);
+				positionals.filter(positional => positional.startsWith("--")).forEach(option =>
+					console.warn(`Warning: Unknown option ${option} (${url})`)); // eslint-disable-line no-console
+				invalidOptions.forEach(({ name, value }) => console.warn(value === undefined ? // eslint-disable-line no-console
+					`Warning: Missing value for --${name} (${url})` :
+					`Warning: Invalid value for --${name}: ${JSON.stringify(value)} (${url})`));
+				return [url, options];
+			} else {
+				return line;
+			}
+		});
+}
+
+function tokenizeArgs(argsString) {
+	const args = [];
+	let previousCharacter, previousPreviousCharacter, lastQuoteCharacter;
+	let lastCharIndex = 0;
+	for (let currentCharIndex = 0; currentCharIndex < argsString.length; currentCharIndex++) {
+		const character = argsString[currentCharIndex];
+		if (character == lastQuoteCharacter && (previousCharacter != "\\" || previousPreviousCharacter == "\\")) {
+			args.push(argsString.substring(lastCharIndex, currentCharIndex));
+			lastQuoteCharacter = null;
+			lastCharIndex = currentCharIndex + 1;
+		} else if (!lastQuoteCharacter) {
+			if (character == "'" || character == "\"") {
+				lastQuoteCharacter = character;
+				lastCharIndex = currentCharIndex + 1;
+			} else if (character == " " || character == "\t" || character == "=") {
+				if (lastCharIndex < currentCharIndex) {
+					args.push(argsString.substring(lastCharIndex, currentCharIndex));
+				}
+				lastCharIndex = currentCharIndex + 1;
+			}
+		}
+		previousPreviousCharacter = previousCharacter;
+		previousCharacter = character;
+	}
+	if (lastCharIndex < argsString.length) {
+		args.push(argsString.substring(lastCharIndex).trim());
+	}
+	return args;
+}
 
 function applySettings(options, settings, explicitOptions = parseArgs(Array.from(args), false).options) {
 	const profiles = settings.profiles || {};

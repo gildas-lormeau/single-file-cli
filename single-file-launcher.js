@@ -24,7 +24,7 @@
 import { initialize } from "./single-file-cli-api.js";
 import { closeBrowser } from "./lib/browser.js";
 import { Deno } from "./lib/deno-polyfill.js";
-import { getOptions, parseArgs, applySettings } from "./options.js";
+import { getOptions, applySettings, parseUrlsFile } from "./options.js";
 
 const { readTextFile, readFile, exit, addSignalListener } = Deno;
 
@@ -109,54 +109,5 @@ async function closeBrowserAndExit(code) {
 }
 
 async function getUrlsFile(urlsFile) {
-	let urls = (await readTextFile(urlsFile)).split("\n");
-	urls = urls.map(value => {
-		value = value.trim();
-		let optionPosition = value.indexOf(" --");
-		if (optionPosition < 0) {
-			optionPosition = value.indexOf("\t--");
-		}
-		if (optionPosition > 0) {
-			const url = value.substring(0, optionPosition).trim();
-			const argsString = value.substring(optionPosition + 1).trim();
-			const args = [];
-			let previousCharacter, previousPreviousCharacter, lastQuoteCharacter;
-			let lastCharIndex = 0;
-			for (let currentCharIndex = 0; currentCharIndex < argsString.length; currentCharIndex++) {
-				const character = argsString[currentCharIndex];
-				if (character == lastQuoteCharacter && (previousCharacter != "\\" || previousPreviousCharacter == "\\")) {
-					args.push(argsString.substring(lastCharIndex, currentCharIndex));
-					lastQuoteCharacter = null;
-					lastCharIndex = currentCharIndex + 1;
-				} else if (!lastQuoteCharacter) {
-					if (character == "'" || character == "\"") {
-						lastQuoteCharacter = argsString[currentCharIndex];
-						lastCharIndex = currentCharIndex + 1;
-					} else {
-						const isSpaceCharacter = character == " " || character == "\t";
-						if (isSpaceCharacter || character == "=") {
-							if (isSpaceCharacter && (currentCharIndex == lastCharIndex + 1)) {
-								lastCharIndex++;
-							} else if (lastCharIndex < currentCharIndex) {
-								args.push(argsString.substring(lastCharIndex, currentCharIndex));
-								lastCharIndex = currentCharIndex + 1;
-							} else {
-								lastCharIndex = currentCharIndex + 1;
-							}
-						}
-					}
-				}
-				previousPreviousCharacter = previousCharacter;
-				previousCharacter = character;
-			}
-			if (lastCharIndex < argsString.length) {
-				args.push(argsString.substring(lastCharIndex).trim());
-			}
-			const { options } = parseArgs(args, false);
-			return [url, options];
-		} else {
-			return value;
-		}
-	});
-	return urls;
+	return parseUrlsFile(await readTextFile(urlsFile));
 }
