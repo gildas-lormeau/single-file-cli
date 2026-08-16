@@ -23,12 +23,18 @@ test("output-json embeds compressed content as base64", { timeout: 60000 }, asyn
 	try {
 		const outputPath = join(directory, "page.json");
 		const url = "http://localhost:" + server.address().port + "/";
-		await execFileAsync(process.execPath, [
+		const { stderr } = await execFileAsync(process.execPath, [
 			"single-file-node.js", url, outputPath,
 			"--compress-content",
 			"--output-json"
 		], { cwd: cliDirectory });
-		const pageData = JSON.parse(await readFile(outputPath, "utf8"));
+		let rawPageData;
+		try {
+			rawPageData = await readFile(outputPath, "utf8");
+		} catch (error) {
+			throw new Error("missing output file, stderr: " + stderr, { cause: error });
+		}
+		const pageData = JSON.parse(rawPageData);
 		assert.ok(pageData.binaryContent);
 		const content = Buffer.from(pageData.binaryContent, "base64").toString("latin1");
 		assert.ok(content.includes(ZIP_SIGNATURE));

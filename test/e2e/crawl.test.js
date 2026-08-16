@@ -18,8 +18,8 @@ const TEST_TIMEOUT = 120000;
 let crawlPromise;
 
 test("a page linked with and without fragment is captured once", { timeout: TEST_TIMEOUT }, async () => {
-	const { filenames } = await getCrawlResult();
-	assert.ok(filenames.includes("Top Page.html"));
+	const { filenames, stderr } = await getCrawlResult();
+	assert.ok(filenames.includes("Top Page.html"), "missing top page, captured: " + filenames.join(", ") + ", stderr: " + stderr);
 	assert.equal(filenames.filter(filename => filename.startsWith("Linked Page")).length, 1);
 });
 
@@ -66,7 +66,9 @@ test("mail and script links are not crawled as external links", { timeout: TEST_
 			"--errors-file", join(directory, "errors.txt"),
 			"--max-parallel-workers", "1"
 		], { cwd: cliDirectory });
-		assert.deepEqual(await readdir(directory), ["Mail Top.html"]);
+		const filenames = await readdir(directory);
+		const errors = filenames.includes("errors.txt") ? await readFile(join(directory, "errors.txt"), "utf8") : "";
+		assert.deepEqual(filenames, ["Mail Top.html"], "errors: " + errors);
 	} finally {
 		await rm(directory, { recursive: true });
 		server.close();
@@ -115,7 +117,7 @@ async function runCrawl() {
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
 		const url = "http://localhost:" + server.address().port + "/";
-		await execFileAsync(process.execPath, [
+		const { stderr } = await execFileAsync(process.execPath, [
 			"single-file-node.js", url,
 			"--crawl-links",
 			"--crawl-replace-URLs",
@@ -128,7 +130,7 @@ async function runCrawl() {
 		for (const filename of filenames) {
 			pages[filename] = await readFile(join(directory, filename), "utf8");
 		}
-		return { filenames, pages, otherServerRequests };
+		return { filenames, pages, otherServerRequests, stderr };
 	} finally {
 		await rm(directory, { recursive: true });
 		server.close();
