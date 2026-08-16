@@ -31,6 +31,12 @@ test("links to pages with the same title are rewritten to distinct filenames", {
 	assert.ok(pages["Top Page.html"].includes("=Same%20Title%20(2).html>"));
 });
 
+test("links to another port are not crawled as inner links", { timeout: TEST_TIMEOUT }, async () => {
+	const { filenames, otherServerRequests } = await getCrawlResult();
+	assert.ok(!filenames.includes("Other Server.html"));
+	assert.equal(otherServerRequests.length, 0);
+});
+
 function getCrawlResult() {
 	if (!crawlPromise) {
 		crawlPromise = runCrawl();

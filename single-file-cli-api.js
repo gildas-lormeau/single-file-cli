@@ -256,7 +256,7 @@ function rewriteURL(url, crawlRemoveURLFragment, crawlRewriteRules = []) {
 
 function getHostURL(url) {
 	url = new URL(url);
-	return url.protocol + "//" + (url.username ? url.username + (url.password || "") + "@" : "") + url.hostname;
+	return url.protocol + "//" + (url.username ? url.username + (url.password ? ":" + url.password : "") + "@" : "") + url.host + "/";
 }
 
 async function capturePage(options) {
