@@ -199,7 +199,7 @@ function testMaxDepth(task) {
 }
 
 async function createTask(url, options, parentTask, rootTaskURL) {
-	options.originalUrl = url;
+	const originalUrl = url;
 	url = parentTask ? rewriteURL(url, options.crawlRemoveURLFragment, options.crawlRewriteRules) : url;
 	if (url) {
 		if (!VALID_URL_TEST.test(url)) {
@@ -219,7 +219,7 @@ async function createTask(url, options, parentTask, rootTaskURL) {
 			url,
 			isInnerLink,
 			isChild,
-			originalUrl: url,
+			originalUrl,
 			rootTaskURL,
 			depth: parentTask ? parentTask.depth + 1 : 0,
 			externalLinkDepth: isInnerLink ? -1 : parentTask ? parentTask.externalLinkDepth + 1 : -1,

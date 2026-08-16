@@ -37,6 +37,11 @@ test("links to another port are not crawled as inner links", { timeout: TEST_TIM
 	assert.equal(otherServerRequests.length, 0);
 });
 
+test("fragment links are rewritten to the captured filename", { timeout: TEST_TIMEOUT }, async () => {
+	const { pages } = await getCrawlResult();
+	assert.ok(pages["Top Page.html"].includes("=Fragment%20Page.html>"));
+});
+
 function getCrawlResult() {
 	if (!crawlPromise) {
 		crawlPromise = runCrawl();
