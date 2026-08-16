@@ -3,7 +3,7 @@
 mv package.json package.json.tmp
 mv deno.json deno.json.tmp
 mv deno.lock deno.lock.tmp
-deno install --vendor --quiet --minimum-dependency-age=0 "npm:single-file-core@1.5.85"
+deno install --vendor --quiet --minimum-dependency-age=0 "npm:single-file-core@1.5.86"
 mv package.json.tmp package.json
 mv deno.json.tmp deno.json
 mv deno.lock.tmp deno.lock
