@@ -203,6 +203,9 @@ async function createTask(url, options, parentTask, rootTaskURL) {
 	url = parentTask ? rewriteURL(url, options.crawlRemoveURLFragment, options.crawlRewriteRules) : url;
 	if (url) {
 		if (!VALID_URL_TEST.test(url)) {
+			if (parentTask) {
+				return;
+			}
 			try {
 				url = url.replace(/\\/g, "/");
 				url = url.replace(/#/g, "%23");

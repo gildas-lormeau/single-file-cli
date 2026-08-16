@@ -42,6 +42,31 @@ test("fragment links are rewritten to the captured filename", { timeout: TEST_TI
 	assert.ok(pages["Top Page.html"].includes("=Fragment%20Page.html>"));
 });
 
+test("mail and script links are not crawled as external links", { timeout: TEST_TIMEOUT }, async () => {
+	const server = createServer((_, response) => servePage(response, "Mail Top", `
+		<a href="mailto:contact@example.net">mail</a>
+		<a href="javascript:void(0)">script</a>
+		<a href="tel:+15550100">phone</a>`));
+	await new Promise(resolve => server.listen(0, "localhost", resolve));
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const url = "http://localhost:" + server.address().port + "/";
+		await execFileAsync(process.execPath, [
+			"single-file-node.js", url,
+			"--crawl-links",
+			"--crawl-inner-links-only=false",
+			"--output-directory", directory,
+			"--filename-template", "{page-title}.html",
+			"--errors-file", join(directory, "errors.txt"),
+			"--max-parallel-workers", "1"
+		], { cwd: cliDirectory });
+		assert.deepEqual(await readdir(directory), ["Mail Top.html"]);
+	} finally {
+		await rm(directory, { recursive: true });
+		server.close();
+	}
+});
+
 function getCrawlResult() {
 	if (!crawlPromise) {
 		crawlPromise = runCrawl();
