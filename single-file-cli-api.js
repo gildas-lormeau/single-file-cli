@@ -23,6 +23,7 @@
 
 /* global URL */
 
+import { Buffer } from "node:buffer";
 import * as backend from "./lib/cdp-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
 import { Deno, path } from "./lib/deno-polyfill.js";
@@ -292,7 +293,7 @@ async function capturePage(options) {
 		if (options.outputJson) {
 			if (content instanceof Uint8Array) {
 				pageData.content = undefined;
-				pageData.binaryContent = content.toBase64();
+				pageData.binaryContent = Buffer.from(content).toString("base64");
 			}
 			pageData.doctype = undefined;
 			pageData.viewport = undefined;

@@ -1,5 +1,3 @@
-/* global TextDecoder */
-
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
@@ -9,6 +7,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Buffer } from "node:buffer";
 import process from "node:process";
 
 const execFileAsync = promisify(execFile);
@@ -31,7 +30,7 @@ test("output-json embeds compressed content as base64", { timeout: 60000 }, asyn
 		], { cwd: cliDirectory });
 		const pageData = JSON.parse(await readFile(outputPath, "utf8"));
 		assert.ok(pageData.binaryContent);
-		const content = new TextDecoder("latin1").decode(Uint8Array.fromBase64(pageData.binaryContent));
+		const content = Buffer.from(pageData.binaryContent, "base64").toString("latin1");
 		assert.ok(content.includes(ZIP_SIGNATURE));
 	} finally {
 		await rm(directory, { recursive: true });

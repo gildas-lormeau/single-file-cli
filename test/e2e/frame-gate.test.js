@@ -9,13 +9,14 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Buffer } from "node:buffer";
 import process from "node:process";
 
 const execFileAsync = promisify(execFile);
 const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const LOAD_MARKER = "MARKER_ADDED_AFTER_LOAD_EVENT";
 const SLOW_RESOURCE_DELAY = 3500;
-const PIXEL_PNG = Uint8Array.fromBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==");
+const PIXEL_PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 
 const TOP_PAGE = `<html><head><title>top</title></head><body>
 <img src="/slow.png">
