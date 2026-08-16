@@ -330,7 +330,7 @@ async function capturePage(options) {
 		return pageData;
 	} catch (error) {
 		const date = new Date();
-		let message = `[${date.toISOString()}] URL: ${options.url}`;
+		let message = `[${date.toISOString()}] URL: ${options.url} Error: ${error.message || error}`;
 		if (!options.errorsTracesDisabled) {
 			message += "\nStack: " + error.stack;
 		}
