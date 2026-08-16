@@ -1,0 +1,61 @@
+/* global setTimeout, URL */
+
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { createServer } from "node:http";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
+
+const execFileAsync = promisify(execFile);
+const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const LOAD_MARKER = "MARKER_ADDED_AFTER_LOAD_EVENT";
+const SLOW_RESOURCE_DELAY = 3500;
+const PIXEL_PNG = Uint8Array.fromBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==");
+
+const TOP_PAGE = `<html><head><title>top</title></head><body>
+<img src="/slow.png">
+<iframe src="/frame.html"></iframe>
+<script>
+addEventListener("load", () => {
+	const marker = document.createElement("div");
+	marker.textContent = "${LOAD_MARKER}";
+	document.body.appendChild(marker);
+});
+</script>
+</body></html>`;
+
+test("capture waits for the top frame, not a fast iframe", { timeout: 60000 }, async () => {
+	const server = createServer((request, response) => {
+		const { pathname } = new URL(request.url, "http://localhost");
+		if (pathname === "/top.html") {
+			response.writeHead(200, { "content-type": "text/html" }).end(TOP_PAGE);
+		} else if (pathname === "/frame.html") {
+			response.writeHead(200, { "content-type": "text/html" }).end("<html><body>frame</body></html>");
+		} else if (pathname === "/slow.png") {
+			setTimeout(() => response.writeHead(200, { "content-type": "image/png" }).end(PIXEL_PNG), SLOW_RESOURCE_DELAY);
+		} else {
+			response.writeHead(404).end();
+		}
+	});
+	await new Promise(resolve => server.listen(0, "localhost", resolve));
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const outputPath = join(directory, "out.html");
+		const url = "http://localhost:" + server.address().port + "/top.html";
+		await execFileAsync(process.execPath, [
+			"single-file-node.js", url, outputPath,
+			"--browser-wait-until", "networkIdle",
+			"--browser-wait-until-delay", "1000"
+		], { cwd: cliDirectory });
+		const content = await readFile(outputPath, "utf8");
+		assert.ok(content.includes(LOAD_MARKER), "page was captured before the top frame finished loading");
+	} finally {
+		await rm(directory, { recursive: true });
+		server.close();
+	}
+});
