@@ -221,7 +221,7 @@ function getOptions() {
 			const categoryName = CATEGORIES[OPTIONS_INFO.indexOf(category)];
 			console.log(`  * ${categoryName}:`); // eslint-disable-line no-console
 			Object.keys(category).forEach(optionName => {
-				const optionInfo = getOptionInfo(optionName);
+				const optionInfo = category[optionName];
 				let optionType = optionInfo.type;
 				if (isArray(optionType)) {
 					optionType = optionType.replace("[]", "*");
@@ -252,24 +252,23 @@ function parseArgs(args, setDefaultValues = true) {
 	let argIndex = 0;
 	while (argIndex < args.length) {
 		const arg = args[argIndex];
-		const { argName, argValue, optionInfo } = parseArg(arg);
-		if (optionInfo) {
-			if (options[argName] === undefined) {
-				options[argName] = [];
+		const { argValue, option } = parseArg(arg);
+		if (option) {
+			const optionName = option.name;
+			if (options[optionName] === undefined) {
+				options[optionName] = [];
 			}
-			let nextArgName;
 			if (argValue === undefined) {
 				if (
 					argIndex + 1 < args.length &&
-					({ argName: nextArgName } = parseArg(args[argIndex + 1])) &&
-					(nextArgName === undefined || !getOptionInfo(nextArgName)) &&
-					isValid(optionInfo.type, args[argIndex + 1]) &&
-					(isArray(optionInfo.type) || !options[argName].length)) {
-					options[argName].push(args[argIndex + 1]);
+					!parseArg(args[argIndex + 1]).option &&
+					isValid(option.info.type, args[argIndex + 1]) &&
+					(isArray(option.info.type) || !options[optionName].length)) {
+					options[optionName].push(args[argIndex + 1]);
 					argIndex++;
 				}
-			} else if (isValid(optionInfo.type, argValue) && (isArray(optionInfo.type) || !options[argName].length)) {
-				options[argName].push(argValue);
+			} else if (isValid(option.info.type, argValue) && (isArray(option.info.type) || !options[optionName].length)) {
+				options[optionName].push(argValue);
 			} else {
 				positionals.push(arg);
 			}
@@ -279,7 +278,7 @@ function parseArgs(args, setDefaultValues = true) {
 		argIndex++;
 	}
 	Object.keys(options).forEach(optionName => {
-		const optionInfo = getOptionInfo(optionName);
+		const optionInfo = getOptionInfo(optionName).info;
 		const optionKey = getOptionKey(optionName, optionInfo);
 		let optionValue = options[optionName];
 		const isArrayType = isArray(optionInfo.type);
@@ -303,10 +302,10 @@ function parseArgs(args, setDefaultValues = true) {
 	if (setDefaultValues) {
 		OPTIONS_INFO.forEach(categoryOptions => {
 			Object.keys(categoryOptions).forEach(optionName => {
-				const optionInfo = getOptionInfo(optionName);
+				const optionInfo = categoryOptions[optionName];
 				const optionKey = getOptionKey(optionName, optionInfo);
 				if (result.options[optionKey] === undefined && optionInfo.defaultValue !== undefined) {
-					result.options[optionKey] = categoryOptions[optionName].defaultValue;
+					result.options[optionKey] = optionInfo.defaultValue;
 				}
 			});
 		});
@@ -339,45 +338,13 @@ function parseArgs(args, setDefaultValues = true) {
 		result.options.browserArgs = result.options.browserArguments;
 		delete result.options.browserArguments;
 	}
-	if (result.options.errorFile) {
+	if (result.options.errorFile !== undefined) {
 		result.options.errorsFile = result.options.errorFile;
 		delete result.options.errorFile;
 	}
-	if (result.options.errorTracesDisabled) {
+	if (result.options.errorTracesDisabled !== undefined) {
 		result.options.errorsTracesDisabled = result.options.errorTracesDisabled;
 		delete result.options.errorTracesDisabled;
-	}
-	if (result.options.crawlReplaceUrls) {
-		result.options.crawlReplaceURLs = result.options.crawlReplaceUrls;
-		delete result.options.crawlReplaceUrls;
-	}
-	if (result.options.saveOriginalUrls) {
-		result.options.saveOriginalURLs = result.options.saveOriginalUrls;
-		delete result.options.saveOriginalUrls;
-	}
-	if (result.options.browserRemoteDebuggingUrl) {
-		result.options.browserRemoteDebuggingURL = result.options.browserRemoteDebuggingUrl;
-		delete result.options.browserRemoteDebuggingUrl;
-	}
-	if (result.options.crawlRemoveUrlFragment) {
-		result.options.crawlRemoveURLFragment = result.options.crawlRemoveUrlFragment;
-		delete result.options.crawlRemoveUrlFragment;
-	}
-	if (result.options.compressCss) {
-		result.options.compressCSS = result.options.compressCss;
-		delete result.options.compressCss;
-	}
-	if (result.options.compressHtml) {
-		result.options.compressHTML = result.options.compressHtml;
-		delete result.options.compressHtml;
-	}
-	if (result.options.insertMetaCsp) {
-		result.options.insertMetaCSP = result.options.insertMetaCsp;
-		delete result.options.insertMetaCsp;
-	}
-	if (result.options.blockedUrlPatterns) {
-		result.options.blockedURLPatterns = result.options.blockedUrlPatterns;
-		delete result.options.blockedUrlPatterns;
 	}
 	if (result.options.filenameReplacedCharacters) {
 		const filenameReplacedCharacters = result.options.filenameReplacedCharacters;
@@ -422,13 +389,13 @@ function parseArg(arg) {
 	const parsedArg = arg.match(ARGS_REGEX);
 	if (parsedArg && parsedArg.length) {
 		let [_, argName, argValue] = parsedArg; // eslint-disable-line no-unused-vars
-		const optionInfo = getOptionInfo(argName);
+		const option = getOptionInfo(argName);
 		if (argValue !== undefined &&
 			((argValue.startsWith("\"") && argValue.endsWith("\"")) ||
 				(argValue.startsWith("'") && argValue.endsWith("'")))) {
 			argValue = argValue.substring(1, argValue.length - 1);
 		}
-		return { argName, argValue, optionInfo };
+		return { argName, argValue, option };
 	} else {
 		return {};
 	}
@@ -439,7 +406,7 @@ function getOptionInfo(optionName) {
 	OPTIONS_INFO.forEach(categoryOptions => {
 		Object.keys(categoryOptions).forEach(keyName => {
 			if (keyName.toLowerCase() == optionName.toLowerCase() || categoryOptions[keyName].alias == optionName.toLowerCase()) {
-				result = categoryOptions[keyName];
+				result = { name: keyName, info: categoryOptions[keyName] };
 			}
 		});
 	});
