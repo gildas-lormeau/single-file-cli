@@ -10,7 +10,8 @@
 	},
 	"type": "module",
 	"scripts": {
-		"test": "node --test \"test/**/*.test.js\""
+		"test": "node --test \"test/**/*.test.js\"",
+		"lint": "eslint ."
 	},
 	"bin": {
 		"single-file": "single-file-node.js"
@@ -20,6 +21,7 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
-		"esbuild": "^0.27.4"
+		"esbuild": "^0.27.4",
+		"eslint": "^10.8.1"
 	}
 }
