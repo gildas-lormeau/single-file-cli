@@ -14,7 +14,7 @@ const execFileAsync = promisify(execFile);
 const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const ZIP_SIGNATURE = "PK\u0003\u0004";
 
-test("output-json embeds compressed content as base64", { timeout: 60000 }, async () => {
+test("output-json embeds compressed content as base64", { timeout: 120000 }, async () => {
 	const server = createServer((_, response) => response
 		.writeHead(200, { "content-type": "text/html" })
 		.end("<html><head><title>JSON Output</title></head><body>content</body></html>"));

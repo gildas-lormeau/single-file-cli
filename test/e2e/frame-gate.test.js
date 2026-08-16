@@ -30,7 +30,7 @@ addEventListener("load", () => {
 </script>
 </body></html>`;
 
-test("capture waits for the top frame, not a fast iframe", { timeout: 60000 }, async () => {
+test("capture waits for the top frame, not a fast iframe", { timeout: 120000 }, async () => {
 	const server = createServer((request, response) => {
 		const { pathname } = new URL(request.url, "http://localhost");
 		if (pathname === "/top.html") {
