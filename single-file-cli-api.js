@@ -127,7 +127,8 @@ async function finish(options) {
 	if (options.crawlReplaceURLs && !options.compressContent) {
 		for (const task of tasks) {
 			try {
-				let pageContent = await readTextFile(task.filename);
+				const outputFilename = getOutputDirectory(options) + task.filename;
+				let pageContent = await readTextFile(outputFilename);
 				tasks.forEach(otherTask => {
 					if (otherTask.filename) {
 						pageContent = pageContent.replace(new RegExp(escapeRegExp("\"" + otherTask.originalUrl + "\""), "gi"), "\"" + otherTask.filename + "\"");
@@ -137,7 +138,7 @@ async function finish(options) {
 						pageContent = pageContent.replace(new RegExp(escapeRegExp("=" + otherTask.originalUrl + ">"), "gi"), "=" + filename + ">");
 					}
 				});
-				await writeTextFile(task.filename, pageContent);
+				await writeTextFile(outputFilename, pageContent);
 			} catch {
 				// ignored
 			}
@@ -332,7 +333,7 @@ async function capturePage(options) {
 	}
 }
 
-async function getFilename(filename, options, index = 1) {
+function getOutputDirectory(options) {
 	if (Array.isArray(options.outputDirectory)) {
 		const outputDirectory = options.outputDirectory.pop();
 		if (outputDirectory.startsWith("/")) {
@@ -345,7 +346,11 @@ async function getFilename(filename, options, index = 1) {
 	if (outputDirectory && !outputDirectory.endsWith("/")) {
 		outputDirectory += "/";
 	}
-	let newFilename = outputDirectory + filename;
+	return outputDirectory;
+}
+
+async function getFilename(filename, options, index = 1) {
+	let newFilename = getOutputDirectory(options) + filename;
 	if (options.filenameConflictAction == "overwrite") {
 		return filename;
 	} else if (options.filenameConflictAction == "uniquify" && index > 1) {
