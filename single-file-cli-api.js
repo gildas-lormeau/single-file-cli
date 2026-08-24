@@ -76,6 +76,9 @@ async function initialize(options) {
 	if (options.crawlSaveArchiveMarkUnarchivedLinks && !options.crawlSaveArchive) {
 		throw new Error("--crawl-save-archive-mark-unarchived-links requires --crawl-save-archive");
 	}
+	if (options.crawlSaveArchiveToc && !options.crawlSaveArchive) {
+		throw new Error("--crawl-save-archive-toc requires --crawl-save-archive");
+	}
 	if (options.crawlSaveArchive) {
 		if (!options.compressContent) {
 			throw new Error("--crawl-save-archive requires --compress-content");
@@ -188,6 +191,7 @@ async function savePagesArchive(options) {
 			zipScript: getZipScriptSource(),
 			dedupPages: options.crawlSaveArchiveDedup,
 			markUnarchivedLinks: options.crawlSaveArchiveMarkUnarchivedLinks,
+			tocPage: options.crawlSaveArchiveToc,
 			selfExtractingArchive: options.selfExtractingArchive,
 			extractDataFromPage: options.extractDataFromPage,
 			preventAppendedData: options.preventAppendedData,

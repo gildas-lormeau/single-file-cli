@@ -162,6 +162,7 @@ const OPTIONS_INFO = [{
 	"crawl-save-archive": { description: "Save all the crawled pages into a single (self-extracting) ZIP file, requires --compress-content", type: "boolean" },
 	"crawl-save-archive-dedup": { description: "Deduplicate identical resources shared between pages when using --crawl-save-archive", type: "boolean" },
 	"crawl-save-archive-mark-unarchived-links": { description: "Mark links to pages not saved in the archive when using --crawl-save-archive", type: "boolean" },
+	"crawl-save-archive-toc": { description: "Save a table of contents page into the archive when using --crawl-save-archive", type: "boolean" },
 }, {
 	"browser-script": { description: "Path of a script executed in the page (and all the frames) before it is loaded", type: "string[]" },
 	"browser-stylesheet": { description: "Path of a stylesheet file inserted into the page (and all the frames) after it is loaded", type: "string[]" },

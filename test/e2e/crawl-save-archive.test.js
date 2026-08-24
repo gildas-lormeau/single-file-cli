@@ -38,7 +38,7 @@ test("the pages manifest maps paths to the crawled URLs", { timeout: TEST_TIMEOU
 	assert.equal(manifest.pages[1].path, "pages/2/");
 	assert.equal(manifest.pages[1].title, "Linked Page");
 	assert.equal(manifest.pages[2].path, "pages/3/");
-	assert.equal(manifest.pages[2].title, "Other Page");
+	assert.equal(manifest.pages[2].title, "Other & \"Page\"");
 	assert.ok(manifest.pages[1].originalUrls.includes(origin + "/page.html"));
 });
 
@@ -78,6 +78,24 @@ test("--crawl-save-archive-mark-unarchived-links sets the manifest flag", { time
 	assert.equal(defaultManifest.markUnarchivedLinks, undefined);
 });
 
+test("--crawl-save-archive-toc stores a table of contents page", { timeout: TEST_TIMEOUT }, async () => {
+	const { entries, entryNames } = await getCrawlResult(true);
+	assert.equal(entryNames.indexOf("sfz-toc.html"), entryNames.length - 2);
+	const tocEntry = entries.find(entry => entry.filename == "sfz-toc.html");
+	const content = await tocEntry.getData(new TextWriter());
+	assert.ok(content.includes("<a href=\"index.html\">Top Page</a>"));
+	assert.ok(content.includes("<a href=\"pages/2/index.html\">Linked Page</a>"));
+	assert.ok(content.includes("<a href=\"pages/3/index.html\">Other &amp; &quot;Page&quot;</a>"));
+	const { entryNames: defaultEntryNames } = await getCrawlResult();
+	assert.ok(!defaultEntryNames.includes("sfz-toc.html"));
+});
+
+test("--crawl-save-archive-toc requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
+	await assert.rejects(
+		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-toc"], { cwd: cliDirectory }),
+		error => error.stderr.includes("--crawl-save-archive-toc requires --crawl-save-archive"));
+});
+
 test("--crawl-save-archive-mark-unarchived-links requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
 		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-mark-unarchived-links"], { cwd: cliDirectory }),
@@ -107,7 +125,7 @@ async function runCrawl(dedup) {
 		} else if (pathname === "/page.html") {
 			servePage(response, "Linked Page");
 		} else if (pathname === "/other.html") {
-			servePage(response, "Other Page");
+			servePage(response, "Other & \"Page\"");
 		} else if (pathname === "/shared.css") {
 			response.writeHead(200, { "content-type": "text/css" }).end("body { background-color: aliceblue; }");
 		} else {
@@ -124,7 +142,7 @@ async function runCrawl(dedup) {
 			"--crawl-save-archive",
 			"--compress-content",
 			"--max-parallel-workers", "1",
-			...(dedup ? ["--crawl-save-archive-dedup", "--crawl-save-archive-mark-unarchived-links"] : [])
+			...(dedup ? ["--crawl-save-archive-dedup", "--crawl-save-archive-mark-unarchived-links", "--crawl-save-archive-toc"] : [])
 		], { cwd: cliDirectory });
 		const filenames = await readdir(directory);
 		const data = new Uint8Array(await readFile(join(directory, "archive.html")));
