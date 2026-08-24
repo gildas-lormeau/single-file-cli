@@ -1,8 +1,12 @@
-FROM zenika/alpine-chrome:with-node
+FROM node:24-alpine
 
-RUN npm install --omit=dev single-file-cli
+RUN apk add --no-cache chromium ttf-freefont font-noto-emoji
+
+USER node
 
 WORKDIR /usr/src/app
+
+RUN npm install --omit=dev single-file-cli
 
 ENTRYPOINT [ \
     "npx", \
