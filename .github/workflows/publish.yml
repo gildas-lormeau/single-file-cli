@@ -108,12 +108,13 @@ jobs:
           TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
           version="${TAG_NAME#v}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           for attempt in $(seq 1 40); do
-            available=$(npm view single-file-cli version 2>/dev/null || true)
+            available=$(npm view "single-file-cli@$version" version 2>/dev/null || true)
             if [ "$available" = "$version" ]; then
               exit 0
             fi
-            echo "npm serves ${available:-nothing}, waiting for $version"
+            echo "npm does not serve $version yet"
             sleep 30
           done
           echo "::error::timed out waiting for npm to serve $version"
@@ -135,6 +136,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
+          build-args: |
+            VERSION=${{ env.RELEASE_VERSION }}
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/singlefile:latest
             ${{ secrets.DOCKER_USERNAME }}/singlefile:${{ github.event.release.tag_name }}
