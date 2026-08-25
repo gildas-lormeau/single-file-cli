@@ -207,6 +207,15 @@ const OPTIONS_INFO = [{
 }];
 
 const { args, exit } = Deno;
+
+const CRAWL_LINKS_DEPENDENT_OPTIONS = {
+	crawlInnerLinksOnly: "--crawl-inner-links-only",
+	crawlNoParent: "--crawl-no-parent",
+	crawlRemoveURLFragment: "--crawl-remove-URL-fragment",
+	crawlMaxDepth: "--crawl-max-depth",
+	crawlExternalLinksMaxDepth: "--crawl-external-links-max-depth",
+	crawlRewriteRules: "--crawl-rewrite-rule"
+};
 export { getOptions, parseArgs, applySettings, parseUrlsFile };
 
 function parseUrlsFile(content) {
@@ -298,6 +307,12 @@ function getOptions() {
 	}
 	if (urls.length > 2) {
 		errorMessages.push(`Unexpected arguments: ${urls.slice(2).join(", ")}`);
+	}
+	if (!options.crawlLinks) {
+		const explicitOptions = parseArgs(Array.from(args), false).options;
+		Object.keys(CRAWL_LINKS_DEPENDENT_OPTIONS)
+			.filter(optionKey => explicitOptions[optionKey] !== undefined)
+			.forEach(optionKey => errorMessages.push(`${CRAWL_LINKS_DEPENDENT_OPTIONS[optionKey]} requires --crawl-links`));
 	}
 	if (errorMessages.length) {
 		printUsage();

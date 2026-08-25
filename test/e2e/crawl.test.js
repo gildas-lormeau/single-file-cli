@@ -75,6 +75,19 @@ test("mail and script links are not crawled as external links", { timeout: TEST_
 	}
 });
 
+test("crawl options require --crawl-links", { timeout: TEST_TIMEOUT }, async () => {
+	await assert.rejects(
+		execFileAsync(process.execPath, [
+			"single-file-node.js", "http://localhost/",
+			"--crawl-no-parent",
+			"--crawl-max-depth", "2",
+			"--crawl-rewrite-rule", "a b"
+		], { cwd: cliDirectory }),
+		error => error.stderr.includes("--crawl-no-parent requires --crawl-links") &&
+			error.stderr.includes("--crawl-max-depth requires --crawl-links") &&
+			error.stderr.includes("--crawl-rewrite-rule requires --crawl-links"));
+});
+
 function getCrawlResult() {
 	if (!crawlPromise) {
 		crawlPromise = runCrawl();
