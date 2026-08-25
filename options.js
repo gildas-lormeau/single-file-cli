@@ -24,6 +24,8 @@
 import { version } from "./lib/version.js";
 import { Deno } from "./lib/deno-polyfill.js";
 
+const { args, build, exit } = Deno;
+
 const USAGE_TEXT = `single-file [url] [output]
 
 Positionals:
@@ -59,7 +61,7 @@ const OPTIONS_INFO = [{
 	"browser-debug": { description: "Enable debug mode", type: "boolean" },
 	"browser-arg": { description: "Argument passed to the browser", type: "string[]", alias: "browser-argument" },
 	"browser-args": { description: "Arguments provided as a JSON array and passed to the browser", type: "string" },
-	"browser-single-process": { description: "Run the browser as a single process", type: "boolean", defaultValue: true },
+	"browser-single-process": { description: "Run the browser as a single process (enabled by default on Windows only, current browsers on other platforms do not support this mode)", type: "boolean", defaultValue: build.os == "windows" },
 	"browser-start-minimized": { description: "Minimize the browser", type: "boolean" },
 	"browser-ignore-insecure-certs": { description: "Ignore HTTPs errors", type: "boolean" },
 	"browser-remote-debugging-URL": { description: "Remote debugging URL", type: "string" }
@@ -205,8 +207,6 @@ const OPTIONS_INFO = [{
 	"help": { description: "Show help", type: "boolean" },
 	"version": { description: "Print the version number and exit.", type: "boolean" },
 }];
-
-const { args, exit } = Deno;
 
 const CRAWL_LINKS_DEPENDENT_OPTIONS = {
 	crawlInnerLinksOnly: "--crawl-inner-links-only",
