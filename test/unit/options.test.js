@@ -27,6 +27,9 @@ test("aliases map to the canonical option", () => {
 	assert.equal(parse(["--error-traces-disabled", "false"]).errorsTracesDisabled, false);
 	assert.equal(parse(["--errors-traces-disabled", "false"]).errorsTracesDisabled, false);
 	assert.equal(parse([]).errorsTracesDisabled, true);
+	assert.equal(parse(["--browser-remote-debugging-URL", "http://localhost:9222"]).browserServer, "http://localhost:9222");
+	assert.equal(parse(["--browser-server", "http://localhost:9222"]).browserServer, "http://localhost:9222");
+	assert.equal("browserRemoteDebuggingUrl" in parse(["--browser-remote-debugging-url", "http://localhost:9222"]), false);
 });
 
 test("browser arguments are merged", () => {

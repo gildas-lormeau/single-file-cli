@@ -53,7 +53,7 @@ const CATEGORIES = [
 ];
 
 const OPTIONS_INFO = [{
-	"browser-server": { description: "Server to connect to", type: "string" },
+	"browser-server": { description: "Server to connect to", type: "string", alias: "browser-remote-debugging-url" },
 	"browser-headless": { description: "Run the browser in headless mode", type: "boolean", defaultValue: true },
 	"browser-executable-path": { description: "Path to chrome/chromium executable", type: "string" },
 	"browser-width": { description: "Width of the browser viewport in pixels", type: "number", defaultValue: 1280 },
@@ -64,8 +64,7 @@ const OPTIONS_INFO = [{
 	"browser-single-process": { description: "Run the browser as a single process (enabled by default on Windows only, current browsers on other platforms do not support this mode)", type: "boolean", defaultValue: build.os == "windows" },
 	"browser-start-minimized": { description: "Minimize the browser", type: "boolean" },
 	"browser-ignore-insecure-certs": { description: "Ignore HTTPs errors", type: "boolean" },
-	"browser-bypass-CSP": { description: "Bypass the Content Security Policy of the page, needed to save pages enforcing Trusted Types with browsers based on Chromium 150 or older", type: "boolean", defaultValue: false },
-	"browser-remote-debugging-URL": { description: "Remote debugging URL", type: "string" }
+	"browser-bypass-CSP": { description: "Bypass the Content Security Policy of the page, needed to save pages enforcing Trusted Types with browsers based on Chromium 150 or older", type: "boolean", defaultValue: false }
 }, {
 	"browser-load-max-time": { description: "Maximum delay of time to wait for loading the page in ms", type: "number", defaultValue: 60000 },
 	"browser-capture-max-time": { description: "Maximum delay of time to wait for capturing the page in ms", type: "number", defaultValue: 60000 },
@@ -454,6 +453,10 @@ function parseArgs(args, setDefaultValues = true) {
 	if (result.options.errorTracesDisabled !== undefined) {
 		result.options.errorsTracesDisabled = result.options.errorTracesDisabled;
 		delete result.options.errorTracesDisabled;
+	}
+	if (result.options.browserRemoteDebuggingUrl !== undefined) {
+		result.options.browserServer = result.options.browserRemoteDebuggingUrl;
+		delete result.options.browserRemoteDebuggingUrl;
 	}
 	if (result.options.filenameReplacedCharacters) {
 		const filenameReplacedCharacters = result.options.filenameReplacedCharacters;
