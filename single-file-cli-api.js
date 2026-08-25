@@ -61,7 +61,7 @@ const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
 const { readTextFile, writeTextFile, readFile, writeFile, stdout, mkdir, makeTempDir, remove, stat, errors } = Deno;
-let tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory;
+let tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, errorCount = 0;
 
 export { initialize };
 
@@ -174,8 +174,9 @@ async function finish(options) {
 		}
 	}
 	if (!options.browserDebug && !options.browserServer) {
-		return backend.closeBrowser();
+		await backend.closeBrowser();
 	}
+	return errorCount;
 }
 
 async function savePagesArchive(options) {
@@ -391,6 +392,7 @@ async function capturePage(options) {
 		}
 		return pageData;
 	} catch (error) {
+		errorCount++;
 		const date = new Date();
 		let message = `[${date.toISOString()}] URL: ${options.url} Error: ${error.message || error}`;
 		if (!options.errorsTracesDisabled) {

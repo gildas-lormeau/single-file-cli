@@ -11,15 +11,21 @@ import process from "node:process";
 const execFileAsync = promisify(execFile);
 const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-test("errors file lines include the error message", { timeout: 120000 }, async () => {
+test("errors file lines include the error message and the exit code is nonzero", { timeout: 120000 }, async () => {
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
 		const errorsPath = join(directory, "errors.txt");
 		const url = "http://localhost:1/";
-		await execFileAsync(process.execPath, [
-			"single-file-node.js", url, join(directory, "out.html"),
-			"--errors-file", errorsPath
-		], { cwd: cliDirectory });
+		let exitCode = 0;
+		try {
+			await execFileAsync(process.execPath, [
+				"single-file-node.js", url, join(directory, "out.html"),
+				"--errors-file", errorsPath
+			], { cwd: cliDirectory });
+		} catch (error) {
+			exitCode = error.code;
+		}
+		assert.equal(exitCode, 1);
 		const content = await readFile(errorsPath, "utf8");
 		assert.ok(content.includes("URL: " + url));
 		const errorMessage = content.match(/Error: (.*)/);

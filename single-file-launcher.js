@@ -71,7 +71,10 @@ async function run() {
 		options.retrieveLinks = true;
 		const singlefile = await initialize(options);
 		await singlefile.capture(urls);
-		await singlefile.finish();
+		const errorCount = await singlefile.finish();
+		if (errorCount) {
+			exit(1);
+		}
 	} catch (error) {
 		console.error(error.message || error); // eslint-disable-line no-console
 		await closeBrowserAndExit(-1);

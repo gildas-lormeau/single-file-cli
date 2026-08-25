@@ -149,6 +149,10 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file https://www.wikipedia.org wikipedia.html --crawl-links=true --crawl-save-archive=true --compress-content=true
   ```
 
+- Exit code
+
+  The exit code is 0 when all the pages have been saved, 1 when at least one capture failed (the other pages of the batch or the crawl are still saved), and 255 when an error prevented the process from running.
+
 ## Compile executables
 
  - Compile executables into `/dist`
