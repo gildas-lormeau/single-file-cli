@@ -3,6 +3,11 @@
 	"version": "2.2.0",
 	"description": "SingleFile CLI",
 	"author": "Gildas Lormeau",
+	"license": "AGPL-3.0-or-later",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gildas-lormeau/single-file-cli.git"
+	},
 	"engines": {
 		"deno": ">=2.2",
 		"bun": ">=1.2",
