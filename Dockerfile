@@ -14,5 +14,6 @@ ENTRYPOINT [ \
     "npx", \
     "single-file", \
     "--browser-executable-path", "/usr/bin/chromium-browser", \
+    "--browser-single-process=false", \
     "--output-directory", "./out/", \
     "--dump-content" ]
