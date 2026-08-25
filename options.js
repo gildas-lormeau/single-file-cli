@@ -560,7 +560,7 @@ function getOptionInfo(optionName) {
 	let result;
 	OPTIONS_INFO.forEach(categoryOptions => {
 		Object.keys(categoryOptions).forEach(keyName => {
-			if (keyName.toLowerCase() == optionName.toLowerCase() || categoryOptions[keyName].alias == optionName.toLowerCase()) {
+			if (keyName.toLowerCase() == optionName.toLowerCase() || (categoryOptions[keyName].alias && categoryOptions[keyName].alias.toLowerCase() == optionName.toLowerCase())) {
 				result = { name: keyName, info: categoryOptions[keyName] };
 			}
 		});
