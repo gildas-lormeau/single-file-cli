@@ -64,6 +64,7 @@ const OPTIONS_INFO = [{
 	"browser-single-process": { description: "Run the browser as a single process (enabled by default on Windows only, current browsers on other platforms do not support this mode)", type: "boolean", defaultValue: build.os == "windows" },
 	"browser-start-minimized": { description: "Minimize the browser", type: "boolean" },
 	"browser-ignore-insecure-certs": { description: "Ignore HTTPs errors", type: "boolean" },
+	"browser-bypass-CSP": { description: "Bypass the Content Security Policy of the page, needed to save pages enforcing Trusted Types", type: "boolean", defaultValue: true },
 	"browser-remote-debugging-URL": { description: "Remote debugging URL", type: "string" }
 }, {
 	"browser-load-max-time": { description: "Maximum delay of time to wait for loading the page in ms", type: "number", defaultValue: 60000 },
