@@ -252,7 +252,7 @@ async function runNextTask() {
 		task.status = STATE_PROCESSED;
 		if (options.crawlLinks || tasks.length > 1) {
 			const processedCount = tasks.filter(task => task.status == STATE_PROCESSED).length;
-			const filenameInfo = pageData && pageData.filename && !options.crawlSaveArchive ? " (" + pageData.filename + ")" : "";
+			const filenameInfo = pageData && pageData.filename && !options.crawlSaveArchive && !options.dumpContent ? " (" + pageData.filename + ")" : "";
 			// written to stderr so that stdout stays parseable when using --dump-content
 			console.error(`[${processedCount}/${tasks.length}] ${pageData ? "saved" : "failed"} ${task.url}${filenameInfo}`); // eslint-disable-line no-console
 		}
