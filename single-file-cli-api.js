@@ -250,6 +250,12 @@ async function runNextTask() {
 		task.promise = capturePage(taskOptions);
 		const pageData = await task.promise;
 		task.status = STATE_PROCESSED;
+		if (options.crawlLinks || tasks.length > 1) {
+			const processedCount = tasks.filter(task => task.status == STATE_PROCESSED).length;
+			const filenameInfo = pageData && pageData.filename && !options.crawlSaveArchive ? " (" + pageData.filename + ")" : "";
+			// written to stderr so that stdout stays parseable when using --dump-content
+			console.error(`[${processedCount}/${tasks.length}] ${pageData ? "saved" : "failed"} ${task.url}${filenameInfo}`); // eslint-disable-line no-console
+		}
 		if (pageData) {
 			task.filename = pageData.filename;
 			task.title = pageData.title;
