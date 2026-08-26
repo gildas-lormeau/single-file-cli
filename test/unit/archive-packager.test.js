@@ -31,13 +31,26 @@ test("the table of contents groups by origin when the crawl crossed hosts", asyn
 	assert.ok(toc.includes("<summary>https://other.example</summary>"));
 });
 
-async function createArchive(pages) {
+test("the page transitions setting is stored in the manifest except the default", async () => {
+	for (const pageTransitions of [undefined, "auto"]) {
+		const archive = await createArchive([{ url: "https://example.com/", title: "Home" }], { pageTransitions });
+		const manifest = JSON.parse(await readEntry(archive, "sfz-pages.json"));
+		assert.equal(manifest.pageTransitions, undefined, "the default is not stored");
+	}
+	for (const pageTransitions of ["fade", "none"]) {
+		const archive = await createArchive([{ url: "https://example.com/", title: "Home" }], { pageTransitions });
+		const manifest = JSON.parse(await readEntry(archive, "sfz-pages.json"));
+		assert.equal(manifest.pageTransitions, pageTransitions);
+	}
+});
+
+async function createArchive(pages, options = {}) {
 	return createPagesArchive(pages.map(page => ({
 		url: page.url,
 		originalUrls: [page.url],
 		title: page.title,
 		getData: () => createPageData(page)
-	})), { tocPage: true, selfExtractingArchive: false });
+	})), Object.assign({ tocPage: true, selfExtractingArchive: false }, options));
 }
 
 async function createPageData(page) {

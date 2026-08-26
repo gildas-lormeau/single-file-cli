@@ -143,10 +143,10 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file https://www.wikipedia.org --crawl-links=true --crawl-inner-links-only=false --crawl-external-links-max-depth=1 --crawl-rewrite-rule="^.*wikipedia.*$"
   ```
 
-  - Save http://info.cern.ch (i.e. the first website) and its internal links into a single self-extracting ZIP file
+  - Save http://info.cern.ch (i.e. the first website) and its internal links into a single self-extracting ZIP file, and mark the links to pages missing from the archive
 
   ```sh
-  single-file http://info.cern.ch first-website.html --crawl-links=true --crawl-max-depth=2 --crawl-save-archive=true --compress-content=true
+  single-file http://info.cern.ch first-website.html --crawl-links=true --crawl-max-depth=2 --crawl-save-archive=true --crawl-save-archive-mark-unarchived-links=true --compress-content=true
   ```
 
 - Exit code

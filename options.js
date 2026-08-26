@@ -164,6 +164,7 @@ const OPTIONS_INFO = [{
 	"crawl-save-archive": { description: "Save all the crawled pages into a single (self-extracting) ZIP file, requires --compress-content", type: "boolean" },
 	"crawl-save-archive-dedup": { description: "Deduplicate identical resources shared between pages when using --crawl-save-archive", type: "boolean" },
 	"crawl-save-archive-mark-unarchived-links": { description: "Mark links to pages not saved in the archive when using --crawl-save-archive", type: "boolean" },
+	"crawl-save-archive-page-transitions": { description: "Page transitions when navigating in the archive saved with --crawl-save-archive. The possible values are \"auto\" (default, i.e. transitions run when pages opt in via CSS), \"fade\" and \"none\"", type: "string", defaultValue: "auto" },
 	"crawl-save-archive-toc": { description: "Save a table of contents page into the archive when using --crawl-save-archive", type: "boolean" },
 }, {
 	"browser-script": { description: "Path of a script executed in the page (and all the frames) before it is loaded", type: "string[]" },

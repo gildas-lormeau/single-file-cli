@@ -79,6 +79,12 @@ async function initialize(options) {
 	if (options.crawlSaveArchiveToc && !options.crawlSaveArchive) {
 		throw new Error("--crawl-save-archive-toc requires --crawl-save-archive");
 	}
+	if (options.crawlSaveArchivePageTransitions !== undefined && !["auto", "fade", "none"].includes(options.crawlSaveArchivePageTransitions)) {
+		throw new Error("--crawl-save-archive-page-transitions must be \"auto\", \"fade\" or \"none\"");
+	}
+	if (options.crawlSaveArchivePageTransitions !== undefined && options.crawlSaveArchivePageTransitions != "auto" && !options.crawlSaveArchive) {
+		throw new Error("--crawl-save-archive-page-transitions requires --crawl-save-archive");
+	}
 	if (options.crawlSaveArchive) {
 		if (!options.compressContent) {
 			throw new Error("--crawl-save-archive requires --compress-content");
@@ -193,6 +199,7 @@ async function savePagesArchive(options) {
 			dedupPages: options.crawlSaveArchiveDedup,
 			markUnarchivedLinks: options.crawlSaveArchiveMarkUnarchivedLinks,
 			tocPage: options.crawlSaveArchiveToc,
+			pageTransitions: options.crawlSaveArchivePageTransitions,
 			selfExtractingArchive: options.selfExtractingArchive,
 			extractDataFromPage: options.extractDataFromPage,
 			preventAppendedData: options.preventAppendedData,
