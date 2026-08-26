@@ -146,7 +146,7 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   - Save https://www.wikipedia.org and its internal links into a single self-extracting ZIP file
 
   ```sh
-  single-file https://www.wikipedia.org wikipedia.html --crawl-links=true --crawl-save-archive=true --compress-content=true
+  single-file https://www.wikipedia.org wikipedia.html --crawl-links=true --crawl-max-depth=1 --crawl-save-archive=true --compress-content=true
   ```
 
 - Exit code
