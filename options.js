@@ -336,7 +336,7 @@ function printUsage() {
 				optionType = optionType.replace("[]", "*");
 			}
 			const optionDescription = optionInfo.description;
-			const optionDefaultValue = optionInfo.defaultValue === undefined ? "" : `(default: ${JSON.stringify(optionInfo.defaultValue)})`;
+			const optionDefaultValue = optionInfo.defaultValue === undefined ? "" : `(default: ${JSON.stringify(optionInfo.defaultValue).replace(/[\u007f-\u009f]/g, character => "\\u" + character.charCodeAt(0).toString(16).padStart(4, "0"))})`;
 			console.log(`    --${optionName}: ${optionDescription} <${optionType}> ${optionDefaultValue}`); // eslint-disable-line no-console
 		});
 		console.log(""); // eslint-disable-line no-console
