@@ -124,6 +124,15 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file https://www.wikipedia.org wikipedia.html
   ```
 
+  - Save a page needing a logged-in session. Create the profile first, log in
+    to the website in the browser window, and quit the browser to save it. Then
+    reuse the profile as many times as needed, it is copied and left unmodified.
+
+  ```sh
+  single-file --create-browser-profile ./profiles/example https://www.example.com/login
+  single-file https://www.example.com/account account.html --browser-profile=./profiles/example
+  ```
+
   - Save a list of URLs stored into `list-urls.txt` in the current folder
 
   ```sh

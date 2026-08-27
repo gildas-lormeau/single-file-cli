@@ -56,6 +56,7 @@ const OPTIONS_INFO = [{
 	"browser-server": { description: "Server to connect to", type: "string", alias: "browser-remote-debugging-url" },
 	"browser-headless": { description: "Run the browser in headless mode", type: "boolean", defaultValue: true },
 	"browser-executable-path": { description: "Path to chrome/chromium executable", type: "string" },
+	"browser-profile": { description: "Path of the browser profile directory to use, e.g. to save pages requiring a logged-in session (see --create-browser-profile). The directory is copied before starting the browser and is left unmodified.", type: "string" },
 	"browser-width": { description: "Width of the browser viewport in pixels", type: "number", defaultValue: 1280 },
 	"browser-height": { description: "Height of the browser viewport in pixels", type: "number", defaultValue: 720 },
 	"browser-debug": { description: "Enable debug mode", type: "boolean" },
@@ -203,6 +204,7 @@ const OPTIONS_INFO = [{
 
 	"save-raw-page": { description: "Save the original page without interpreting it into the browser", type: "boolean" },
 	"output-json": { description: "Output the result as a JSON string containing the page and network info", type: "boolean" },
+	"create-browser-profile": { description: "Path of the browser profile directory to create or update instead of saving a page. The browser is started with a visible window on the URL passed as argument, log in to the website and quit the browser to save the profile, then pass it to --browser-profile when saving pages", type: "string" },
 
 }, {
 	"help": { description: "Show help", type: "boolean" },
@@ -303,11 +305,21 @@ function getOptions() {
 	invalidOptions.forEach(({ name, value }) => errorMessages.push(value === undefined ?
 		`Missing value for --${name}` :
 		`Invalid value for --${name}: ${JSON.stringify(value)}`));
-	if (!urls.length && !options.urlsFile) {
+	if (!urls.length && !options.urlsFile && !options.createBrowserProfile) {
 		errorMessages.push("The URL or path of the page to save is required");
 	}
 	if (urls.length > 2) {
 		errorMessages.push(`Unexpected arguments: ${urls.slice(2).join(", ")}`);
+	}
+	if (options.createBrowserProfile) {
+		if (options.browserProfile) {
+			errorMessages.push("--create-browser-profile cannot be used with --browser-profile, it already takes the path of the profile directory");
+		}
+		if (options.browserServer) {
+			errorMessages.push("--create-browser-profile cannot be used with --browser-server");
+		}
+	} else if (options.browserProfile && options.browserServer) {
+		errorMessages.push("--browser-profile cannot be used with --browser-server");
 	}
 	if (!options.crawlLinks) {
 		const explicitOptions = parseArgs(Array.from(args), false).options;

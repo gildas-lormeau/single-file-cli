@@ -22,11 +22,12 @@
  */
 
 import { initialize } from "./single-file-cli-api.js";
-import { closeBrowser } from "./lib/browser.js";
+import { closeBrowser, createBrowserProfile, getBrowserOptions } from "./lib/browser.js";
 import { Deno } from "./lib/deno-polyfill.js";
 import { getOptions, applySettings, parseUrlsFile } from "./options.js";
 
-const { readTextFile, readFile, exit, addSignalListener } = Deno;
+const { readTextFile, readFile, exit, addSignalListener, build } = Deno;
+const QUIT_BROWSER_HINT = build.os == "darwin" ? " (Cmd+Q)" : "";
 
 try {
 	addSignalListener("SIGTERM", closeBrowserAndExit);
@@ -48,6 +49,10 @@ async function run() {
 		if (options.settingsFile) {
 			const settings = JSON.parse(await readTextFile(options.settingsFile));
 			applySettings(options, settings);
+		}
+		if (options.createBrowserProfile) {
+			await saveBrowserProfile(options);
+			exit(0);
 		}
 		if (options.urlsFile) {
 			urls = await getUrlsFile(options.urlsFile);
@@ -79,6 +84,13 @@ async function run() {
 		console.error(error.message || error); // eslint-disable-line no-console
 		await closeBrowserAndExit(-1);
 	}
+}
+
+async function saveBrowserProfile(options) {
+	const profileDirectory = options.createBrowserProfile;
+	console.error(`Log in to the website in the browser window, then quit the browser${QUIT_BROWSER_HINT} to save the profile.`); // eslint-disable-line no-console
+	await createBrowserProfile(Object.assign(getBrowserOptions(options), { profile: profileDirectory, startUrl: options.url }));
+	console.error(`Profile saved, use it with --browser-profile ${JSON.stringify(profileDirectory)}.`); // eslint-disable-line no-console
 }
 
 function parseCookies(textValue) {

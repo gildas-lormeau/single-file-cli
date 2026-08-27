@@ -49,6 +49,21 @@ test("a wrong browser executable path is reported with the path", async () => {
 	assert.ok(stderr.includes("The browser executable was not found at \"/nonexistent/chrome\""));
 });
 
+test("creating a browser profile does not require a url", async () => {
+	const { code, stderr } = await runCli(["--create-browser-profile", "/path/to/profile", "--browser-executable-path", "/nonexistent/chrome"]);
+	assert.notEqual(code, 0);
+	assert.equal(stderr.includes("The URL or path of the page to save is required"), false);
+});
+
+test("conflicting browser profile options are reported as errors", async () => {
+	const { code, stderr } = await runCli(["--create-browser-profile", "/path/to/profile", "--browser-profile", "/path/to/other"]);
+	assert.equal(code, 1);
+	assert.ok(stderr.includes("--create-browser-profile cannot be used with --browser-profile"));
+	const remoteResult = await runCli(["https://example.com", "--browser-profile", "/path/to/profile", "--browser-server", "http://localhost:9222"]);
+	assert.equal(remoteResult.code, 1);
+	assert.ok(remoteResult.stderr.includes("--browser-profile cannot be used with --browser-server"));
+});
+
 test("unexpected extra arguments are reported as errors", async () => {
 	const { code, stderr } = await runCli(["https://example.com", "out.html", "extra.html"]);
 	assert.equal(code, 1);
