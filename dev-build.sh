@@ -2,8 +2,13 @@
 
 set -e
 
+ESBUILD_PACKAGE="npm:esbuild@0.27.7"
+
+build_dir=$(mktemp -d)
+trap 'rm -rf "$build_dir"' EXIT
+
 echo "
-import { build } from 'npm:esbuild';
+import { build } from '$ESBUILD_PACKAGE';
 
 await build({
   entryPoints: [
@@ -93,4 +98,4 @@ await Promise.all(SCRIPTS.map(script => Deno.remove(script)));
 await Deno.remove('lib/single-file-hooks-frames.js');
 const version = JSON.parse(await Deno.readTextFile('./deno.json')).version;
 await Deno.writeTextFile('lib/version.js', 'export const version = ' + JSON.stringify(version) + ';');
-" |  deno run --allow-read --allow-write --allow-net --allow-run --allow-env --lock=node_modules/deno.lock.tmp -
+" |  deno run --allow-read --allow-write --allow-net --allow-run --allow-env --lock="$build_dir/build.lock" -
