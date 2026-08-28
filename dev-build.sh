@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-mkdir -p node_modules/single-file-core
-cp -R ../single-file-core/* node_modules/single-file-core
+set -e
 
 echo "
 import { build } from 'npm:esbuild';
 
 await build({
   entryPoints: [
-    'node_modules/single-file-core/single-file.js'
+    '../single-file-core/single-file.js'
   ],
   bundle: true,
   globalName: 'singlefile',
@@ -22,7 +21,7 @@ await build({
 
 await build({
   entryPoints: [
-    'node_modules/single-file-core/single-file-bootstrap.js'
+    '../single-file-core/single-file-bootstrap.js'
   ],
   bundle: true,
   globalName: 'singlefileBootstrap',
@@ -36,7 +35,7 @@ await build({
 
 await build({
   entryPoints: [
-    'node_modules/single-file-core/single-file-hooks-frames.js'
+    '../single-file-core/single-file-hooks-frames.js'
   ],
   bundle: true,
   outdir: 'lib/',
@@ -49,7 +48,7 @@ await build({
 
 await build({
   entryPoints: [
-    'node_modules/single-file-core/vendor/zip/zip.min.js'
+    '../single-file-core/vendor/zip/zip.min.js'
   ],
   bundle: true,
   globalName: 'zip',
@@ -64,7 +63,7 @@ await build({
 await build({
   stdin: {
     contents: \"export * from './processors/compression/compression.js'; export * from './vendor/zip/zip.js';\",
-    resolveDir: 'node_modules/single-file-core',
+    resolveDir: '../single-file-core',
   },
   bundle: true,
   outfile: 'lib/single-file-archive.js',
@@ -96,5 +95,3 @@ await Deno.remove('lib/single-file-hooks-frames.js');
 const version = JSON.parse(await Deno.readTextFile('./deno.json')).version;
 await Deno.writeTextFile('lib/version.js', 'export const version = ' + JSON.stringify(version) + ';');
 " |  deno run --allow-read --allow-write --allow-net --allow-run --allow-env --lock=node_modules/deno.lock.tmp -
-
-rm -rf node_modules
