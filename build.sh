@@ -67,10 +67,9 @@ await build({
 });
 
 await build({
-  stdin: {
-    contents: \"export * from './processors/compression/compression.js'; export * from './vendor/zip/zip.js';\",
-    resolveDir: 'node_modules/single-file-core',
-  },
+  entryPoints: [
+    'node_modules/single-file-core/single-file-archive.js'
+  ],
   bundle: true,
   outfile: 'lib/single-file-archive.js',
   platform: 'neutral',

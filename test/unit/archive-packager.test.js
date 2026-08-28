@@ -1,7 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createPagesArchive } from "../../lib/archive-packager.js";
-import { configure, ZipWriter, ZipReader, Uint8ArrayReader, Uint8ArrayWriter, TextReader, TextWriter } from "../../lib/single-file-archive.js";
+import { createPagesArchive, configure, ZipWriter, ZipReader, Uint8ArrayReader, Uint8ArrayWriter, TextReader, TextWriter } from "../../lib/single-file-archive.js";
 
 configure({ useWebWorkers: false });
 

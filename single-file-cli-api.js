@@ -26,7 +26,7 @@
 import { Buffer } from "node:buffer";
 import * as backend from "./lib/cdp-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
-import { createPagesArchive } from "./lib/archive-packager.js";
+import { createPagesArchive } from "./lib/single-file-archive.js";
 import { Deno, path } from "./lib/deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
