@@ -21,6 +21,11 @@ test("option names are canonicalized regardless of case", () => {
 	assert.equal("compressHtml" in options, false);
 });
 
+test("the compression of the entries can be disabled", () => {
+	assert.equal(parse(["--disable-compression"]).disableCompression, true);
+	assert.equal(parse([]).disableCompression, undefined);
+});
+
 test("aliases map to the canonical option", () => {
 	assert.equal(parse(["--error-file", "errors.txt"]).errorsFile, "errors.txt");
 	assert.equal(parse(["--errors-file", "errors.txt"]).errorsFile, "errors.txt");

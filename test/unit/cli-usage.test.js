@@ -31,6 +31,18 @@ test("every option of the help is named in lowercase", async () => {
 	assert.deepEqual(optionNames.filter(name => name != name.toLowerCase()), []);
 });
 
+test("a byte order mark that cannot be written is reported as a warning", async () => {
+	const { stderr } = await runCli(["--include-bom", "--compress-content"]);
+	assert.ok(stderr.includes("Warning: --include-bom is ignored"));
+});
+
+test("a byte order mark that can be written is not reported", async () => {
+	const { stderr } = await runCli(["--include-bom", "--compress-content", "--extract-data-from-page=false"]);
+	assert.equal(stderr.includes("--include-bom is ignored"), false);
+	const plain = await runCli(["--include-bom"]);
+	assert.equal(plain.stderr.includes("--include-bom is ignored"), false);
+});
+
 test("a missing url is reported as an error", async () => {
 	const { code, stderr } = await runCli(["--browser-executable-path", "/path/to/chrome"]);
 	assert.equal(code, 1);

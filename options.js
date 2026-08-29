@@ -129,6 +129,7 @@ const OPTIONS_INFO = [{
 	"group-duplicate-stylesheets": { description: "Group duplicate inline stylesheets into a single stylesheet in order to reduce the size of the page", type: "boolean", defaultValue: false }
 }, {
 	"compress-content": { description: "Create a ZIP file instead of an HTML file", type: "boolean" },
+	"disable-compression": { description: "Store the files of the ZIP file without compressing them", type: "boolean" },
 	"self-extracting-archive": { description: "Create a self-extracting (ZIP) HTML file", type: "boolean", defaultValue: true },
 	"password": { description: "Password of the zip file when using --compress-content or --self-extracting-archive", type: "string" },
 	"insert-text-body": { description: "Insert the text of the page into the self-extracting HTML file", type: "boolean" },
@@ -185,7 +186,7 @@ const OPTIONS_INFO = [{
 	"infobar-position-right": { description: "Position the infobar at the right of the page", type: "string", defaultValue: "16px" },
 	"infobar-position-left": { description: "Position the infobar at the left of the page", type: "string", defaultValue: "" },
 }, {
-	"include-bom": { key: "includeBOM", description: "Include the UTF-8 BOM into the HTML page", type: "boolean" },
+	"include-bom": { key: "includeBOM", description: "Include the UTF-8 BOM into the HTML page, ignored when the page is compressed unless --extract-data-from-page is disabled and no image is embedded", type: "boolean" },
 	"insert-meta-csp": { key: "insertMetaCSP", description: "Include a <meta> tag with a CSP to avoid potential requests to internet when viewing a page", type: "boolean", defaultValue: true },
 	"remove-saved-date": { description: "Remove saved date metadata in HTML header", type: "boolean" },
 	"save-original-urls": { key: "saveOriginalURLs", description: "Save the original URLS in the embedded contents", type: "boolean" },
@@ -328,6 +329,14 @@ function getOptions() {
 		Object.keys(CRAWL_LINKS_DEPENDENT_OPTIONS)
 			.filter(optionKey => explicitOptions[optionKey] !== undefined)
 			.forEach(optionKey => errorMessages.push(`${CRAWL_LINKS_DEPENDENT_OPTIONS[optionKey]} requires --crawl-links`));
+	}
+	// the byte order mark is written by the CLI when the page is saved as HTML, and by the
+	// compression processor in the prelude of a self-extracting file — but a universal file
+	// declares a single-byte charset the mark would break, and an embedded image must start
+	// with the PNG signature, so there is nowhere left to write it
+	if (options.includeBOM && options.compressContent &&
+		(!options.selfExtractingArchive || options.extractDataFromPage || options.embeddedImage || options.embedScreenshot)) {
+		console.error("Warning: --include-bom is ignored, the file cannot start with a byte order mark. It requires --self-extracting-archive, --extract-data-from-page=false and no embedded image"); // eslint-disable-line no-console
 	}
 	if (errorMessages.length) {
 		printUsage();
