@@ -65,7 +65,7 @@ const OPTIONS_INFO = [{
 	"browser-single-process": { description: "Run the browser as a single process (enabled by default on Windows only, current browsers on other platforms do not support this mode)", type: "boolean", defaultValue: build.os == "windows" },
 	"browser-start-minimized": { description: "Minimize the browser", type: "boolean" },
 	"browser-ignore-insecure-certs": { description: "Ignore HTTPs errors", type: "boolean" },
-	"browser-bypass-CSP": { description: "Bypass the Content Security Policy of the page, needed to save pages enforcing Trusted Types with browsers based on Chromium 150 or older", type: "boolean", defaultValue: false }
+	"browser-bypass-csp": { key: "browserBypassCSP", description: "Bypass the Content Security Policy of the page, needed to save pages enforcing Trusted Types with browsers based on Chromium 150 or older", type: "boolean", defaultValue: false }
 }, {
 	"browser-load-max-time": { description: "Maximum delay of time to wait for loading the page in ms", type: "number", defaultValue: 60000 },
 	"browser-capture-max-time": { description: "Maximum delay of time to wait for capturing the page in ms", type: "number", defaultValue: 60000 },
@@ -102,7 +102,7 @@ const OPTIONS_INFO = [{
 	"block-stylesheets": { description: "Block stylesheets", type: "boolean", defaultValue: false },
 	"block-videos": { description: "Block videos", type: "boolean", defaultValue: true },
 	"block-mixed-content": { description: "Block mixed contents", type: "boolean" },
-	"blocked-URL-pattern": { description: "Regular expression matching URLs to block (e.g. 'annoying-banners\\.com')", type: "string[]" }
+	"blocked-url-pattern": { key: "blockedURLPatterns", description: "Regular expression matching URLs to block (e.g. 'annoying-banners\\.com')", type: "string[]" }
 }, {
 	"load-deferred-images": { description: "Load deferred (a.k.a. lazy-loaded) images", type: "boolean", defaultValue: true },
 	"load-deferred-images-dispatch-scroll-event": { description: "Dispatch 'scroll' event when loading deferred images", type: "boolean" },
@@ -112,8 +112,8 @@ const OPTIONS_INFO = [{
 	"max-resource-size-enabled": { description: "Enable removal of embedded resources exceeding a given size", type: "boolean" },
 	"max-resource-size": { description: "Maximum size of embedded resources in MB (i.e. images, stylesheets, scripts and iframes)", type: "number", defaultValue: 10 }
 }, {
-	"compress-CSS": { description: "Compress CSS stylesheets", type: "boolean" },
-	"compress-HTML": { description: "Compress HTML content", type: "boolean", defaultValue: true },
+	"compress-css": { key: "compressCSS", description: "Compress CSS stylesheets", type: "boolean" },
+	"compress-html": { key: "compressHTML", description: "Compress HTML content", type: "boolean", defaultValue: true },
 	"remove-frames": { description: "Remove frames", type: "boolean" },
 	"remove-hidden-elements": { description: "Remove HTML elements which are not displayed", type: "boolean", defaultValue: true },
 	"removed-elements-selector": { description: "Remove specific HTML elements matching the given CSS selectors (comma separated)", type: "string" },
@@ -156,12 +156,12 @@ const OPTIONS_INFO = [{
 	"crawl-inner-links-only": { description: "Crawl pages found via inner links only if they are hosted on the same domain", type: "boolean", defaultValue: true },
 	"crawl-no-parent": { description: "Crawl pages found via inner links only if their URLs are not parent of the URL to crawl", type: "boolean" },
 	"crawl-load-session": { description: "Name of the file of the session to load (previously saved with --crawl-save-session or --crawl-sync-session)", type: "string" },
-	"crawl-remove-URL-fragment": { description: "Remove URL fragments found in links", type: "boolean", defaultValue: true },
+	"crawl-remove-url-fragment": { key: "crawlRemoveURLFragment", description: "Remove URL fragments found in links", type: "boolean", defaultValue: true },
 	"crawl-save-session": { description: "Name of the file where to save the state of the session", type: "string" },
 	"crawl-sync-session": { description: "Name of the file where to load and save the state of the session", type: "string" },
 	"crawl-max-depth": { description: "Max depth when crawling pages found in internal and external links (0: infinite)", type: "number", defaultValue: 1 },
 	"crawl-external-links-max-depth": { description: "Max depth when crawling pages found in external links (0: infinite)", type: "number", defaultValue: 1 },
-	"crawl-replace-URLs": { description: "Replace URLs of saved pages with relative paths of saved pages on the filesystem", type: "boolean" },
+	"crawl-replace-urls": { key: "crawlReplaceURLs", description: "Replace URLs of saved pages with relative paths of saved pages on the filesystem", type: "boolean" },
 	"crawl-rewrite-rule": { description: "Rewrite rule used to rewrite URLs of crawled pages", type: "string[]" },
 	"crawl-save-archive": { description: "Save all the crawled pages into a single (self-extracting) ZIP file, requires --compress-content", type: "boolean" },
 	"crawl-save-archive-dedup": { description: "Deduplicate identical resources shared between pages when using --crawl-save-archive", type: "boolean" },
@@ -185,10 +185,10 @@ const OPTIONS_INFO = [{
 	"infobar-position-right": { description: "Position the infobar at the right of the page", type: "string", defaultValue: "16px" },
 	"infobar-position-left": { description: "Position the infobar at the left of the page", type: "string", defaultValue: "" },
 }, {
-	"include-BOM": { description: "Include the UTF-8 BOM into the HTML page", type: "boolean" },
-	"insert-meta-CSP": { description: "Include a <meta> tag with a CSP to avoid potential requests to internet when viewing a page", type: "boolean", defaultValue: true },
+	"include-bom": { key: "includeBOM", description: "Include the UTF-8 BOM into the HTML page", type: "boolean" },
+	"insert-meta-csp": { key: "insertMetaCSP", description: "Include a <meta> tag with a CSP to avoid potential requests to internet when viewing a page", type: "boolean", defaultValue: true },
 	"remove-saved-date": { description: "Remove saved date metadata in HTML header", type: "boolean" },
-	"save-original-URLs": { description: "Save the original URLS in the embedded contents", type: "boolean" },
+	"save-original-urls": { key: "saveOriginalURLs", description: "Save the original URLS in the embedded contents", type: "boolean" },
 	"insert-single-file-comment": { description: "Insert a comment in the HTML header with the URL of the page", type: "boolean", defaultValue: true },
 	"resolve-links": { description: "Resolve link URLs to absolute URLs", type: "boolean", defaultValue: true }
 }, {
@@ -216,7 +216,7 @@ const OPTIONS_INFO = [{
 const CRAWL_LINKS_DEPENDENT_OPTIONS = {
 	crawlInnerLinksOnly: "--crawl-inner-links-only",
 	crawlNoParent: "--crawl-no-parent",
-	crawlRemoveURLFragment: "--crawl-remove-URL-fragment",
+	crawlRemoveURLFragment: "--crawl-remove-url-fragment",
 	crawlMaxDepth: "--crawl-max-depth",
 	crawlExternalLinksMaxDepth: "--crawl-external-links-max-depth",
 	crawlRewriteRules: "--crawl-rewrite-rule"
@@ -545,6 +545,11 @@ function parseArgs(args, setDefaultValues = true) {
 
 function getOptionKey(optionKeyName, optionInfo) {
 	if (optionInfo) {
+		// option names are lowercase, the keys they fill are not always: the acronyms of
+		// "insertMetaCSP" and its kind cannot be derived from "insert-meta-csp", so they are declared
+		if (optionInfo.key) {
+			return optionInfo.key;
+		}
 		const optionName = optionInfo.alias || optionKeyName;
 		if (isArray(optionInfo.type)) {
 			return kebabToCamelCase(optionName + "s");

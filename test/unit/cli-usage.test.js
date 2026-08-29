@@ -24,6 +24,13 @@ test("help is displayed with an exit code of 0", async () => {
 	assert.ok(stdout.includes("--browser-executable-path"));
 });
 
+test("every option of the help is named in lowercase", async () => {
+	const { stdout } = await runCli(["--help"]);
+	const optionNames = Array.from(stdout.matchAll(/^\s+--(\S+):/gm)).map(([, name]) => name);
+	assert.ok(optionNames.length > 100);
+	assert.deepEqual(optionNames.filter(name => name != name.toLowerCase()), []);
+});
+
 test("a missing url is reported as an error", async () => {
 	const { code, stderr } = await runCli(["--browser-executable-path", "/path/to/chrome"]);
 	assert.equal(code, 1);
