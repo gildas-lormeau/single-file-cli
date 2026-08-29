@@ -2,7 +2,7 @@
 
 set -e
 
-CORE_PACKAGE="npm:single-file-core@1.5.107"
+CORE_PACKAGE="npm:single-file-core@1.5.109"
 ESBUILD_PACKAGE="npm:esbuild@0.27.7"
 
 project_dir=$(pwd)
