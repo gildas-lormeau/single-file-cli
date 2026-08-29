@@ -369,6 +369,13 @@ async function capturePage(options) {
 		options.zipScript = getZipScriptSource();
 		const pageData = await backend.getPageData(options);
 		content = pageData.content;
+		// the compressed path emits the BOM inside the archive prologue, where only the writer
+		// can place it; for plain HTML it belongs to whoever saves the file, which is the
+		// extension's download layer there and this function here. The string test keeps the
+		// two apart: compressed content arrives as bytes
+		if (options.includeBOM && typeof content == "string") {
+			content = "\ufeff" + content;
+		}
 		if (options.consoleMessagesFile && pageData.consoleMessages) {
 			await writeTextFile(options.consoleMessagesFile, JSON.stringify(pageData.consoleMessages, null, 2));
 		}
