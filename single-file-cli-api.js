@@ -207,6 +207,7 @@ async function savePagesArchive(options) {
 			selfExtractingArchive: options.selfExtractingArchive,
 			extractDataFromPage: options.extractDataFromPage,
 			preventAppendedData: options.preventAppendedData,
+			declareAppendedData: options.declareAppendedData,
 			includeBOM: options.includeBOM,
 			insertMetaCSP: options.insertMetaCSP,
 			insertCanonicalLink: options.insertCanonicalLink,
