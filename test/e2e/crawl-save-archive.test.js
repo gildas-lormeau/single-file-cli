@@ -96,6 +96,12 @@ test("--crawl-save-archive-toc requires --crawl-save-archive", { timeout: TEST_T
 		error => error.stderr.includes("--crawl-save-archive-toc requires --crawl-save-archive"));
 });
 
+test("--crawl-save-archive-page-list requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
+	await assert.rejects(
+		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-page-list"], { cwd: cliDirectory }),
+		error => error.stderr.includes("--crawl-save-archive-page-list requires --crawl-save-archive"));
+});
+
 test("--crawl-save-archive-mark-unarchived-links requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
 		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-mark-unarchived-links"], { cwd: cliDirectory }),
