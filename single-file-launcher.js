@@ -28,6 +28,8 @@ import { getOptions, applySettings, parseUrlsFile } from "./options.js";
 
 const { readTextFile, readFile, exit, addSignalListener, build } = Deno;
 const QUIT_BROWSER_HINT = build.os == "darwin" ? " (Cmd+Q)" : "";
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+const PDF_SIGNATURE = [0x25, 0x50, 0x44, 0x46, 0x2d];
 
 try {
 	addSignalListener("SIGTERM", closeBrowserAndExit);
@@ -69,9 +71,11 @@ async function run() {
 		}
 		if (options.embeddedImage) {
 			options.embeddedImage = Array.from(await readFile(options.embeddedImage));
+			checkSignature(options.embeddedImage, PNG_SIGNATURE, "--embedded-image", "PNG");
 		}
 		if (options.embeddedPdf) {
 			options.embeddedPdf = Array.from(await readFile(options.embeddedPdf));
+			checkSignature(options.embeddedPdf, PDF_SIGNATURE, "--embedded-pdf", "PDF");
 		}
 		options.retrieveLinks = true;
 		const singlefile = await initialize(options);
@@ -125,4 +129,12 @@ async function closeBrowserAndExit(code) {
 
 async function getUrlsFile(urlsFile) {
 	return parseUrlsFile(await readTextFile(urlsFile));
+}
+
+// the faces are read from the bytes the file starts with: a PDF whose header sits further in
+// is dropped by PDF readers, and a file that is not a PNG produces an image nothing can open
+function checkSignature(data, signature, optionName, formatName) {
+	if (signature.some((byte, index) => data[index] != byte)) {
+		throw new Error(optionName + " must be given a " + formatName + " file, and it must start with the " + formatName + " signature");
+	}
 }

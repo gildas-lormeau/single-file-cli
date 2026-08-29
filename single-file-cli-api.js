@@ -92,9 +92,11 @@ async function initialize(options) {
 		if (!options.compressContent) {
 			throw new Error("--crawl-save-archive requires --compress-content");
 		}
-		if (options.embedPdf || options.embeddedPdf || options.embedScreenshot || options.embeddedImage ||
-			options.outputJson || options.insertTextBody || options.password) {
-			throw new Error("--crawl-save-archive is not compatible with --embed-pdf, --embedded-pdf, --embed-screenshot, --embedded-image, --output-json, --insert-text-body and --password");
+		if (options.embedPdf || options.embedScreenshot) {
+			throw new Error("--crawl-save-archive is not compatible with --embed-pdf and --embed-screenshot: an archive has a single PDF and a single image, and they cannot be rendered from one page among many. Use --embedded-pdf and --embedded-image to provide them");
+		}
+		if (options.outputJson || options.insertTextBody || options.password) {
+			throw new Error("--crawl-save-archive is not compatible with --output-json, --insert-text-body and --password");
 		}
 		archiveTempDirectory = await makeTempDir();
 	}
@@ -208,6 +210,8 @@ async function savePagesArchive(options) {
 			extractDataFromPage: options.extractDataFromPage,
 			preventAppendedData: options.preventAppendedData,
 			declareAppendedData: options.declareAppendedData,
+			embeddedPdf: options.embeddedPdf,
+			embeddedImage: options.embeddedImage,
 			includeBOM: options.includeBOM,
 			insertMetaCSP: options.insertMetaCSP,
 			insertCanonicalLink: options.insertCanonicalLink,
@@ -248,6 +252,10 @@ async function runNextTask() {
 			taskOptions.selfExtractingArchive = false;
 			taskOptions.extractDataFromPage = false;
 			taskOptions.createRootDirectory = false;
+			// the faces belong to the archive, not to the pages it holds: leaving them here would
+			// embed the same PDF and the same image in every page, and copy them once per task
+			taskOptions.embeddedPdf = undefined;
+			taskOptions.embeddedImage = undefined;
 			taskOptions.archiveFilename = archiveTempDirectory + "/" + tasks.indexOf(task) + ".zip";
 		}
 		task.status = STATE_PROCESSING;

@@ -138,10 +138,10 @@ const OPTIONS_INFO = [{
 	"declare-appended-data": { description: "Declare the data appended after the compressed data as the comment of the ZIP archive, for readers rejecting undeclared trailing bytes (e.g. java.util.zip); ZIP tools then print that data when listing the archive", type: "boolean" },
 	"embed-screenshot": { description: "Embed a screenshot of the page as a PNG file in the compressed file (self-extracting HTML or ZIP file). When enabled, the resulting file can be read as a ZIP file or a PNG image.", type: "boolean" },
 	"embed-screenshot-options": { description: "Options passed to the CDP method `Page.captureScreenshot()` given as a JSON string (e.g. { \"captureBeyondViewport\": false })", type: "string" },
-	"embedded-image": { description: "Path to a PNG image to embed in the compressed file.", type: "string" },
+	"embedded-image": { description: "Path to a PNG image to embed in the compressed file. Unlike --embed-screenshot it is also compatible with --crawl-save-archive, where it becomes the image of the whole archive.", type: "string" },
 	"embed-pdf": { description: "Embed a PDF file in the ZIP or self-extracting file. When enabled, the resulting file can be read as a ZIP file or a PDF file.", type: "boolean" },
 	"embed-pdf-options": { description: "Options passed to the CDP method `Page.printToPDF()` given as a JSON string (e.g. { \"pageRanges\": \"1-1\", \"paperWidth\": 11, \"paperHeight\": 8.5 })", type: "string" },
-	"embedded-pdf": { description: "Path to a PDF file to embed in the compressed file.", type: "string" }
+	"embedded-pdf": { description: "Path to a PDF file to embed in the compressed file. Unlike --embed-pdf it is also compatible with --crawl-save-archive, where it becomes the PDF of the whole archive.", type: "string" }
 }, {
 	"filename-template": { description: "Template used to generate the output filename (see https://github.com/gildas-lormeau/SingleFile/wiki/Template-variables-and-functions)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
 	"filename-conflict-action": { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"", type: "string", defaultValue: "uniquify" },
