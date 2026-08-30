@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Unresolved font property</title>
+	<!--
+		The family is named through a var() written inside the fallback of another var(). The browser
+		resolves it without difficulty — the outer property is declared nowhere, so it takes the
+		fallback — but the minifier cannot: reading a nested var() as a family list would invent
+		families the document never had, so it reports the value as undetermined.
+
+		This is the page the pruning policy for undetermined values is decided on. Keeping every
+		declared face renders exactly like keeping the right one, so the two halves are checked
+		apart: the pixels say the face that was drawn survived, and the markup says the faces that
+		were not drawn are gone. A build that gives up on the document passes the first and fails
+		the second, which is what used to happen for every page holding one unreadable value.
+	-->
+	<style>
+		@font-face {
+			font-family: "Fidelity Block";
+			src: url(../fonts/block.ttf) format("truetype");
+		}
+
+		@font-face {
+			font-family: "Fidelity Unused One";
+			src: url(../fonts/band.ttf) format("truetype");
+		}
+
+		@font-face {
+			font-family: "Fidelity Unused Two";
+			src: url(../fonts/bar.ttf) format("truetype");
+		}
+
+		body {
+			background: #fff;
+			margin: 0;
+			padding: 40px;
+			font: 20px/1.5 monospace;
+		}
+
+		.card {
+			--actual-font: "Fidelity Block";
+		}
+
+		.card .sample {
+			font-family: var(--missing-font, var(--actual-font)), serif;
+			font-size: 48px;
+			margin: 0;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="card">
+		<p>The family below is named through a var() nested in the fallback of another var().</p>
+		<p class="sample">abcdefghij</p>
+	</div>
+</body>
+
+</html>

@@ -98,6 +98,22 @@ test("a saved page keeps the fonts declared inside a frame it cannot read", { ti
 	assertNoWorseThanNoise(comparison, noise);
 });
 
+// The two halves of what happens when a family cannot be resolved from the stylesheets. The face
+// the browser drew with has to survive — the rendered list is the only thing left that names it —
+// and the faces nothing drew have to go, which is the half that says the document was pruned at all
+// rather than given up on. Both are needed: keeping everything passes the first check alone.
+test("a saved page keeps a font named through a value it cannot resolve", { timeout: TEST_TIMEOUT }, async () => {
+	const { comparison, noise } = await compareSaveWithSource("unresolved-font-property", []);
+	assertNoWorseThanNoise(comparison, noise);
+});
+
+test("a value it cannot resolve does not stop the rest of the page being pruned", { timeout: TEST_TIMEOUT }, async () => {
+	const { saved } = await compareSaveWithSource("unresolved-font-property", []);
+	const page = new TextDecoder().decode(saved);
+	assert.match(page, /Fidelity Block/, "the face the page was drawn with was dropped");
+	assert.doesNotMatch(page, /Fidelity Unused/, "one unreadable value kept every face the page declares");
+});
+
 function assertNoWorseThanNoise(comparison, noise) {
 	assert.ok(comparison.differing <= noise.differing, describe(comparison, noise));
 }
