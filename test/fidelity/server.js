@@ -39,7 +39,11 @@ async function startServer(rootDirectory) {
 		// silently serve the file it was meant to prove absent
 		const pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
 		const relativePath = normalize(pathname).replace(/^(\.\.[/\\])+/, "").replace(/^[/\\]+/, "");
-		const path = join(rootDirectory, relativePath || "index.html", pathname.endsWith("/") ? "index.html" : "");
+		// a directory is named by the trailing slash and answered with its index, anything else is
+		// the file it names. Writing this as one join with a conditional last segment reads the same
+		// and is not: the root "/" leaves nothing to join, so it resolved to index.html/index.html
+		// and the server could serve every fixture but not its own root
+		const path = pathname.endsWith("/") ? join(rootDirectory, relativePath, "index.html") : join(rootDirectory, relativePath);
 		readFile(path)
 			.then(content => response
 				.writeHead(200, {
