@@ -5,10 +5,15 @@
 	<meta charset="utf-8">
 	<title>Unresolved font property</title>
 	<!--
-		The family is named through a var() written inside the fallback of another var(). The browser
-		resolves it without difficulty — the outer property is declared nowhere, so it takes the
-		fallback — but the minifier cannot: reading a nested var() as a family list would invent
-		families the document never had, so it reports the value as undetermined.
+		The property holds a whole font shorthand, not a family list. The browser substitutes it and
+		draws the text in the face it names; the minifier must not read it as a list of families,
+		because the words in it are a style and a size and reading them as names would invent
+		families the document never had. So the family is genuinely unnameable from the stylesheets,
+		and the only thing left that knows it is the list of fonts the rendering reported.
+
+		The shape matters. A var() in family position — even one nested in a fallback — is walked
+		branch by branch and usually resolves, so a fixture written that way keeps its face through
+		the ordinary path and proves nothing about the case it was built for. This one was.
 
 		This is the page the pruning policy for undetermined values is decided on. Keeping every
 		declared face renders exactly like keeping the right one, so the two halves are checked
@@ -40,12 +45,18 @@
 		}
 
 		.card {
-			--actual-font: "Fidelity Block";
+			--sample-font: 48px "Fidelity Block";
+		}
+
+		/* a second declaration, so that the property has no single value to substitute into the
+		   shorthand. It names a face nothing draws with: a resolver that read these values as
+		   family lists would keep that one, which is the other way this can go wrong */
+		.note {
+			--sample-font: 48px "Fidelity Unused One";
 		}
 
 		.card .sample {
-			font-family: var(--missing-font, var(--actual-font)), serif;
-			font-size: 48px;
+			font: var(--sample-font);
 			margin: 0;
 		}
 	</style>
@@ -53,8 +64,11 @@
 
 <body>
 	<div class="card">
-		<p>The family below is named through a var() nested in the fallback of another var().</p>
+		<p>The family below is named inside a property holding a whole font shorthand.</p>
 		<p class="sample">abcdefghij</p>
+	</div>
+	<div class="note">
+		<p>This section declares the same property with another value and draws nothing with it.</p>
 	</div>
 </body>
 

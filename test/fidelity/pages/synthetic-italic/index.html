@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Synthetic italic</title>
+	<!--
+		Two faces, both declared with no style of their own, both drawn. The second is asked for in
+		italic, and since no italic face is declared the browser slants the normal one — a synthetic
+		oblique. The face is used; it is simply used at an angle.
+
+		What the page reports as its used fonts is read off the computed styles, and the family is
+		kept only when a loaded face answers for the computed font-style. A synthesized style has no
+		face behind it, so the match fails and the family is not recorded as used at all — while the
+		first sample keeps the list non-empty, so the guard for "nothing could be read" does not
+		apply either. The italic family is then declared, drawn, and pruned.
+	-->
+	<style>
+		@font-face {
+			font-family: "Fidelity Block";
+			src: url(../fonts/block.ttf) format("truetype");
+		}
+
+		@font-face {
+			font-family: "Fidelity Bar";
+			src: url(../fonts/bar.ttf) format("truetype");
+		}
+
+		body {
+			background: #fff;
+			margin: 0;
+			padding: 40px;
+			font: 20px/1.5 monospace;
+		}
+
+		.sample {
+			font-size: 48px;
+			margin: 0 0 24px;
+		}
+
+		.upright {
+			font-family: "Fidelity Block";
+		}
+
+		.slanted {
+			font-family: "Fidelity Bar";
+			font-style: italic;
+		}
+	</style>
+</head>
+
+<body>
+	<p>Upright, drawn with a face declared for that style:</p>
+	<p class="sample upright">abcdefghij</p>
+	<p>Italic, drawn by slanting a face declared without one:</p>
+	<p class="sample slanted">abcdefghij</p>
+</body>
+
+</html>

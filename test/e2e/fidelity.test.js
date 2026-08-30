@@ -87,15 +87,32 @@ test("a saved page still draws with the fonts it used", { timeout: TEST_TIMEOUT 
 // the page draws with are still declared
 test("a saved page drops the fonts it did not use", { timeout: TEST_TIMEOUT }, async () => {
 	const { saved } = await compareSaveWithSource("used-fonts", []);
-	const page = new TextDecoder().decode(saved);
-	assert.doesNotMatch(page, /Fidelity Unused/, "a face that nothing on the page draws with was kept");
-	["Fidelity Block", "Fidelity Band", "Fidelity Bar"].forEach(familyName =>
-		assert.match(page, new RegExp(familyName), "the face " + familyName + " is no longer declared"));
+	assert.deepEqual(getDeclaredFontFamilies(saved).sort(), ["Fidelity Band", "Fidelity Bar", "Fidelity Block"]);
 });
+
+// the faces are read out of the @font-face rules rather than looked for anywhere in the page: a
+// family name also appears in the declarations that USE it, and a check that searched the whole
+// text called a pruned face present because the custom property naming it was still there
+function getDeclaredFontFamilies(saved) {
+	return new TextDecoder().decode(saved).split("@font-face").slice(1).map(rule => {
+		const [, quoted, single, plain] = rule.match(/font-family:\s*(?:"([^"]*)"|'([^']*)'|([^;}]*))/) || [];
+		return (quoted || single || plain || "").trim();
+	});
+}
 
 test("a saved page keeps the fonts declared inside a frame it cannot read", { timeout: TEST_TIMEOUT }, async () => {
 	const { comparison, noise } = await compareSaveWithSource("frame-fonts", []);
 	assertNoWorseThanNoise(comparison, noise);
+});
+
+// A family drawn in a style it declares no face for is drawn by the browser slanting or thickening
+// the face it has. It is still the family being used, and narrowing the used list to the faces that
+// match the computed style dropped it from the page that draws it — while the upright sample kept
+// the list non-empty, so nothing else noticed.
+test("a saved page keeps a font drawn in a style it declares no face for", { timeout: TEST_TIMEOUT }, async () => {
+	const { comparison, noise, saved } = await compareSaveWithSource("synthetic-italic", []);
+	assertNoWorseThanNoise(comparison, noise);
+	assert.deepEqual(getDeclaredFontFamilies(saved).sort(), ["Fidelity Bar", "Fidelity Block"]);
 });
 
 // The two halves of what happens when a family cannot be resolved from the stylesheets. The face
@@ -109,9 +126,8 @@ test("a saved page keeps a font named through a value it cannot resolve", { time
 
 test("a value it cannot resolve does not stop the rest of the page being pruned", { timeout: TEST_TIMEOUT }, async () => {
 	const { saved } = await compareSaveWithSource("unresolved-font-property", []);
-	const page = new TextDecoder().decode(saved);
-	assert.match(page, /Fidelity Block/, "the face the page was drawn with was dropped");
-	assert.doesNotMatch(page, /Fidelity Unused/, "one unreadable value kept every face the page declares");
+	assert.deepEqual(getDeclaredFontFamilies(saved), ["Fidelity Block"],
+		"one unreadable value decided what happens to every face the page declares");
 });
 
 function assertNoWorseThanNoise(comparison, noise) {
