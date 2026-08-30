@@ -5,12 +5,11 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, mkdir, readdir, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import process from "node:process";
+import { cliDirectory } from "../target.js";
 
 const execFileAsync = promisify(execFile);
-const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 test("a browser profile is copied and left unmodified by a capture", { timeout: 120000 }, async () => {
 	const server = createServer((_, response) => response

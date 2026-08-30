@@ -8,12 +8,11 @@ import { promisify } from "node:util";
 import { mkdtemp, rm } from "node:fs/promises";
 import { Buffer } from "node:buffer";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import process from "node:process";
+import { cliDirectory } from "../target.js";
 
 const execFileAsync = promisify(execFile);
-const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 test("load timeout is reported when the page never loads", { timeout: 120000 }, async () => {
 	const server = createServer(() => { });

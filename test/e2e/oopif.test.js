@@ -7,12 +7,11 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import process from "node:process";
+import { cliDirectory } from "../target.js";
 
 const execFileAsync = promisify(execFile);
-const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const FRAME_MARKER = "OUT_OF_PROCESS_FRAME_CONTENT";
 
 test("blocked URL patterns and extra HTTP headers apply in cross-origin frames", { timeout: 120000 }, async () => {

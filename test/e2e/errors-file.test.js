@@ -4,12 +4,11 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import process from "node:process";
+import { cliDirectory } from "../target.js";
 
 const execFileAsync = promisify(execFile);
-const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 test("errors file lines include the error message and the exit code is nonzero", { timeout: 120000 }, async () => {
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));

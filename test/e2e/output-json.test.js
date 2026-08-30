@@ -5,13 +5,12 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { Buffer } from "node:buffer";
 import process from "node:process";
+import { cliDirectory } from "../target.js";
 
 const execFileAsync = promisify(execFile);
-const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const ZIP_SIGNATURE = "PK\u0003\u0004";
 
 test("output-json embeds compressed content as base64", { timeout: 120000 }, async () => {

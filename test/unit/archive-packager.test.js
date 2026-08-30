@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createPagesArchive, configure, ZipWriter, ZipReader, Uint8ArrayReader, Uint8ArrayWriter, TextReader, TextWriter } from "../../lib/single-file-archive.js";
+import { importLibModule } from "../target.js";
+const { createPagesArchive, configure, ZipWriter, ZipReader, Uint8ArrayReader, Uint8ArrayWriter, TextReader, TextWriter } = await importLibModule("single-file-archive.js");
 
 configure({ useWebWorkers: false });
 

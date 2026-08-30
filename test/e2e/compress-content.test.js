@@ -7,13 +7,12 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import process from "node:process";
-import { configure, ZipReader, Uint8ArrayReader } from "../../lib/single-file-archive.js";
+const { configure, ZipReader, Uint8ArrayReader } = await importLibModule("single-file-archive.js");
+import { cliDirectory, importLibModule } from "../target.js";
 
 const execFileAsync = promisify(execFile);
-const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const TEST_TIMEOUT = 120000;
 const END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06054b50;
 const END_OF_CENTRAL_DIRECTORY_LENGTH = 22;

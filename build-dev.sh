@@ -106,7 +106,7 @@ await Deno.writeTextFile('lib-dev/version.js', 'export const version = ' + JSON.
 # opt into by invoking .dev/single-file rather than something you get by forgetting to rebuild.
 rm -rf .dev
 mkdir -p .dev
-cp ./single-file ./single-file-launcher.js ./single-file-cli-api.js ./options.js ./deno.json ./package.json .dev/
+cp ./single-file ./single-file-node.js ./single-file-launcher.js ./single-file-cli-api.js ./options.js ./deno.json ./package.json .dev/
 cp -R ./resources .dev/resources
 cp -R ./lib .dev/lib
 cp lib-dev/* .dev/lib/
