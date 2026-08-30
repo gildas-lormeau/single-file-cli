@@ -24,18 +24,33 @@ const BAND_HEIGHT = 1000;
 const VIEWPORT_WIDTH = 1200;
 const VIEWPORT_HEIGHT = 900;
 const LOAD_TIMEOUT = 60000;
-const SETTLE_EXPRESSION = `(async () => {
-	if (document.fonts) {
-		await document.fonts.ready;
-	}
-	await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-})()`;
+const COMMAND_TIMEOUT = 60000;
+const SETTLE_TIMEOUT = 10000;
+// Waiting for the fonts and for two frames is waiting on the page, and a page is allowed not to
+// answer: a self-extracting archive replaces the document as it opens, and a font that never
+// resolves leaves document.fonts.ready pending for good. The race means this expression always
+// settles, so the only thing that can hang is the connection, which has its own limit below.
+const SETTLE_EXPRESSION = `Promise.race([
+	(async () => {
+		if (document.fonts) {
+			await document.fonts.ready;
+		}
+		await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+	})(),
+	new Promise(resolve => setTimeout(resolve, ${SETTLE_TIMEOUT}))
+])`;
 
 export { openBrowser, BAND_HEIGHT };
 
 async function openBrowser({ headless = true } = {}) {
 	const { launchBrowser, closeBrowser } = await importLibModule("browser.js");
 	cdpOptions.apiUrl = LOCALHOST + (await launchBrowser({ headless }));
+	// A command with no limit waits for its answer for ever, and that is the default. One that never
+	// came back took a whole CI run with it: the suite reported nothing but its own test timeout,
+	// the connection stayed wedged, and every check after it in the file was never reached. With a
+	// limit the failure names the method that did not answer, which is the difference between a
+	// diagnosis and a rerun.
+	cdpOptions.commandMaxTime = COMMAND_TIMEOUT;
 	const comparisonTarget = await createSession();
 	return { capture, compare, close };
 
