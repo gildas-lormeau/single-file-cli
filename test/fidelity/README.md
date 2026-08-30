@@ -12,8 +12,21 @@ suite:
 ./build-dev.sh && npm run test:dev
 ```
 
-`test:dev` is the form that matters here. The default target runs the committed `lib/`, a build of
-the *pinned npm release* of single-file-core, so a green run says nothing about a local fix.
+`test:dev` is the form that matters here, and it is also what switches these checks on. They are
+skipped on the default target, which runs the committed `lib/` — a build of the *pinned npm release*
+of single-file-core, so a green run there says nothing about a local fix, and a check written for one
+stays red until it ships. To run them against that released build anyway:
+
+```
+SINGLE_FILE_FIDELITY=1 node --test test/e2e/fidelity.test.js
+```
+
+**They do not run in CI yet, and that is a hold rather than a decision.** The first CI run wedged on
+a CDP command that never answered: simple-cdp leaves commands without a limit by default, so nothing
+failed, the connection stayed stuck, every check after the first was never reached, and the job had
+to be cancelled after ten minutes. The limit is set now (`commandMaxTime`), so a repeat would name
+the method that did not answer instead of hanging — but that has not been seen on a runner yet.
+Where they belong is a CI job that builds core from source and runs `test:dev`.
 
 ## What it can assert, and why
 
