@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Duplicate stylesheet</title>
+	<!--
+		Two <style> elements with byte-identical content. The archive writer groups them, stores the
+		content once as an entry, and points a <link> at it. Both elements are rewritten: the second
+		because it is a duplicate, the first because it is the one the duplicates were folded into —
+		leaving that one inline stored the same stylesheet twice, once as the entry and once in the
+		page.
+
+		The attributes are here because the rewrite replaces the element rather than editing it. An
+		id a script looks up and a class a selector matches have to survive that, and they were
+		being dropped: the archive came back with a bare <link>.
+	-->
+	<style id="palette" class="theme" data-role="tokens">
+		:root {
+			--ink: #17202a;
+			--paper: #f4f4f2;
+			--accent: #1f5673;
+			--edge: #c9c9c4;
+		}
+
+		body {
+			background: var(--paper);
+			color: var(--ink);
+			font: 16px/1.6 Georgia, "Times New Roman", serif;
+			margin: 0;
+			padding: 40px;
+		}
+
+		h1 {
+			font-size: 34px;
+			margin: 0 0 24px;
+			border-bottom: 3px solid var(--accent);
+			padding-bottom: 12px;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 16px;
+			margin: 24px 0;
+		}
+
+		.cell {
+			background: #fff;
+			border: 1px solid var(--edge);
+			padding: 20px;
+		}
+
+		.cell b {
+			color: var(--accent);
+		}
+
+		.rule {
+			height: 8px;
+			background: var(--accent);
+			margin: 32px 0;
+		}
+	</style>
+	<style>
+		:root {
+			--ink: #17202a;
+			--paper: #f4f4f2;
+			--accent: #1f5673;
+			--edge: #c9c9c4;
+		}
+
+		body {
+			background: var(--paper);
+			color: var(--ink);
+			font: 16px/1.6 Georgia, "Times New Roman", serif;
+			margin: 0;
+			padding: 40px;
+		}
+
+		h1 {
+			font-size: 34px;
+			margin: 0 0 24px;
+			border-bottom: 3px solid var(--accent);
+			padding-bottom: 12px;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 16px;
+			margin: 24px 0;
+		}
+
+		.cell {
+			background: #fff;
+			border: 1px solid var(--edge);
+			padding: 20px;
+		}
+
+		.cell b {
+			color: var(--accent);
+		}
+
+		.rule {
+			height: 8px;
+			background: var(--accent);
+			margin: 32px 0;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Duplicate stylesheet</h1>
+	<p>The two style elements above hold the same declarations. Everything on this page is drawn by
+		them, so a stylesheet that goes missing in the save takes the whole layout with it.</p>
+	<div class="grid">
+		<div class="cell"><b>One</b><br>Bordered cell drawn by the shared stylesheet.</div>
+		<div class="cell"><b>Two</b><br>Bordered cell drawn by the shared stylesheet.</div>
+		<div class="cell"><b>Three</b><br>Bordered cell drawn by the shared stylesheet.</div>
+	</div>
+	<div class="rule"></div>
+	<p>The grid, the rule above and the serif family all come from the custom properties declared in
+		the same block, so the comparison fails loudly rather than subtly.</p>
+</body>
+
+</html>

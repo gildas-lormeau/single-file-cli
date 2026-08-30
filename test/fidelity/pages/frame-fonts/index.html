@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Frame fonts</title>
+	<!--
+		The frame is sandboxed, which gives it an opaque origin and puts its contentDocument out of
+		reach. SingleFile then re-parses it from its srcdoc with DOMParser, and that document is
+		never rendered: it reports no font as used at all.
+
+		An empty list of used fonts is not a short one. Every rendered element has a computed
+		font-family, so nothing rendered can report none — an empty list means the styles could not
+		be read. Read as an answer instead of as an absence, it said "this frame uses no font" and
+		every face the frame declared was pruned. Measured on derstandard.at, where a newsletter box
+		inside such a frame fell back to a system font, and on MDN, where the text in the CSS demo
+		reflowed.
+
+		The frame declares its own face and uses it, and the face is not declared anywhere in the
+		parent: nothing outside the frame can keep it alive.
+	-->
+	<style>
+		body {
+			background: #fff;
+			margin: 0;
+			padding: 40px;
+			font: 20px/1.5 monospace;
+		}
+
+		iframe {
+			width: 700px;
+			height: 220px;
+			border: 2px solid #333;
+		}
+	</style>
+</head>
+
+<body>
+	<p>The frame below declares and uses a face that the page around it never names.</p>
+	<iframe sandbox title="framed" srcdoc="
+		<!DOCTYPE html>
+		<meta charset=&quot;utf-8&quot;>
+		<style>
+			@font-face { font-family: &quot;Fidelity Frame&quot;; src: url(../fonts/bar.ttf) format(&quot;truetype&quot;) }
+			body { margin: 0; padding: 20px; background: #fff }
+			p { font: 48px &quot;Fidelity Frame&quot;, serif; margin: 0 0 16px }
+		</style>
+		<p>abcdefghij</p>
+		<p>klmnopqrst</p>
+	"></iframe>
+</body>
+
+</html>

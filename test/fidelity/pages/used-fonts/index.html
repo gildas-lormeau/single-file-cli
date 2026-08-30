@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Used fonts</title>
+	<!--
+		Five declared faces, three of them drawn. The three are named in the three ways the font
+		minifier has to read: a plain family, a custom property declared on a DESCENDANT rather than
+		on :root, and the font shorthand. Anything that stops resolving one of them prunes a face
+		the page actually uses, and the block turns back into ordinary text.
+
+		Every glyph in these fonts is a filled rectangle, so a face that goes missing is not a
+		subtle reflow: the bar becomes words. The three shapes differ, so keeping the wrong face is
+		as visible as keeping none.
+
+		The two unused faces are here so that pruning has something to remove. A build that gives up
+		and keeps everything renders exactly like a correct one — that half of the contract is not
+		visible, and is asserted on the saved markup instead.
+	-->
+	<style>
+		@font-face {
+			font-family: "Fidelity Block";
+			src: url(../fonts/block.ttf) format("truetype");
+		}
+
+		@font-face {
+			font-family: "Fidelity Band";
+			src: url(../fonts/band.ttf) format("truetype");
+		}
+
+		@font-face {
+			font-family: "Fidelity Bar";
+			src: url(../fonts/bar.ttf) format("truetype");
+		}
+
+		@font-face {
+			font-family: "Fidelity Unused One";
+			src: url(../fonts/block.ttf) format("truetype");
+		}
+
+		@font-face {
+			font-family: "Fidelity Unused Two";
+			src: url(../fonts/band.ttf) format("truetype");
+		}
+
+		body {
+			background: #fff;
+			margin: 0;
+			padding: 40px;
+			font: 20px/1.5 monospace;
+		}
+
+		.sample {
+			font-size: 48px;
+			margin: 0 0 24px;
+		}
+
+		.plain .sample {
+			font-family: "Fidelity Block";
+		}
+
+		.card {
+			--card-font: "Fidelity Band";
+		}
+
+		.card .sample {
+			font-family: var(--card-font), serif;
+		}
+
+		.shorthand {
+			--shorthand-font: "Fidelity Bar";
+		}
+
+		.shorthand .sample {
+			font: 48px var(--shorthand-font);
+		}
+	</style>
+</head>
+
+<body>
+	<section class="plain">
+		<p>Plain family name</p>
+		<p class="sample">abcdefghij</p>
+	</section>
+	<section class="card">
+		<p>Custom property declared on this section, not on the root</p>
+		<p class="sample">abcdefghij</p>
+	</section>
+	<section class="shorthand">
+		<p>Custom property read through the font shorthand</p>
+		<p class="sample">abcdefghij</p>
+	</section>
+</body>
+
+</html>
