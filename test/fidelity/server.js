@@ -19,13 +19,11 @@ const CONTENT_TYPES = {
 	".woff2": "font/woff2"
 };
 
-// Requests that say nothing about the fixture. Chrome asks for a favicon on every navigation. The
-// zip worker is asked for by the archive writer, not by the page: the CLI never configures a worker
-// URI, so zip.js falls back to its default and resolves it against the captured page — three 404s
-// on the user's own site per archive save, then a silent fallback to the main thread. That is a
-// defect in the compression processor rather than in these fixtures, and it is recorded in the
-// findings; it is ignored here so the suite fails on fidelity and not on it.
-const IGNORED_MISS_PATTERNS = [/^\/favicon\.ico$/, /\/core\/web-worker-wasm\.js$/];
+// Chrome asks for a favicon on every navigation and its absence says nothing about the fixture.
+// Nothing else is excused: the archive writer used to ask the captured site for a zip worker that
+// site had never heard of, three times per save, and this list is where that would have been
+// quietly tolerated. It is a real request to a real server, so it is a failure here.
+const IGNORED_MISS_PATTERNS = [/^\/favicon\.ico$/];
 
 export { startServer };
 

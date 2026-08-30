@@ -1,0 +1,38 @@
+:root {
+	--ink: #1b1b1f;
+	--paper: #fbfaf7;
+	--accent: #7a3b2e;
+	--edge: #d6d2c8;
+}
+
+body {
+	background: var(--paper);
+	color: var(--ink);
+	font: 16px/1.6 Georgia, "Times New Roman", serif;
+	margin: 0;
+	padding: 40px;
+}
+
+h1 {
+	font-size: 32px;
+	margin: 0 0 20px;
+	border-bottom: 4px solid var(--accent);
+	padding-bottom: 10px;
+}
+
+.panel {
+	border: 1px solid var(--edge);
+	background: #fff;
+	padding: 20px;
+	margin: 0 0 16px;
+}
+
+.panel b {
+	color: var(--accent);
+}
+
+.stripe {
+	height: 10px;
+	background: var(--accent);
+	margin: 24px 0;
+}

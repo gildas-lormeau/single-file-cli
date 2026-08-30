@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Linked stylesheet</title>
+	<!--
+		An external stylesheet, linked with the attributes a page uses to find it again: an id a
+		theme switcher looks up, a class a selector matches, a data attribute a script reads.
+
+		A plain save has nowhere to put an external stylesheet, so the link becomes a style element
+		holding its content — a brand-new element, built with the media and the text and nothing
+		else. Everything the page used to identify that stylesheet was dropped, on every plain save
+		of every page with an external stylesheet. The archive path had the same defect in the other
+		direction and was fixed first; this is its mirror.
+	-->
+	<link rel="stylesheet" type="text/css" href="theme.css" id="theme" class="site-theme" data-role="tokens" title="Site theme">
+</head>
+
+<body>
+	<h1>Linked stylesheet</h1>
+	<p>Everything below is drawn by the linked stylesheet, so losing it in the save is not subtle.</p>
+	<div class="panel"><b>Panel</b> — bordered by the linked stylesheet.</div>
+	<div class="panel"><b>Panel</b> — bordered by the linked stylesheet.</div>
+	<div class="stripe"></div>
+	<p>The element carrying that stylesheet is looked up by id, by class and by data attribute, none
+		of which survives a rewrite that keeps only the text.</p>
+</body>
+
+</html>

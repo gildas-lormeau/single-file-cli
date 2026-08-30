@@ -73,6 +73,26 @@ async function readArchiveEntry(data, filename) {
 	return entry.getData(new TextWriter());
 }
 
+// The mirror of the check above, on the other path. A plain save has nowhere to put an external
+// stylesheet, so the link becomes a style element built from the media and the text — and the id a
+// script looks up, the class a selector matches and the data attribute it reads were all left
+// behind, on every plain save of every page with an external stylesheet.
+test("a plain saved page keeps the attributes of the stylesheet it inlines", { timeout: TEST_TIMEOUT }, async () => {
+	const { comparison, noise, saved } = await compareSaveWithSource("linked-stylesheet", []);
+	assertNoWorseThanNoise(comparison, noise);
+	const [openingTag] = new TextDecoder().decode(saved).match(/<style[^>]*>/) || [];
+	assert.ok(openingTag, "the saved page holds no style element");
+	["id=theme", "class=site-theme", "data-role=tokens", "title=\"Site theme\""].forEach(attribute =>
+		assert.ok(openingTag.includes(attribute), "the style element lost " + attribute + ": " + openingTag));
+	// what the link used to fetch its stylesheet means nothing on the element now holding it
+	assert.doesNotMatch(openingTag, /\brel=|\bhref=/, "the style element kept an attribute of the link: " + openingTag);
+});
+
+test("an archived page with an external stylesheet renders exactly like its source", { timeout: TEST_TIMEOUT }, async () => {
+	const { comparison, noise } = await compareSaveWithSource("linked-stylesheet", ["--compress-content"]);
+	assertNoWorseThanNoise(comparison, noise);
+});
+
 // The font minifier keeps a declared face when something on the page draws with it, and the three
 // samples name their family in the three ways it has to read. It has given up on all three at some
 // point: a property declared on a descendant resolved to nothing, the shorthand was unreadable, and
