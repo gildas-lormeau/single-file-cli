@@ -28,3 +28,27 @@ jobs:
       -
         name: Run tests
         run: npm test
+
+  # lib/ holds generated code that is committed, so nothing at runtime notices when it falls behind
+  # the core release it was built from — a stale bundle just silently runs old code, and a dev build
+  # (build-dev.sh, unminified, built from a local core checkout) silently replaces the released one.
+  # build.sh is reproducible: it pins both the core package and esbuild, so rebuilding here and
+  # diffing catches either case before it ships.
+  build-output:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      -
+        name: Checkout sources
+        uses: actions/checkout@v7
+      -
+        name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      -
+        name: Rebuild the released artifacts
+        run: bash build.sh
+      -
+        name: Check lib/ matches the pinned core release
+        run: git diff --exit-code --stat -- lib/
