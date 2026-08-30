@@ -43,6 +43,7 @@ saying which.
 | Fixture | What it holds |
 |---|---|
 | `duplicate-stylesheet/` | Two `<style>` elements with identical content. The archive writer folds them into one entry and points links at it; the element they were folded into kept its content inline as well, and the replacement dropped the attributes that identified it. |
+| `linked-stylesheet/` | An external stylesheet linked with an id, a class, a data attribute and a title. A plain save has nowhere to put it, so the link becomes a style element — a new one, built from the media and the text and nothing else. |
 | `used-fonts/` | Five declared faces, three drawn — named as a plain family, through a custom property declared on a descendant, and through the `font` shorthand. The minifier has stopped resolving each of those at some point. |
 | `frame-fonts/` | A sandboxed frame declaring and using a face the page around it never names. Its `contentDocument` is out of reach, so it is re-parsed from its srcdoc and reports nothing about what it draws with. |
 | `synthetic-italic/` | A face drawn in an italic it declares no face for, so the browser slants the upright one. Matching a loaded face against the computed style found nothing and pruned the family off the page that draws it. |
@@ -63,7 +64,9 @@ Each of these is a way a run reported good news that was not true.
 3. **A fixture that fails to load renders identically to itself.** The floor is zero, the save of
    that same failure matches it, and the check passes while testing nothing — it happened here, with
    a directory served as a file giving two beautifully identical 404 pages. The server records every
-   miss and the checks refuse to conclude when there is one.
+   miss and the checks refuse to conclude when there is one. Only the favicon is excused: a request
+   to the captured site that the site cannot answer is a defect wherever it comes from, and this is
+   how the archive writer was caught asking that site for a zip worker three times per save.
 4. **The output file is removed before each save.** The default conflict action is to uniquify, so a
    second save writes `saved (2).html` and leaves the stale file where the test is looking.
 5. **A stale dev build reads as "the change has no effect".** [`../target.js`](../target.js) refuses
@@ -89,3 +92,7 @@ Two traps worth knowing before writing one. A face used in a style the fonts do 
 drawn synthesized, which changes what the page reports about it; and a family name appears in the
 declarations that *use* it as well as in the `@font-face` that declares it, so read the declared
 faces out of the `@font-face` rules rather than searching the page for a name.
+
+And commit the fix before mutating it. Restoring the tree between mutations is a `git checkout`,
+which takes the uncommitted fix with it — the next mutation then fails to apply against code that
+is already reverted, and reports a pass. It has happened twice here.
