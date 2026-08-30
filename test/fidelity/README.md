@@ -45,6 +45,8 @@ saying which.
 | `duplicate-stylesheet/` | Two `<style>` elements with identical content. The archive writer folds them into one entry and points links at it; the element they were folded into kept its content inline as well, and the replacement dropped the attributes that identified it. |
 | `used-fonts/` | Five declared faces, three drawn — named as a plain family, through a custom property declared on a descendant, and through the `font` shorthand. The minifier has stopped resolving each of those at some point. |
 | `frame-fonts/` | A sandboxed frame declaring and using a face the page around it never names. Its `contentDocument` is out of reach, so it is re-parsed from its srcdoc and reports nothing about what it draws with. |
+| `synthetic-italic/` | A face drawn in an italic it declares no face for, so the browser slants the upright one. Matching a loaded face against the computed style found nothing and pruned the family off the page that draws it. |
+| `unresolved-font-property/` | A family named inside a property holding a whole font shorthand, declared twice so there is no single value to substitute. The stylesheets cannot name it; the rendered list can. |
 
 `pages/fonts/` holds generated fonts in which every printable ASCII character is the same filled
 rectangle: text set in them is a solid bar, so a face that goes missing is not a subtle reflow. The
@@ -76,6 +78,14 @@ that was — the fixtures read as a record of what has gone wrong, which is most
 the bug is a year old.
 
 Then confirm the check can fail. Break the fix in single-file-core, rebuild, watch it go red, and
-put it back. A check that passes against deliberately broken code is protecting nothing: two of the
-checks here survived their first mutation, and the font fixture found a defect on its first run that
-the code it was written to guard did not cover.
+put it back. A check that passes against deliberately broken code is protecting nothing, and this is
+not a formality here: `frame-fonts` found a defect on its first run that the commit it was written
+to guard did not cover, `unresolved-font-property` had to be reshaped twice before it exercised the
+code it names — a var() in family position resolves through the ordinary path, whatever it is nested
+in — and `synthetic-italic` exists because a fixture that should have been unremarkable came back
+with an empty list of used fonts.
+
+Two traps worth knowing before writing one. A face used in a style the fonts do not declare is
+drawn synthesized, which changes what the page reports about it; and a family name appears in the
+declarations that *use* it as well as in the `@font-face` that declares it, so read the declared
+faces out of the `@font-face` rules rather than searching the page for a name.
