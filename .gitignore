@@ -2,3 +2,6 @@
 **/node_modules/
 vendor/
 /dist/
+
+lib-dev/
+.dev/
