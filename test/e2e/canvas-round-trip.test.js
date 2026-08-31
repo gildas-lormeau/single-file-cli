@@ -12,8 +12,7 @@
 // as it always has. The fix skips the capture only when the fresh bitmap is blank AND the element
 // already carries a background image, so both of those paths have to stay untouched.
 //
-// The assertions run against the dev tree only: the released core still overwrites, so they would
-// land red on the default target until the fix ships and the pin is bumped. Drop the skip then.
+// The fix shipped in single-file-core 1.5.119, so these run against the committed lib/ as well.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -25,11 +24,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import process from "node:process";
-import { cliDirectory, useDevBuild } from "../target.js";
+import { cliDirectory } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 180000;
-const SKIP = useDevBuild ? false : "the released core still overwrites the canvas, run with SINGLE_FILE_TARGET=dev";
 const RED_DOT = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 const DRAWING = "<script>const context=document.getElementById(\"probe\").getContext(\"2d\");context.fillStyle=\"#00aa00\";context.fillRect(10,10,150,80);</script>";
 const PAGES = {
@@ -38,20 +36,20 @@ const PAGES = {
 	"/blank": "<html><head><title>blank</title></head><body><canvas id=\"probe\" width=\"200\" height=\"100\"></canvas></body></html>"
 };
 
-test("re-saving a saved page keeps the canvas drawing", { timeout: TEST_TIMEOUT, skip: SKIP }, async () => {
+test("re-saving a saved page keeps the canvas drawing", { timeout: TEST_TIMEOUT }, async () => {
 	const generations = await capture("/drawn", 3);
 	assert.ok(generations[0], "the first save stored no canvas image");
 	assert.equal(generations[1], generations[0], "the second save replaced the canvas image");
 	assert.equal(generations[2], generations[0], "the third save replaced the canvas image");
 });
 
-test("a canvas drawn over a background image still stores its drawing", { timeout: TEST_TIMEOUT, skip: SKIP }, async () => {
+test("a canvas drawn over a background image still stores its drawing", { timeout: TEST_TIMEOUT }, async () => {
 	const [saved] = await capture("/drawn-with-background", 1);
 	assert.ok(saved, "the save stored no canvas image");
 	assert.notEqual(saved, RED_DOT.split(",")[1], "the save kept the background image instead of the drawing");
 });
 
-test("a canvas nothing drew into is still captured when there is no background", { timeout: TEST_TIMEOUT, skip: SKIP }, async () => {
+test("a canvas nothing drew into is still captured when there is no background", { timeout: TEST_TIMEOUT }, async () => {
 	const [saved] = await capture("/blank", 1);
 	assert.ok(saved, "the save stored no canvas image");
 });
