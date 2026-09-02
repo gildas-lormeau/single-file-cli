@@ -1,6 +1,6 @@
 {
   "name": "@single-file/single-file-cli",
-  "version": "2.6.4",
+  "version": "2.7.0",
   "description": "SingleFile CLI",
   "exports": {
     ".": "./single-file-cli-api.js"
