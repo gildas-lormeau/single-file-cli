@@ -126,6 +126,7 @@ const OPTIONS_INFO = [{
 	"move-styles-in-head": { description: "Move style elements outside the head element into the head element", type: "boolean" },
 	"group-duplicate-images": { description: "Group duplicate images into CSS custom properties", type: "boolean", defaultValue: true },
 	"max-size-duplicate-images": { description: "Maximum size in bytes of duplicate images stored as CSS custom properties", type: "number", defaultValue: 512 * 1024 },
+	"image-reduction-factor": { description: "Divide the dimensions of PNG, JPEG and WEBP images by this factor in order to reduce the size of the page (e.g. 2 halves them)", type: "number", defaultValue: 1 },
 	"group-duplicate-stylesheets": { description: "Group duplicate inline stylesheets into a single stylesheet in order to reduce the size of the page", type: "boolean", defaultValue: false }
 }, {
 	"compress-content": { description: "Create a ZIP file instead of an HTML file", type: "boolean" },
