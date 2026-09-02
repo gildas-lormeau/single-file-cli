@@ -73,7 +73,7 @@ const OPTIONS_INFO = [{
 	"browser-wait-end-delay": { description: "Time to wait after capturing the page in ms", type: "number" },
 	"browser-wait-until": { description: "When to consider the page is loaded (InteractiveTime, networkIdle, networkAlmostIdle, load, domContentLoaded)", type: "string", defaultValue: "networkIdle" },
 	"browser-wait-until-delay": { description: "Delay of time in ms to wait before considering the page is loaded when the value of --browser-wait-until is reached", type: "number", defaultValue: 1000 },
-	"browser-wait-until-fallback": { description: "Retry with the next value of --browser-wait-until when a timeout error is thrown", type: "boolean", defaultValue: true },
+	"browser-wait-until-fallback": { description: "Stop loading the page and capture it as it is when --browser-load-max-time expires before the value of --browser-wait-until is reached, provided the page has reached DOMContentLoaded; a load timeout error is thrown otherwise", type: "boolean", defaultValue: true },
 }, {
 	"browser-mobile-emulation": { description: "Emulate a mobile device", type: "boolean" },
 	"browser-device-width": { description: "Width of the device viewport in pixels (default value is 360 when using --browser-mobile-emulation)", type: "number" },
