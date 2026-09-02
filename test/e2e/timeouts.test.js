@@ -1,18 +1,15 @@
-/* global setInterval, clearInterval */
+/* global setInterval, clearInterval, setTimeout, clearTimeout */
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { Buffer } from "node:buffer";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
 import { cliDirectory } from "../target.js";
-
-const execFileAsync = promisify(execFile);
 
 test("load timeout is reported when the page never loads", { timeout: 120000 }, async () => {
 	const server = createServer(() => { });
@@ -138,13 +135,22 @@ test("capture timeout is reported when capturing an endless download", { timeout
 	}
 });
 
-async function runCli(args) {
-	try {
-		return await execFileAsync(process.execPath, ["single-file-node.js", ...args], { cwd: cliDirectory, timeout: 90000, killSignal: "SIGKILL" });
-	} catch (error) {
-		if (error.killed) {
-			throw new Error("the process did not exit before the timeout");
-		}
-		return { stdout: error.stdout, stderr: error.stderr };
-	}
+function runCli(args) {
+	return new Promise((resolve, reject) => {
+		let terminated = false, killTimeoutId;
+		const child = execFile(process.execPath, ["single-file-node.js", ...args], { cwd: cliDirectory }, (error, stdout, stderr) => {
+			clearTimeout(terminateTimeoutId);
+			clearTimeout(killTimeoutId);
+			if (terminated) {
+				reject(new Error("the process did not exit before the timeout"));
+			} else {
+				resolve({ stdout, stderr });
+			}
+		});
+		const terminateTimeoutId = setTimeout(() => {
+			terminated = true;
+			child.kill("SIGTERM");
+			killTimeoutId = setTimeout(() => child.kill("SIGKILL"), 10000);
+		}, 90000);
+	});
 }
