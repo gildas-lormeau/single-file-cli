@@ -1,6 +1,6 @@
 {
 	"name": "single-file-cli",
-	"version": "2.7.2",
+	"version": "2.8.0",
 	"description": "SingleFile CLI",
 	"author": "Gildas Lormeau",
 	"license": "AGPL-3.0-or-later",
