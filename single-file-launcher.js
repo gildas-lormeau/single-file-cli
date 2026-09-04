@@ -22,7 +22,7 @@
  */
 
 import { initialize, closeBrowser } from "./single-file-cli-api.js";
-import { createBrowserProfile, getBrowserOptions } from "./lib/browser.js";
+import { createBrowserProfile, getChromiumOptions } from "./lib/chromium.js";
 import { Deno } from "./lib/deno-polyfill.js";
 import { getOptions, applySettings, parseUrlsFile } from "./options.js";
 
@@ -93,7 +93,7 @@ async function run() {
 async function saveBrowserProfile(options) {
 	const profileDirectory = options.createBrowserProfile;
 	console.error(`Log in to the website in the browser window, then quit the browser${QUIT_BROWSER_HINT} to save the profile.`); // eslint-disable-line no-console
-	await createBrowserProfile(Object.assign(getBrowserOptions(options), { profile: profileDirectory, startUrl: options.url }));
+	await createBrowserProfile(Object.assign(getChromiumOptions(options), { profile: profileDirectory, startUrl: options.url }));
 	console.error(`Profile saved, use it with --browser-profile ${JSON.stringify(profileDirectory)}.`); // eslint-disable-line no-console
 }
 

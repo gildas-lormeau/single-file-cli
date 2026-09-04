@@ -43,8 +43,8 @@ const SETTLE_EXPRESSION = `Promise.race([
 export { openBrowser, BAND_HEIGHT };
 
 async function openBrowser({ headless = true } = {}) {
-	const { launchBrowser, closeBrowser } = await importLibModule("browser.js");
-	cdpOptions.apiUrl = LOCALHOST + (await launchBrowser({ headless }));
+	const { launchChromium, closeChromium } = await importLibModule("chromium.js");
+	cdpOptions.apiUrl = LOCALHOST + (await launchChromium({ headless }));
 	// A command with no limit waits for its answer for ever, and that is the default. One that never
 	// came back took a whole CI run with it: the suite reported nothing but its own test timeout,
 	// the connection stayed wedged, and every check after it in the file was never reached. With a
@@ -87,7 +87,7 @@ async function openBrowser({ headless = true } = {}) {
 
 	async function close() {
 		await CDP.closeTarget(comparisonTarget.targetId).catch(() => { });
-		await closeBrowser();
+		await closeChromium();
 	}
 }
 
