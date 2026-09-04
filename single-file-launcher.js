@@ -21,8 +21,8 @@
  *   Source.
  */
 
-import { initialize } from "./single-file-cli-api.js";
-import { closeBrowser, createBrowserProfile, getBrowserOptions } from "./lib/browser.js";
+import { initialize, closeBrowser } from "./single-file-cli-api.js";
+import { createBrowserProfile, getBrowserOptions } from "./lib/browser.js";
 import { Deno } from "./lib/deno-polyfill.js";
 import { getOptions, applySettings, parseUrlsFile } from "./options.js";
 

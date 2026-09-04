@@ -24,7 +24,8 @@
 /* global URL */
 
 import { Buffer } from "node:buffer";
-import * as backend from "./lib/cdp-client.js";
+import * as cdpBackend from "./lib/cdp-client.js";
+import * as bidiBackend from "./lib/bidi-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
 import { createPagesArchive } from "./lib/single-file-archive.js";
 import { Deno, path } from "./lib/deno-polyfill.js";
@@ -61,9 +62,13 @@ const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
 const { readTextFile, writeTextFile, readFile, writeFile, stdout, mkdir, makeTempDir, remove, stat, errors } = Deno;
-let tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, errorCount = 0;
+let backend = cdpBackend, tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, errorCount = 0;
 
-export { initialize };
+export { initialize, closeBrowser };
+
+async function closeBrowser() {
+	await backend.closeBrowser();
+}
 
 async function initialize(options) {
 	options = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -101,11 +106,12 @@ async function initialize(options) {
 		archiveTempDirectory = await makeTempDir();
 	}
 	maxParallelWorkers = options.maxParallelWorkers || 8;
+	backend = options.browserEngine == "firefox" ? bidiBackend : cdpBackend;
 	try {
 		await backend.initialize(options);
 	} catch (error) {
 		if (error instanceof errors.NotFound) {
-			let message = "Chromium executable not found. ";
+			let message = (options.browserEngine == "firefox" ? "Firefox" : "Chromium") + " executable not found. ";
 			if (options.browserExecutablePath) {
 				message += "Make sure --browser-executable-path is correct.";
 			} else {
@@ -184,7 +190,7 @@ async function finish(options) {
 			}
 		}
 	}
-	if (!options.browserDebug && !options.browserServer) {
+	if (!options.browserDebug) {
 		await backend.closeBrowser();
 	}
 	return errorCount;

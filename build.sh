@@ -4,13 +4,14 @@ set -e
 
 CORE_PACKAGE="npm:single-file-core@1.5.121"
 ESBUILD_PACKAGE="npm:esbuild@0.27.7"
+WEB_STREAMS_PACKAGE="npm:web-streams-polyfill@4.3.0"
 
 project_dir=$(pwd)
 build_dir=$(mktemp -d)
 trap 'rm -rf "$build_dir"' EXIT
 
 cd "$build_dir"
-deno install --vendor --quiet --minimum-dependency-age=0 "$CORE_PACKAGE"
+deno install --vendor --quiet --minimum-dependency-age=0 "$CORE_PACKAGE" "$WEB_STREAMS_PACKAGE"
 
 echo "
 import { build } from '$ESBUILD_PACKAGE';
@@ -100,7 +101,9 @@ const hookScript = await Deno.readTextFile(lib + '/single-file-hooks-frames.js')
 script += 'const hookScript = ' + JSON.stringify(hookScript) + ';';
 const zipScript = await Deno.readTextFile(lib + '/zip.min.js');
 script += 'const zipScript = ' + JSON.stringify(zipScript) + ';';
-script += 'export { script, zipScript, hookScript };';
+const webStreamsPonyfill = await Deno.readTextFile('$build_dir/node_modules/web-streams-polyfill/dist/ponyfill.js');
+script += 'const webStreamsPonyfill = ' + JSON.stringify(webStreamsPonyfill) + ';';
+script += 'export { script, zipScript, hookScript, webStreamsPonyfill };';
 await Deno.writeTextFile(lib + '/single-file-bundle.js', script)
 await Promise.all(SCRIPTS.map(script => Deno.remove(script)));
 await Deno.remove(lib + '/single-file-hooks-frames.js');

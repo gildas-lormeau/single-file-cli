@@ -24,7 +24,9 @@
 import { version } from "./lib/version.js";
 import { Deno } from "./lib/deno-polyfill.js";
 
-const { args, build, exit } = Deno;
+const { args, build, env, exit } = Deno;
+const BROWSER_ENGINE_ENVIRONMENT_VARIABLE = "SINGLE_FILE_BROWSER_ENGINE";
+const BROWSER_ENGINES = ["chromium", "firefox"];
 
 const USAGE_TEXT = `single-file [url] [output]
 
@@ -56,6 +58,7 @@ const OPTIONS_INFO = [{
 	"browser-server": { description: "Server to connect to", type: "string", alias: "browser-remote-debugging-url" },
 	"browser-headless": { description: "Run the browser in headless mode", type: "boolean", defaultValue: true },
 	"browser-executable-path": { description: "Path to chrome/chromium executable", type: "string" },
+	"browser-engine": { description: "Browser engine to use (chromium, firefox)", type: "string", defaultValue: "chromium" },
 	"browser-profile": { description: "Path of the browser profile directory to use, e.g. to save pages requiring a logged-in session (see --create-browser-profile). The directory is copied before starting the browser and is left unmodified.", type: "string" },
 	"browser-width": { description: "Width of the browser viewport in pixels", type: "number", defaultValue: 1280 },
 	"browser-height": { description: "Height of the browser viewport in pixels", type: "number", defaultValue: 720 },
@@ -294,6 +297,15 @@ function applySettings(options, settings, explicitOptions = parseArgs(Array.from
 
 function getOptions() {
 	const { positionals, options, invalidOptions } = parseArgs(Array.from(args));
+	const explicitOptions = parseArgs(Array.from(args), false).options;
+	const environmentBrowserEngine = env.get(BROWSER_ENGINE_ENVIRONMENT_VARIABLE);
+	if (explicitOptions.browserEngine === undefined && environmentBrowserEngine) {
+		if (BROWSER_ENGINES.includes(environmentBrowserEngine)) {
+			options.browserEngine = environmentBrowserEngine;
+		} else {
+			invalidOptions.push({ name: "browser-engine", value: environmentBrowserEngine });
+		}
+	}
 	const unknownOptions = positionals.filter(positional => positional.startsWith("--"));
 	const urls = positionals.filter(positional => !positional.startsWith("--"));
 	if (options.help) {
@@ -316,6 +328,9 @@ function getOptions() {
 		errorMessages.push(`Unexpected arguments: ${urls.slice(2).join(", ")}`);
 	}
 	if (options.createBrowserProfile) {
+		if (options.browserEngine == "firefox") {
+			errorMessages.push("--create-browser-profile is not supported with --browser-engine firefox");
+		}
 		if (options.browserProfile) {
 			errorMessages.push("--create-browser-profile cannot be used with --browser-profile, it already takes the path of the profile directory");
 		}
@@ -326,7 +341,6 @@ function getOptions() {
 		errorMessages.push("--browser-profile cannot be used with --browser-server");
 	}
 	if (!options.crawlLinks) {
-		const explicitOptions = parseArgs(Array.from(args), false).options;
 		Object.keys(CRAWL_LINKS_DEPENDENT_OPTIONS)
 			.filter(optionKey => explicitOptions[optionKey] !== undefined)
 			.forEach(optionKey => errorMessages.push(`${CRAWL_LINKS_DEPENDENT_OPTIONS[optionKey]} requires --crawl-links`));
@@ -482,6 +496,9 @@ function parseArgs(args, setDefaultValues = true) {
 	if (result.options.browserRemoteDebuggingUrl !== undefined) {
 		result.options.browserServer = result.options.browserRemoteDebuggingUrl;
 		delete result.options.browserRemoteDebuggingUrl;
+	}
+	if (result.options.browserEngine !== undefined && !BROWSER_ENGINES.includes(result.options.browserEngine)) {
+		invalidOptions.push({ name: "browser-engine", value: result.options.browserEngine });
 	}
 	if (result.options.filenameReplacedCharacters) {
 		const filenameReplacedCharacters = result.options.filenameReplacedCharacters;

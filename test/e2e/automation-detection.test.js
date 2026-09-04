@@ -7,11 +7,11 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, firefox } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
-test("pages are not captured as controlled by automation", { timeout: 120000 }, async () => {
+test("pages are not captured as controlled by automation", { timeout: 120000, skip: firefox && "navigator.webdriver is always true under the Firefox remote agent" }, async () => {
 	const server = createServer((_, response) => response
 		.writeHead(200, { "content-type": "text/html" })
 		.end("<html><head><title>Automation</title></head><body><p id=result></p>" +
@@ -66,7 +66,8 @@ test("pages are not captured with a headless user agent", { timeout: 120000 }, a
 		assert.ok(scriptAgent, "missing the user agent read in the page");
 		assert.ok(!headerAgent[1].includes("Headless"), "unexpected headless token in the user agent sent to the server: " + headerAgent[1]);
 		assert.ok(!scriptAgent[1].includes("Headless"), "unexpected headless token in the user agent read in the page: " + scriptAgent[1]);
-		assert.ok(scriptAgent[1].includes("Chrome/"), "expected a Chrome user agent, got: " + scriptAgent[1]);
+		const engineToken = firefox ? "Firefox/" : "Chrome/";
+		assert.ok(scriptAgent[1].includes(engineToken), "expected a user agent naming " + engineToken + ", got: " + scriptAgent[1]);
 	} finally {
 		await rm(directory, { recursive: true });
 		server.close();

@@ -9,7 +9,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, firefox } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -44,7 +44,7 @@ navigator.serviceWorker.register("/sw.js").then(async () => {
 });
 </script></body></html>`;
 
-test("network options reach the requests made by a service worker", { timeout: 120000 }, async () => {
+test("network options reach the requests made by a service worker", { timeout: 120000, skip: firefox && "Firefox reports the requests of a service worker as intercepted but refuses to continue them" }, async () => {
 	const STYLE = "rgb(7,7,7)";
 	const requests = [];
 	const server = createServer((request, response) => {

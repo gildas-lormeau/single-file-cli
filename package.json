@@ -17,6 +17,7 @@
 	"scripts": {
 		"test": "node --test --test-concurrency=2 \"test/**/*.test.js\"",
 		"test:dev": "SINGLE_FILE_TARGET=dev node --test --test-concurrency=2 \"test/**/*.test.js\"",
+		"test:firefox": "SINGLE_FILE_BROWSER_ENGINE=firefox node --test --test-concurrency=2 \"test/**/*.test.js\"",
 		"lint": "eslint .",
 		"update-core": "bash update-core.sh"
 	},

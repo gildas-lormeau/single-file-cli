@@ -21,6 +21,10 @@ const IGNORED_DIRECTORY_NAMES = ["node_modules", "test", "tmp", "dist", "doc"];
 
 const repositoryDirectory = join(dirname(fileURLToPath(import.meta.url)), "..");
 const useDevBuild = process.env.SINGLE_FILE_TARGET === "dev";
+// SINGLE_FILE_BROWSER_ENGINE=firefox runs the same suite through the BiDi client, the CLI reads it
+// as the default of --browser-engine; the checks that hold for one engine only say so by name
+const browserEngine = process.env.SINGLE_FILE_BROWSER_ENGINE || "chromium";
+const firefox = browserEngine === "firefox";
 const cliDirectory = useDevBuild ? join(repositoryDirectory, ".dev") : repositoryDirectory;
 
 if (useDevBuild) {
@@ -74,4 +78,4 @@ function importLibModule(name) {
 	return import(join(cliDirectory, "lib", name));
 }
 
-export { cliDirectory, repositoryDirectory, useDevBuild, importLibModule };
+export { cliDirectory, repositoryDirectory, useDevBuild, importLibModule, browserEngine, firefox };
