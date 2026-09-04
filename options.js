@@ -58,7 +58,7 @@ const OPTIONS_INFO = [{
 	"browser-server": { description: "Server to connect to", type: "string", alias: "browser-remote-debugging-url" },
 	"browser-headless": { description: "Run the browser in headless mode", type: "boolean", defaultValue: true },
 	"browser-executable-path": { description: "Path to chrome/chromium executable", type: "string" },
-	"browser-engine": { description: "Browser engine to use (chromium, firefox)", type: "string", defaultValue: "chromium" },
+	"browser-engine": { description: "Browser engine to use (chromium, firefox). Firefox is driven through WebDriver BiDi and has limitations: --create-browser-profile is not available, --browser-mobile-emulation only sets the viewport size and scale factor, --emulate-media-feature and the pause of --browser-debug are ignored, the requests of service workers do not get the blocked URL patterns and extra HTTP headers, and navigator.webdriver is true in the page", type: "string", defaultValue: "chromium" },
 	"browser-profile": { description: "Path of the browser profile directory to use, e.g. to save pages requiring a logged-in session (see --create-browser-profile). The directory is copied before starting the browser and is left unmodified.", type: "string" },
 	"browser-width": { description: "Width of the browser viewport in pixels", type: "number", defaultValue: 1280 },
 	"browser-height": { description: "Height of the browser viewport in pixels", type: "number", defaultValue: 720 },
