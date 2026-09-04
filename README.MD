@@ -4,13 +4,13 @@
 
 [SingleFile](https://www.getsinglefile.com) can be launched from the command line by running it into a (headless) browser. 
 
-It runs through Deno as a standalone script injected into the web page via the Chrome DevTools Protocol instead of being embedded into a WebExtension.
+It runs through Deno as a standalone script injected into the web page via the Chrome DevTools Protocol, or via WebDriver BiDi when using Firefox, instead of being embedded into a WebExtension.
 
 ## Installation
 
 SingleFile can be run without installing it, just download the executable file and save it in the directory of your choice here: https://github.com/gildas-lormeau/single-file-cli/releases
 
-Make sure Chrome or a Chromium-based browser is installed in the default folder. Otherwise you might need to set the `--browser-executable-path` option to help SingleFile locating the path of the executable file.
+Make sure Chrome or a Chromium-based browser is installed in the default folder. Otherwise you might need to set the `--browser-executable-path` option to help SingleFile locating the path of the executable file. Firefox can be used instead by setting the `--browser-engine firefox` option, with some limitations described in the help.
 
 ## Installation with Docker
 
@@ -131,6 +131,12 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   ```sh
   single-file --create-browser-profile ./profiles/example https://www.example.com/login
   single-file https://www.example.com/account account.html --browser-profile=./profiles/example
+  ```
+
+  - Save https://www.wikipedia.org with Firefox
+
+  ```sh
+  single-file https://www.wikipedia.org wikipedia.html --browser-engine firefox
   ```
 
   - Save a list of URLs stored into `list-urls.txt` in the current folder
