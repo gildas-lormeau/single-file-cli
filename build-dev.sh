@@ -92,7 +92,9 @@ const hookScript = await Deno.readTextFile('lib-dev/single-file-hooks-frames.js'
 script += 'const hookScript = ' + JSON.stringify(hookScript) + ';';
 const zipScript = await Deno.readTextFile('lib-dev/zip.min.js');
 script += 'const zipScript = ' + JSON.stringify(zipScript) + ';';
-script += 'export { script, zipScript, hookScript };';
+const webStreamsPonyfill = await Deno.readTextFile('node_modules/web-streams-polyfill/dist/ponyfill.js');
+script += 'const webStreamsPonyfill = ' + JSON.stringify(webStreamsPonyfill) + ';';
+script += 'export { script, zipScript, hookScript, webStreamsPonyfill };';
 await Deno.writeTextFile('lib-dev/single-file-bundle.js', script)
 await Promise.all(SCRIPTS.map(script => Deno.remove(script)));
 await Deno.remove('lib-dev/single-file-hooks-frames.js');
