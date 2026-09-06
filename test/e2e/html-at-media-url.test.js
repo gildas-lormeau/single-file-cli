@@ -5,6 +5,8 @@
 // so a plain save embedded the HTML as src:url(data:text/html;base64,...) inside the @font-face,
 // while --compress-content dropped it because only that path tests the bytes with FontFace. An
 // HTML body at a media URL is never a usable resource, so both modes now treat it like a 404.
+// A @font-face left with no source at all is dropped whole, rather than kept as an "src:" with
+// nothing after it, which is the invalid declaration a browser discards anyway.
 //
 // The controls are a real font and a real image on the same page: they must still be embedded.
 
@@ -39,7 +41,7 @@ const capturePromises = new Map();
 test("an HTML page served at a font URL is dropped from a plain save", { timeout: TEST_TIMEOUT }, async () => {
 	const content = (await getCaptureResult(false)).toString("utf8");
 	assert.ok(!content.includes("data:text/html"), "an HTML body was embedded as a resource");
-	assert.match(content, /font-family:\s*"?Fake"?;\s*src:\s*[;}]/, "the unusable font source was not removed");
+	assert.doesNotMatch(content, /@font-face\s*{[^}]*font-family:\s*"?Fake"?/, "the unusable @font-face rule was kept");
 	assert.match(content, /font-family:\s*"?Real"?;\s*src:\s*url\("?data:font\/ttf;base64,/, "the real font was not embedded");
 });
 
