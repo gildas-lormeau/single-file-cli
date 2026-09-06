@@ -28,9 +28,12 @@ const TEST_TIMEOUT = 120000;
 const FONTS_DIRECTORY = join(dirname(fileURLToPath(import.meta.url)), "..", "fidelity", "pages", "fonts");
 // three distinct fixtures, told apart in the save by their byte length
 const FONT_NAMES = ["band.ttf", "bar.ttf", "block.ttf"];
+// the two Dup rules differ in size-adjust, which getFontKey does not cover, so they share a key
+// while rendering differently. That is what makes "keep the last rule" the only correct reduction:
+// keeping the first would pair the later rule's font with the earlier rule's metrics
 const PAGE = "<html><head><style>" +
-	"@font-face{font-family:\"Dup\";src:url(/fonts/band.ttf) format(\"truetype\")}" +
-	"@font-face{font-family:\"Dup\";src:url(/fonts/bar.ttf) format(\"truetype\")}" +
+	"@font-face{font-family:\"Dup\";src:url(/fonts/band.ttf) format(\"truetype\");size-adjust:50%}" +
+	"@font-face{font-family:\"Dup\";src:url(/fonts/bar.ttf) format(\"truetype\");size-adjust:150%}" +
 	"@font-face{font-family:\"Solo\";src:url(/fonts/block.ttf) format(\"truetype\"),url(/fonts/band.ttf) format(\"truetype\")}" +
 	"h1{font-family:\"Dup\",serif}p{font-family:\"Solo\",serif}" +
 	"</style></head><body><h1>Head</h1><p>Body</p></body></html>";
@@ -43,6 +46,14 @@ test("duplicate @font-face rules resolve to the later rule, as the browser does"
 	assert.ok(dup.length > 0, "no Dup rule survived the save");
 	dup.forEach(rule => assert.equal(rule.length, sizes["bar.ttf"],
 		`a Dup rule embedded ${describe(rule.length, sizes)} instead of bar.ttf, the later rule's font`));
+});
+
+test("a shadowed @font-face rule is dropped, with its own descriptors", { timeout: TEST_TIMEOUT }, async () => {
+	const { embedded } = await getCaptureResult();
+	const dup = embedded.filter(rule => rule.family === "Dup");
+	assert.equal(dup.length, 1, "the shadowed rule was kept, so the font is embedded twice");
+	assert.match(dup[0].text, /size-adjust:\s*150%/, "the surviving rule is not the later one");
+	assert.doesNotMatch(dup[0].text, /size-adjust:\s*50%/, "the earlier rule's metrics survived");
 });
 
 test("a single @font-face rule still resolves to its first source", { timeout: TEST_TIMEOUT }, async () => {
@@ -95,7 +106,8 @@ async function runCapture() {
 			const data = match[0].match(/base64,([A-Za-z0-9+/=]+)/);
 			return {
 				family: family && family[1].trim(),
-				length: data ? Buffer.from(data[1], "base64").length : 0
+				length: data ? Buffer.from(data[1], "base64").length : 0,
+				text: match[0].replace(/base64,[A-Za-z0-9+/=]+/, "base64,...")
 			};
 		});
 		return { embedded, sizes };
