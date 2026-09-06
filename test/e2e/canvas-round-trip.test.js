@@ -84,7 +84,11 @@ async function capture(pathname, generations) {
 }
 
 function getCanvasImage(html) {
-	const match = html.match(/background-image:\s*url\(["']?data:image\/png;base64,([^"')]+)["']?\)/);
+	// either property name is correct: core pins every background longhand on the canvas, and once
+	// background-attachment joined them CSSOM had a complete set and serialised them as the
+	// `background` shorthand. Only cssText changed — core reads the value back through
+	// getPropertyValue("background-image"), which is why the round trip above still holds
+	const match = html.match(/background(?:-image)?:\s*url\(["']?data:image\/png;base64,([^"')]+)["']?\)/);
 	return match && match[1];
 }
 
