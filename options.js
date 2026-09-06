@@ -104,7 +104,7 @@ const OPTIONS_INFO = [{
 	"block-scripts": { description: "Block scripts", type: "boolean", defaultValue: true },
 	"block-stylesheets": { description: "Block stylesheets", type: "boolean", defaultValue: false },
 	"block-videos": { description: "Block videos", type: "boolean", defaultValue: true },
-	"block-mixed-content": { description: "Block mixed contents", type: "boolean" },
+	"block-mixed-content": { description: "Block active content (i.e. stylesheets, scripts, fonts) served from HTTP in HTTPS pages, like browsers do; images, videos and audios are unaffected", type: "boolean" },
 	"blocked-url-pattern": { key: "blockedURLPatterns", description: "Regular expression matching URLs to block (e.g. 'annoying-banners\\.com')", type: "string[]" }
 }, {
 	"load-deferred-images": { description: "Load deferred (a.k.a. lazy-loaded) images", type: "boolean", defaultValue: true },
