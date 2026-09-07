@@ -27,10 +27,12 @@ import { Buffer } from "node:buffer";
 import * as cdpBackend from "./lib/cdp-client.js";
 import * as bidiBackend from "./lib/bidi-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
-import { createPagesArchive } from "./lib/single-file-archive.js";
+import { createPagesArchive, PROCESS_OPTION_NAMES } from "./lib/single-file-archive.js";
 import { Deno, path } from "./lib/deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
+
+const ARCHIVE_EXCLUDED_OPTION_NAMES = ["createRootDirectory", "disableCompression", "insertTextBody", "password", "url"];
 
 const DEFAULT_OPTIONS = {
 	removeHiddenElements: true,
@@ -64,7 +66,7 @@ const STATE_PROCESSED = "processed";
 const { readTextFile, writeTextFile, readFile, writeFile, stdout, mkdir, makeTempDir, remove, stat, errors } = Deno;
 let backend = cdpBackend, tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, errorCount = 0;
 
-export { initialize, closeBrowser };
+export { initialize, closeBrowser, getArchiveOptions, ARCHIVE_EXCLUDED_OPTION_NAMES };
 
 async function closeBrowser() {
 	await backend.closeBrowser();
@@ -196,6 +198,23 @@ async function finish(options) {
 	return errorCount;
 }
 
+function getArchiveOptions(options) {
+	const archiveOptions = {
+		zipScript: getZipScriptSource(),
+		dedupPages: options.crawlSaveArchiveDedup,
+		markUnarchivedLinks: options.crawlSaveArchiveMarkUnarchivedLinks,
+		tocPage: options.crawlSaveArchiveToc,
+		pageList: options.crawlSaveArchivePageList,
+		pageTransitions: options.crawlSaveArchivePageTransitions,
+		insertSingleFileComment: options.insertSingleFileComment,
+		removeSavedDate: options.removeSavedDate
+	};
+	PROCESS_OPTION_NAMES
+		.filter(name => !ARCHIVE_EXCLUDED_OPTION_NAMES.includes(name) && !(name in archiveOptions))
+		.forEach(name => archiveOptions[name] = options[name]);
+	return archiveOptions;
+}
+
 async function savePagesArchive(options) {
 	const archiveTasks = tasks.filter(task => task.archiveFilename);
 	if (archiveTasks.length) {
@@ -205,27 +224,7 @@ async function savePagesArchive(options) {
 			title: task.title,
 			getData: () => readFile(task.archiveFilename)
 		}));
-		const content = await createPagesArchive(pages, {
-			zipScript: getZipScriptSource(),
-			dedupPages: options.crawlSaveArchiveDedup,
-			markUnarchivedLinks: options.crawlSaveArchiveMarkUnarchivedLinks,
-			tocPage: options.crawlSaveArchiveToc,
-			pageList: options.crawlSaveArchivePageList,
-			pageTransitions: options.crawlSaveArchivePageTransitions,
-			selfExtractingArchive: options.selfExtractingArchive,
-			extractDataFromPage: options.extractDataFromPage,
-			preventAppendedData: options.preventAppendedData,
-			declareAppendedData: options.declareAppendedData,
-			maxAppendedDataLength: options.maxAppendedDataLength,
-			embeddedPdf: options.embeddedPdf,
-			embeddedImage: options.embeddedImage,
-			includeBOM: options.includeBOM,
-			insertMetaCSP: options.insertMetaCSP,
-			insertCanonicalLink: options.insertCanonicalLink,
-			insertMetaNoIndex: options.insertMetaNoIndex,
-			insertSingleFileComment: options.insertSingleFileComment,
-			removeSavedDate: options.removeSavedDate
-		});
+		const content = await createPagesArchive(pages, getArchiveOptions(options));
 		if (options.dumpContent && !options.output) {
 			await stdout.write(content);
 		} else {
