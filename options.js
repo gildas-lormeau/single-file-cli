@@ -113,7 +113,7 @@ const OPTIONS_INFO = [{
 	"load-deferred-images-keep-zoom-level": { description: "Load deferred images by keeping zoomed out the page", type: "boolean" },
 	"load-deferred-images-before-frames": { description: "Load deferred frames before before saving fame contents", type: "boolean" },
 	"max-resource-size-enabled": { description: "Enable removal of embedded resources exceeding a given size", type: "boolean" },
-	"max-resource-size": { description: "Maximum size of embedded resources in MB (i.e. images, stylesheets, scripts and iframes)", type: "number", defaultValue: 10 }
+	"max-resource-size": { description: "Maximum size of embedded resources in MB. It applies to every fetched resource, i.e. images, fonts, stylesheets, scripts, frames, videos and audios; a resource above the limit is left out of the saved page", type: "number", defaultValue: 10 }
 }, {
 	"compress-css": { key: "compressCSS", description: "Compress CSS stylesheets", type: "boolean" },
 	"compress-html": { key: "compressHTML", description: "Compress HTML content", type: "boolean", defaultValue: true },
