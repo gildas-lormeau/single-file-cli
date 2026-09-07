@@ -216,6 +216,7 @@ async function savePagesArchive(options) {
 			extractDataFromPage: options.extractDataFromPage,
 			preventAppendedData: options.preventAppendedData,
 			declareAppendedData: options.declareAppendedData,
+			maxAppendedDataLength: options.maxAppendedDataLength,
 			embeddedPdf: options.embeddedPdf,
 			embeddedImage: options.embeddedImage,
 			includeBOM: options.includeBOM,
