@@ -58,6 +58,46 @@ test("a browser script that throws fails the save instead of degrading it", { ti
 	});
 });
 
+// The same concatenation swallowed code across file boundaries. The scripts were joined with "",
+// and the initSingleFile call appended straight onto the last one, so a file whose final line was a
+// // comment commented out whatever came next. It only bites when that file has no trailing newline,
+// which is why it went unnoticed: an editor that adds one hides it completely. The last-file case
+// failed loudly (initSingleFile never ran, "no valid SingleFile execution context"), but a file
+// eating the NEXT script was silent — exit 0, a valid save, and one script quietly skipped.
+test("a browser script ending in a comment does not swallow the next one", { timeout: TEST_TIMEOUT }, async () => {
+	const MARKER = "second-script-marker";
+	await withPage(async ({ url, directory }) => {
+		const firstPath = join(directory, "first.js");
+		const secondPath = join(directory, "second.js");
+		// deliberately no trailing newline: that is the whole trigger
+		await writeFile(firstPath, "globalThis.__first = 1; // a trailing comment");
+		await writeFile(secondPath, "addEventListener(\"DOMContentLoaded\",()=>{" +
+			"const marker=document.createElement(\"p\");marker.id=\"" + MARKER + "\";document.body.appendChild(marker);});\n");
+		const outputPath = join(directory, "out.html");
+		await execFileAsync(process.execPath, [
+			"single-file-node.js", url, outputPath,
+			"--browser-script", firstPath,
+			"--browser-script", secondPath
+		], { cwd: cliDirectory });
+		assert.match(await readFile(outputPath, "utf8"), new RegExp(MARKER),
+			"the first script's trailing comment swallowed the second one");
+	});
+});
+
+test("a lone browser script ending in a comment still saves the page", { timeout: TEST_TIMEOUT }, async () => {
+	await withPage(async ({ url, directory }) => {
+		const scriptPath = join(directory, "only.js");
+		await writeFile(scriptPath, "globalThis.__only = 1; // a trailing comment");
+		const outputPath = join(directory, "out.html");
+		await execFileAsync(process.execPath, [
+			"single-file-node.js", url, outputPath,
+			"--browser-script", scriptPath
+		], { cwd: cliDirectory });
+		assert.match(await readFile(outputPath, "utf8"), /<h1>page<\/h1>/,
+			"the trailing comment reached the initSingleFile call");
+	});
+});
+
 async function withPage(run) {
 	const server = createServer((request, response) =>
 		response.writeHead(200, { "content-type": "text/html" }).end("<html><body><h1>page</h1></body></html>"));
