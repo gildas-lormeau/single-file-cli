@@ -1,14 +1,18 @@
 /* global URL */
 
 // CSS orders @font-face sources two ways at once, and a saved page has to honour both.
-// Within one rule the browser uses the FIRST source that loads. Across duplicate rules sharing the
-// same descriptors the LAST rule wins outright: measured in Chrome, only the later rule's font is
-// fetched and document.fonts reports the earlier face as "unloaded", so it is never a fallback.
+// Within one rule the browser uses the FIRST source that loads. Across rules sharing the same
+// family, style, weight and stretch the rules form a single COMPOSITE face: they are checked in
+// reverse declaration order for each character, so a character the last rule's font lacks is drawn
+// from an earlier rule's font, under that rule's own descriptors. Measured in Chrome with two
+// generated fonts, one mapping A-Z and one mapping only A: both are fetched, the later font draws
+// A, the earlier draws B, and each glyph carries its own rule's size-adjust. A control with the
+// same page and only the later rule draws B in serif and never fetches the other font, so the
+// fallback is real and not an eager download. size-adjust does NOT split the composite face.
 // SingleFile merged every rule sharing a font key into one array built with unshift, which reversed
-// both axes at once. The within-rule axis then read correctly and the across-rule axis backwards,
-// so the save embedded the font from the rule the browser had overridden — the right font was
-// absent from the file entirely. The two cases below pin the axes against each other, because a fix
-// that satisfies only one of them is the bug in the other direction.
+// both axes at once, and a later fix dropped the earlier rule outright, which lost every glyph only
+// its font carried. The cases below pin the axes against each other, because a fix that satisfies
+// only one of them is the bug in the other direction.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -29,8 +33,8 @@ const FONTS_DIRECTORY = join(dirname(fileURLToPath(import.meta.url)), "..", "fid
 // three distinct fixtures, told apart in the save by their byte length
 const FONT_NAMES = ["band.ttf", "bar.ttf", "block.ttf"];
 // the two Dup rules differ in size-adjust, which getFontKey does not cover, so they share a key
-// while rendering differently. That is what makes "keep the last rule" the only correct reduction:
-// keeping the first would pair the later rule's font with the earlier rule's metrics
+// while rendering differently. That is what makes per-rule pairing the thing to test: any reduction
+// that keeps one rule pairs its metrics with the other rule's font
 const PAGE = "<html><head><style>" +
 	"@font-face{font-family:\"Dup\";src:url(/fonts/band.ttf) format(\"truetype\");size-adjust:50%}" +
 	"@font-face{font-family:\"Dup\";src:url(/fonts/bar.ttf) format(\"truetype\");size-adjust:150%}" +
@@ -40,21 +44,36 @@ const PAGE = "<html><head><style>" +
 
 let capturePromise;
 
-test("duplicate @font-face rules resolve to the later rule, as the browser does", { timeout: TEST_TIMEOUT }, async () => {
-	const { embedded, sizes } = await getCaptureResult();
-	const dup = embedded.filter(rule => rule.family === "Dup");
-	assert.ok(dup.length > 0, "no Dup rule survived the save");
-	dup.forEach(rule => assert.equal(rule.length, sizes["bar.ttf"],
-		`a Dup rule embedded ${describe(rule.length, sizes)} instead of bar.ttf, the later rule's font`));
-});
-
-test("a shadowed @font-face rule is dropped, with its own descriptors", { timeout: TEST_TIMEOUT }, async () => {
+test("every @font-face rule of a composite face is kept", { timeout: TEST_TIMEOUT }, async () => {
 	const { embedded } = await getCaptureResult();
 	const dup = embedded.filter(rule => rule.family === "Dup");
-	assert.equal(dup.length, 1, "the shadowed rule was kept, so the font is embedded twice");
-	assert.match(dup[0].text, /size-adjust:\s*150%/, "the surviving rule is not the later one");
-	assert.doesNotMatch(dup[0].text, /size-adjust:\s*50%/, "the earlier rule's metrics survived");
+	assert.equal(dup.length, 2, "a rule of the composite face was dropped, so it lost the glyphs only its font carries");
 });
+
+test("each rule of a composite face keeps its own source", { timeout: TEST_TIMEOUT }, async () => {
+	const { embedded, sizes } = await getCaptureResult();
+	const { earlier, later } = getCompositeRules(embedded);
+	assert.equal(earlier.length, sizes["band.ttf"],
+		`the size-adjust:50% rule embedded ${describe(earlier.length, sizes)} instead of band.ttf, its own source`);
+	assert.equal(later.length, sizes["bar.ttf"],
+		`the size-adjust:150% rule embedded ${describe(later.length, sizes)} instead of bar.ttf, its own source`);
+});
+
+test("a composite face keeps its declaration order", { timeout: TEST_TIMEOUT }, async () => {
+	const { embedded } = await getCaptureResult();
+	const { earlier, later } = getCompositeRules(embedded);
+	assert.ok(embedded.indexOf(earlier) < embedded.indexOf(later),
+		"the rules were reordered, which inverts which font the browser reaches for first");
+});
+
+function getCompositeRules(embedded) {
+	const dup = embedded.filter(rule => rule.family === "Dup");
+	const earlier = dup.find(rule => /size-adjust:\s*50%/.test(rule.text));
+	const later = dup.find(rule => /size-adjust:\s*150%/.test(rule.text));
+	assert.ok(earlier, "no rule carries the earlier rule's size-adjust:50%");
+	assert.ok(later, "no rule carries the later rule's size-adjust:150%");
+	return { earlier, later };
+}
 
 test("a single @font-face rule still resolves to its first source", { timeout: TEST_TIMEOUT }, async () => {
 	const { embedded, sizes } = await getCaptureResult();
