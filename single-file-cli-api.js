@@ -77,6 +77,12 @@ async function initialize(options) {
 	if ((options.embedPdf || options.embeddedPdf || options.embedScreenshot || options.embeddedImage) && !options.compressContent) {
 		throw new Error("--embed-pdf, --embedded-pdf, --embed-screenshot and --embedded-image require --compress-content");
 	}
+	if (options.dumpJson && options.outputJson) {
+		throw new Error("--dump-json is not compatible with --output-json, which already writes the JSON in place of the page");
+	}
+	if (options.dumpJson && options.dumpContent && !options.output) {
+		throw new Error("--dump-json is not compatible with --dump-content unless --output is set, because both write to stdout");
+	}
 	if (options.crawlSaveArchiveDedup && !options.crawlSaveArchive) {
 		throw new Error("--crawl-save-archive-dedup requires --crawl-save-archive");
 	}
@@ -400,6 +406,7 @@ async function capturePage(options) {
 		if (options.archiveFilename) {
 			await writeFile(options.archiveFilename, content);
 			pageData.archiveFilename = options.archiveFilename;
+			dumpJsonMetadata(pageData, options);
 			return pageData;
 		}
 		if (options.outputJson) {
@@ -429,6 +436,7 @@ async function capturePage(options) {
 			const outputDirectory = getOutputDirectory(options);
 			pageData.filename = filename.startsWith(outputDirectory) ? filename.substring(outputDirectory.length) : filename;
 		}
+		dumpJsonMetadata(pageData, options);
 		return pageData;
 	} catch (error) {
 		errorCount++;
@@ -450,6 +458,18 @@ async function capturePage(options) {
 			await writeTextFile(options.debugMessagesFile, error.debugMessages.map(([timestamp, message]) =>
 				`[${new Date(timestamp).toISOString()}] ${message.join(" ")}`).join("\n"));
 		}
+	}
+}
+
+function dumpJsonMetadata(pageData, options) {
+	if (options.dumpJson) {
+		const metadata = Object.assign({}, pageData);
+		delete metadata.content;
+		delete metadata.binaryContent;
+		delete metadata.doctype;
+		delete metadata.viewport;
+		delete metadata.comment;
+		console.log(JSON.stringify(metadata, null, 2)); // eslint-disable-line no-console
 	}
 }
 

@@ -213,6 +213,7 @@ const OPTIONS_INFO = [{
 
 	"save-raw-page": { description: "Save the original page without interpreting it into the browser", type: "boolean" },
 	"output-json": { description: "Output the result as a JSON string containing the page and network info", type: "boolean" },
+	"dump-json": { description: "Write the same JSON as --output-json to stdout, without the page content, and leave the page file alone. Unlike --output-json the page is still written where it would have been, so the two outputs can be combined. Incompatible with --output-json, and with --dump-content unless --output is set, because both write to stdout", type: "boolean" },
 	"create-browser-profile": { description: "Path of the browser profile directory to create or update instead of saving a page. The browser is started with a visible window on the URL passed as argument, log in to the website and quit the browser to save the profile, then pass it to --browser-profile when saving pages", type: "string" },
 
 }, {
