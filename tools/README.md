@@ -30,6 +30,19 @@ its own bytes, unzips them and replaces the document, all after load. So `--dump
 returns the wrapper, and the wrapper carries the title of the first page, which reads
 like a plausible answer rather than an obvious failure.
 
+Its siblings are no better, and each fails in a way that looks like a result. On a
+three-page archive opened from `file:`, comparing the route holding the small table of
+contents against the route holding a saved github.com page, every one of these exited 0:
+
+| flag | table of contents route | github.com route |
+| --- | --- | --- |
+| `--dump-dom` | the wrapper | the wrapper |
+| `--screenshot` | correct | a blank white PNG, 2727 bytes against 2728 for `about:blank` |
+| `--print-to-pdf` | correct | an empty page whose header reads `Example Domain`, the wrapper's title |
+
+`--screenshot` is the one to watch, because it fires late enough to be right whenever
+the archive extracts quickly. That makes it look like it waits. It does not.
+
 Chromium offers no "wait, then dump". The nearest thing, `--virtual-time-budget`, is a
 fake clock rather than a wait: it fast-forwards the page's timers and stops when the
 budget of *virtual* milliseconds is spent, whatever that costs in real time. It fails
