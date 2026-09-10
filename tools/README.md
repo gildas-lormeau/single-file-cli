@@ -4,7 +4,8 @@ Development tools. Nothing here is shipped or imported by the CLI.
 
 ## `dump-dom.js`
 
-Loads a page in Chromium and prints the DOM once the page has finished building itself.
+Loads a page in Chromium and prints the DOM, and optionally a screenshot, once the page
+has finished building itself.
 
 ```
 node tools/dump-dom.js <url> [options]
@@ -15,12 +16,20 @@ node tools/dump-dom.js <url> [options]
 | `--wait-for <expression>` | dump when this JavaScript expression is truthy |
 | `--stable-for <ms>` | otherwise, dump when the DOM has not changed for this long (default 1000) |
 | `--timeout <ms>` | give up after this long (default 30000) |
-| `--output <file>` | write to this file instead of stdout |
+| `--output <file>` | write the DOM to this file instead of stdout |
+| `--screenshot <file>` | also write a PNG, and leave the DOM out of stdout |
+| `--full-page` | capture the whole page instead of the viewport |
+| `--browser-width <px>`, `--browser-height <px>` | viewport size |
 | `--browser-executable-path <path>` | browser to run |
 | `--show-browser` | run with a window instead of headless |
 
 Exit status is 1 when the wait times out, with the condition and its last evaluated
 value on stderr.
+
+`--screenshot` waits on the same condition the DOM dump does, so it captures the page
+the archive built rather than whatever was on screen at the load event. Pass `--output`
+alongside it to get both; on its own it keeps stdout free for the PNG's sake. There is
+no PDF: `--print-to-pdf` has no debugging use a screenshot does not cover.
 
 ### Why this exists
 

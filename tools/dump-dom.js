@@ -21,13 +21,13 @@
  *   Source.
  */
 
-/* global setTimeout, TextEncoder */
+/* global setTimeout, TextEncoder, atob */
 
 import { CDP, options as cdpOptions } from "simple-cdp";
 import { launchChromium, closeChromium } from "./../lib/chromium.js";
 import { Deno } from "./../lib/deno-polyfill.js";
 
-const { args, writeTextFile, stdout, exit } = Deno;
+const { args, writeTextFile, writeFile, stdout, exit } = Deno;
 
 const LOCALHOST = "http://localhost:";
 const EMPTY_PAGE_URL = "about:blank";
@@ -40,7 +40,11 @@ const USAGE = `Usage: node tools/dump-dom.js <url> [options]
   --wait-for <expression>          dump when this JavaScript expression is truthy
   --stable-for <ms>                otherwise, dump when the DOM has not changed for this long (default ${DEFAULT_STABLE_DELAY})
   --timeout <ms>                   give up after this long (default ${DEFAULT_MAX_DELAY})
-  --output <file>                  write to this file instead of stdout
+  --output <file>                  write the DOM to this file instead of stdout
+  --screenshot <file>              also write a PNG, and leave the DOM out of stdout
+  --full-page                      capture the whole page instead of the viewport
+  --browser-width <px>             viewport width
+  --browser-height <px>            viewport height
   --browser-executable-path <path> browser to run
   --show-browser                   run with a window instead of headless`;
 
@@ -49,12 +53,16 @@ const OPTION_NAMES = {
 	"--stable-for": "stableDelay",
 	"--timeout": "maxDelay",
 	"--output": "output",
+	"--screenshot": "screenshot",
+	"--browser-width": "browserWidth",
+	"--browser-height": "browserHeight",
 	"--browser-executable-path": "browserExecutablePath"
 };
 const FLAG_NAMES = {
-	"--show-browser": "showBrowser"
+	"--show-browser": "showBrowser",
+	"--full-page": "fullPage"
 };
-const NUMBER_OPTION_NAMES = ["stableDelay", "maxDelay"];
+const NUMBER_OPTION_NAMES = ["stableDelay", "maxDelay", "browserWidth", "browserHeight"];
 
 let options;
 try {
@@ -66,11 +74,14 @@ try {
 }
 let exitCode = 0;
 try {
-	const content = await dumpDOM(options);
+	const { content, screenshot } = await capture(options);
 	if (options.output) {
 		await writeTextFile(options.output, content);
-	} else {
+	} else if (!options.screenshot) {
 		await stdout.write(new TextEncoder().encode(content + "\n"));
+	}
+	if (screenshot) {
+		await writeFile(options.screenshot, screenshot);
 	}
 } catch (error) {
 	console.error(error.message || error); // eslint-disable-line no-console
@@ -80,10 +91,12 @@ try {
 }
 exit(exitCode);
 
-async function dumpDOM(options) {
+async function capture(options) {
 	cdpOptions.apiUrl = LOCALHOST + (await launchChromium({
 		headless: !options.showBrowser,
-		executablePath: options.browserExecutablePath
+		executablePath: options.browserExecutablePath,
+		width: options.browserWidth,
+		height: options.browserHeight
 	}));
 	const targetInfo = await CDP.createTarget(EMPTY_PAGE_URL);
 	const cdp = new CDP(targetInfo);
@@ -92,7 +105,9 @@ async function dumpDOM(options) {
 	await Page.enable();
 	await Page.navigate({ url: options.url });
 	try {
-		return await waitForContent(Runtime, options);
+		const content = await waitForContent(Runtime, options);
+		const screenshot = options.screenshot ? await captureScreenshot(Page, options) : undefined;
+		return { content, screenshot };
 	} finally {
 		try {
 			await CDP.closeTarget(targetInfo.id);
@@ -100,6 +115,26 @@ async function dumpDOM(options) {
 			// ignored
 		}
 	}
+}
+
+async function captureScreenshot(Page, options) {
+	let clip;
+	if (options.fullPage) {
+		const metrics = await Page.getLayoutMetrics();
+		const { width, height } = metrics.cssContentSize || metrics.contentSize;
+		clip = { x: 0, y: 0, width, height, scale: 1 };
+	}
+	const { data } = await Page.captureScreenshot({ captureBeyondViewport: Boolean(clip), clip });
+	return decodeBase64(data);
+}
+
+function decodeBase64(data) {
+	const binary = atob(data);
+	const bytes = new Uint8Array(binary.length);
+	for (let indexByte = 0; indexByte < binary.length; indexByte++) {
+		bytes[indexByte] = binary.charCodeAt(indexByte);
+	}
+	return bytes;
 }
 
 async function waitForContent(Runtime, options) {
@@ -164,7 +199,7 @@ function parseArguments(args) {
 	if (options.url === undefined) {
 		throw new Error("Missing url");
 	}
-	NUMBER_OPTION_NAMES.forEach(name => {
+	NUMBER_OPTION_NAMES.filter(name => options[name] !== undefined).forEach(name => {
 		const value = Number(options[name]);
 		if (!Number.isFinite(value) || value < 0) {
 			throw new Error(`Invalid value for ${name}`);
