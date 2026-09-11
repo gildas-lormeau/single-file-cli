@@ -137,7 +137,7 @@ const OPTIONS_INFO = [{
 	"self-extracting-archive": { description: "Create a self-extracting (ZIP) HTML file", type: "boolean", defaultValue: true },
 	"password": { description: "Password of the zip file when using --compress-content or --self-extracting-archive", type: "string" },
 	"insert-text-body": { description: "Insert the text of the page into the self-extracting HTML file", type: "boolean" },
-	"create-root-directory": { description: "Create a root directory based on the timestamp", type: "boolean" },
+	"create-root-directory": { description: "Create a root directory based on the timestamp. With --crawl-save-archive it stores the first page in a folder of its own instead, like the other pages, so that no page shares the root of the archive with the files describing it", type: "boolean" },
 	"extract-data-from-page": { description: "Extract compressed data from the page instead of fetching the page in order to create universal self-extracting HTML files", type: "boolean", defaultValue: true },
 	"prevent-appended-data": { description: "Prevent appending data after the compressed data when creating self-extracting HTML files", type: "boolean" },
 	"declare-appended-data": { description: "Declare the data appended after the compressed data as the comment of the ZIP archive, for readers rejecting undeclared trailing bytes (e.g. java.util.zip); ZIP tools then print that data when listing the archive. Has no effect when the extra data is relocated ahead of the compressed data, because nothing is appended then", type: "boolean" },

@@ -7,6 +7,11 @@
 //
 // --max-appended-data-length is what found this: it needed a line here as well as in options.js,
 // and would otherwise have shipped working everywhere except archives.
+//
+// Being on the withheld list is not free either, and --create-root-directory is the proof: it sat
+// there while options.js advertised it with no mention of archives, so `--crawl-save-archive
+// --create-root-directory` exited 0 and produced an archive with no root directory at all. The
+// list means "the archive writer must not receive this", never "this option does not apply here".
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -18,9 +23,10 @@ const { PROCESS_OPTION_NAMES } = await importLibModule("single-file-archive.js")
 // archive path receives
 const FORWARDED = [
 	"zipScript", "dedupPages", "markUnarchivedLinks", "tocPage", "pageList", "pageTransitions",
-	"insertSingleFileComment", "removeSavedDate", "declareAppendedData", "embeddedImage",
-	"embeddedPdf", "extractDataFromPage", "includeBOM", "insertCanonicalLink", "insertMetaCSP",
-	"insertMetaNoIndex", "maxAppendedDataLength", "preventAppendedData", "selfExtractingArchive"
+	"insertSingleFileComment", "removeSavedDate", "createRootDirectory", "declareAppendedData",
+	"embeddedImage", "embeddedPdf", "extractDataFromPage", "includeBOM", "insertCanonicalLink",
+	"insertMetaCSP", "insertMetaNoIndex", "maxAppendedDataLength", "preventAppendedData",
+	"selfExtractingArchive"
 ];
 
 test("every compression option is either forwarded to the archive or deliberately withheld", () => {
@@ -48,4 +54,8 @@ test("a crawl option is renamed on its way to the archive", () => {
 
 test("a compression option reaches the archive under its own name", () => {
 	assert.equal(getArchiveOptions({ maxAppendedDataLength: 4096 }).maxAppendedDataLength, 4096);
+});
+
+test("the root directory option reaches the archive", () => {
+	assert.equal(getArchiveOptions({ createRootDirectory: true }).createRootDirectory, true);
 });

@@ -32,7 +32,7 @@ import { Deno, path } from "./lib/deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
-const ARCHIVE_EXCLUDED_OPTION_NAMES = ["createRootDirectory", "disableCompression", "insertTextBody", "password", "url"];
+const ARCHIVE_EXCLUDED_OPTION_NAMES = ["disableCompression", "insertTextBody", "password", "url"];
 
 const DEFAULT_OPTIONS = {
 	removeHiddenElements: true,
