@@ -14,6 +14,17 @@
 		"node": ">=24.0.0"
 	},
 	"type": "module",
+	"files": [
+		"lib",
+		"deno.json",
+		"options.js",
+		"single-file",
+		"single-file.bat",
+		"single-file-cli-api.js",
+		"single-file-launcher.js",
+		"single-file-node.js",
+		"single-file-node.bat"
+	],
 	"scripts": {
 		"test": "node --test --test-concurrency=2 \"test/**/*.test.js\"",
 		"test:dev": "SINGLE_FILE_TARGET=dev node --test --test-concurrency=2 \"test/**/*.test.js\"",
