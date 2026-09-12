@@ -74,7 +74,7 @@ const OPTIONS_INFO = [{
 	"browser-capture-max-time": { description: "Maximum delay of time to wait for capturing the page in ms", type: "number", defaultValue: 60000 },
 	"browser-wait-delay": { description: "Time to wait before capturing the page in ms", type: "number" },
 	"browser-wait-end-delay": { description: "Time to wait after capturing the page in ms", type: "number" },
-	"browser-wait-until": { description: "When to consider the page is loaded (InteractiveTime, networkIdle, networkAlmostIdle, load, domContentLoaded)", type: "string", defaultValue: "networkIdle" },
+	"browser-wait-until": { description: "When to consider the page is loaded (InteractiveTime, networkIdle, networkAlmostIdle, load, DOMContentLoaded)", type: "string", defaultValue: "networkIdle" },
 	"browser-wait-until-delay": { description: "Delay of time in ms to wait before considering the page is loaded when the value of --browser-wait-until is reached", type: "number", defaultValue: 1000 },
 	"browser-wait-until-fallback": { description: "Stop loading the page and capture it as it is when --browser-load-max-time expires before the value of --browser-wait-until is reached, provided the page has reached DOMContentLoaded; a load timeout error is thrown otherwise", type: "boolean", defaultValue: true },
 }, {
