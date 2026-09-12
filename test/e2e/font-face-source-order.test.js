@@ -25,7 +25,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import process from "node:process";
 import { Buffer } from "node:buffer";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
@@ -118,7 +118,7 @@ async function runCapture() {
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
 		const outputPath = join(directory, "out.html");
-		await execFileAsync(process.execPath, ["single-file-node.js", "http://localhost:" + server.address().port + "/", outputPath], { cwd: cliDirectory });
+		await execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, "http://localhost:" + server.address().port + "/", outputPath], { cwd: cliDirectory });
 		const content = (await readFile(outputPath)).toString("utf8");
 		const embedded = [...content.matchAll(/@font-face\s*{[^}]*}/g)].map(match => {
 			const family = match[0].match(/font-family:\s*"?([^;"}]+)"?/);

@@ -9,7 +9,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -37,7 +37,7 @@ test("the backend fetch presents the same user agent as the browser", { timeout:
 	try {
 		const outputPath = join(directory, "out.html");
 		const url = "http://localhost:" + server.address().port + "/top.html";
-		await execFileAsync(process.execPath, ["single-file-node.js", url, outputPath], { cwd: cliDirectory });
+		await execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, url, outputPath], { cwd: cliDirectory });
 		// the fetch made outside the browser sends no sec-fetch-dest; it does send
 		// sec-fetch-mode, which node sets on every request, so that one tells nothing
 		const browserRequest = requests.find(({ headers }) => headers["sec-fetch-dest"] !== undefined);
@@ -77,7 +77,7 @@ test("the backend fetch presents the user agent given on the command line", { ti
 		const outputPath = join(directory, "out.html");
 		const url = "http://localhost:" + server.address().port + "/top.html";
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 			"--user-agent", USER_AGENT
 		], { cwd: cliDirectory });
 		assert.ok(requests.length, "the resource was not fetched");

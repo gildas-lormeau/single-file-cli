@@ -9,7 +9,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const FRAME_MARKER = "OUT_OF_PROCESS_FRAME_CONTENT";
@@ -44,7 +44,7 @@ test("blocked URL patterns and extra HTTP headers apply in cross-origin frames",
 		const outputPath = join(directory, "out.html");
 		const url = "http://localhost:" + server.address().port + "/top.html";
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 			"--blocked-URL-pattern", "tracker",
 			"--http-header", "x-test-header=yes"
 		], { cwd: cliDirectory });
@@ -74,7 +74,7 @@ test("cross-origin frames are captured in the saved page", { timeout: 120000 }, 
 	try {
 		const outputPath = join(directory, "out.html");
 		const url = "http://localhost:" + server.address().port + "/top.html";
-		await execFileAsync(process.execPath, ["single-file-node.js", url, outputPath], { cwd: cliDirectory });
+		await execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, url, outputPath], { cwd: cliDirectory });
 		const content = await readFile(outputPath, "utf8");
 		assert.ok(content.includes(FRAME_MARKER), "the out-of-process frame was saved empty");
 	} finally {

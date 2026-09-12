@@ -24,7 +24,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
 import zlib from "node:zlib";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
@@ -85,7 +85,7 @@ async function runCapture(mode) {
 		const url = mode === "raw" ? origin + "/big.html" : origin + "/";
 		const options = ["--max-resource-size-enabled", "--max-resource-size=" + CAP_MEGABYTES];
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", url, join(directory, "page.html"),
+			"single-file-node.js", ...fastCaptureArgs, url, join(directory, "page.html"),
 			...mode === "uncapped" ? [] : options,
 			...mode === "raw" ? ["--save-raw-page"] : []
 		], { cwd: cliDirectory, maxBuffer: 16 * 1024 * 1024 });

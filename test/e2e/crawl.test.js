@@ -9,7 +9,7 @@ import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
@@ -57,7 +57,7 @@ test("mail and script links are not crawled as external links", { timeout: TEST_
 	try {
 		const url = "http://localhost:" + server.address().port + "/";
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", url,
+			"single-file-node.js", ...fastCaptureArgs, url,
 			"--crawl-links",
 			"--crawl-inner-links-only=false",
 			"--output-directory", directory,
@@ -77,7 +77,7 @@ test("mail and script links are not crawled as external links", { timeout: TEST_
 test("crawl options require --crawl-links", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
 		execFileAsync(process.execPath, [
-			"single-file-node.js", "http://localhost/",
+			"single-file-node.js", ...fastCaptureArgs, "http://localhost/",
 			"--crawl-no-parent",
 			"--crawl-max-depth", "2",
 			"--crawl-rewrite-rule", "a b"
@@ -130,7 +130,7 @@ async function runCrawl() {
 	try {
 		const url = "http://localhost:" + server.address().port + "/";
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", url,
+			"single-file-node.js", ...fastCaptureArgs, url,
 			"--crawl-links",
 			"--crawl-replace-URLs",
 			"--output-directory", directory,

@@ -9,7 +9,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory, importLibModule } from "../target.js";
+import { cliDirectory, importLibModule, fastCaptureArgs } from "../target.js";
 
 const { configure, ZipReader, Uint8ArrayReader, TextWriter } = await importLibModule("single-file-archive.js");
 const execFileAsync = promisify(execFile);
@@ -27,7 +27,7 @@ test("a password-protected archive decrypts with the password", { timeout: 12000
 	try {
 		const outputPath = join(directory, "out.html");
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", "http://localhost:" + server.address().port + "/", outputPath,
+			"single-file-node.js", ...fastCaptureArgs, "http://localhost:" + server.address().port + "/", outputPath,
 			"--compress-content", "--password", PASSWORD
 		], { cwd: cliDirectory });
 		const data = new Uint8Array(await readFile(outputPath));

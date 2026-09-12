@@ -6,7 +6,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -18,7 +18,7 @@ test("errors file lines include the error message and the exit code is nonzero",
 		let exitCode = 0;
 		try {
 			await execFileAsync(process.execPath, [
-				"single-file-node.js", url, join(directory, "out.html"),
+				"single-file-node.js", ...fastCaptureArgs, url, join(directory, "out.html"),
 				"--errors-file", errorsPath
 			], { cwd: cliDirectory });
 		} catch (error) {

@@ -9,7 +9,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -36,7 +36,7 @@ test("a blocked URL is never requested", { timeout: 120000 }, async () => {
 		const outputPath = join(directory, "out.html");
 		const url = "http://localhost:" + server.address().port + "/top.html";
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 			"--blocked-URL-pattern", "tracker"
 		], { cwd: cliDirectory });
 		const content = await readFile(outputPath, "utf8");

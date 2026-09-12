@@ -7,7 +7,7 @@ import { mkdtemp, mkdir, readdir, readFile, writeFile, rm } from "node:fs/promis
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -24,7 +24,7 @@ test("a browser profile is copied and left unmodified by a capture", { timeout: 
 		const outputPath = join(directory, "page.html");
 		const url = "http://localhost:" + server.address().port + "/";
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 			"--browser-profile", profilePath
 		], { cwd: cliDirectory });
 		let content;
@@ -51,7 +51,7 @@ test("a missing browser profile is reported with its path", { timeout: 120000 },
 		let stderr = "";
 		try {
 			await execFileAsync(process.execPath, [
-				"single-file-node.js", "https://example.com", join(directory, "page.html"),
+				"single-file-node.js", ...fastCaptureArgs, "https://example.com", join(directory, "page.html"),
 				"--browser-profile", profilePath
 			], { cwd: cliDirectory });
 		} catch (error) {

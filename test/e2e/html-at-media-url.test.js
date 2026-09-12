@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 import process from "node:process";
 import { Buffer } from "node:buffer";
 const { configure, ZipReader, Uint8ArrayReader } = await importLibModule("single-file-archive.js");
-import { cliDirectory, importLibModule } from "../target.js";
+import { cliDirectory, importLibModule, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
@@ -85,7 +85,7 @@ async function runCapture(compressContent) {
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
 		const outputPath = join(directory, compressContent ? "out.zip.html" : "out.html");
-		const args = ["single-file-node.js", "http://localhost:" + server.address().port + "/", outputPath];
+		const args = ["single-file-node.js", ...fastCaptureArgs, "http://localhost:" + server.address().port + "/", outputPath];
 		if (compressContent) {
 			args.push("--compress-content");
 		}

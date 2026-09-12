@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Buffer } from "node:buffer";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const ZIP_SIGNATURE = "PK\u0003\u0004";
@@ -23,7 +23,7 @@ test("output-json embeds compressed content as base64", { timeout: 120000 }, asy
 		const outputPath = join(directory, "page.json");
 		const url = "http://localhost:" + server.address().port + "/";
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 			"--compress-content",
 			"--output-json"
 		], { cwd: cliDirectory });

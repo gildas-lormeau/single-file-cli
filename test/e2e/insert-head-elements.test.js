@@ -21,7 +21,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
@@ -61,7 +61,7 @@ async function runCapture(extraArguments) {
 	try {
 		const outputPath = join(directory, "page.html");
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", "http://localhost:" + server.address().port + "/", outputPath
+			"single-file-node.js", ...fastCaptureArgs, "http://localhost:" + server.address().port + "/", outputPath
 		].concat(extraArguments), { cwd: cliDirectory });
 		return (await readFile(outputPath)).toString("utf8");
 	} finally {

@@ -7,7 +7,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory, firefox } from "../target.js";
+import { cliDirectory, firefox, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -23,7 +23,7 @@ test("pages are not captured as controlled by automation", { timeout: 120000, sk
 		const outputPath = join(directory, "page.html");
 		const url = "http://localhost:" + server.address().port + "/";
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath
 		], { cwd: cliDirectory });
 		let content;
 		try {
@@ -52,7 +52,7 @@ test("pages are not captured with a headless user agent", { timeout: 120000 }, a
 		const outputPath = join(directory, "page.html");
 		const url = "http://localhost:" + server.address().port + "/";
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath
 		], { cwd: cliDirectory });
 		let content;
 		try {
@@ -87,7 +87,7 @@ test("the user agent option overrides the browser user agent", { timeout: 120000
 		const outputPath = join(directory, "page.html");
 		const url = "http://localhost:" + server.address().port + "/";
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath, "--user-agent=" + userAgent
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath, "--user-agent=" + userAgent
 		], { cwd: cliDirectory });
 		let content;
 		try {

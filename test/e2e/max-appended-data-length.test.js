@@ -20,7 +20,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
 const { configure, ZipReader, Uint8ArrayReader } = await importLibModule("single-file-archive.js");
-import { cliDirectory, importLibModule } from "../target.js";
+import { cliDirectory, importLibModule, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
@@ -77,7 +77,7 @@ async function runCapture(maxAppendedDataLength) {
 	try {
 		const origin = "http://localhost:" + server.address().port;
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", origin + "/", join(directory, "page.html"),
+			"single-file-node.js", ...fastCaptureArgs, origin + "/", join(directory, "page.html"),
 			"--compress-content",
 			"--max-appended-data-length=" + maxAppendedDataLength
 		], { cwd: cliDirectory });

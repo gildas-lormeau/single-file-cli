@@ -21,7 +21,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 180000;
@@ -75,5 +75,5 @@ async function captureAndReopen(options) {
 }
 
 function runCli(args) {
-	return execFileAsync(process.execPath, ["single-file-node.js", ...args], { cwd: cliDirectory });
+	return execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, ...args], { cwd: cliDirectory });
 }

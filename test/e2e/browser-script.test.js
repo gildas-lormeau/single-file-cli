@@ -15,7 +15,7 @@ import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
@@ -28,7 +28,7 @@ test("a browser script runs in the page it saves", { timeout: TEST_TIMEOUT }, as
 			"const marker=document.createElement(\"p\");marker.id=\"" + MARKER + "\";document.body.appendChild(marker);});");
 		const outputPath = join(directory, "out.html");
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 			"--browser-script", scriptPath
 		], { cwd: cliDirectory });
 		assert.match(await readFile(outputPath, "utf8"), new RegExp(MARKER));
@@ -44,7 +44,7 @@ test("a browser script that throws fails the save instead of degrading it", { ti
 		let exitCode = 0, stderr = "";
 		try {
 			await execFileAsync(process.execPath, [
-				"single-file-node.js", url, outputPath,
+				"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 				"--browser-script", scriptPath
 			], { cwd: cliDirectory });
 		} catch (error) {
@@ -75,7 +75,7 @@ test("a browser script ending in a comment does not swallow the next one", { tim
 			"const marker=document.createElement(\"p\");marker.id=\"" + MARKER + "\";document.body.appendChild(marker);});\n");
 		const outputPath = join(directory, "out.html");
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 			"--browser-script", firstPath,
 			"--browser-script", secondPath
 		], { cwd: cliDirectory });
@@ -90,7 +90,7 @@ test("a lone browser script ending in a comment still saves the page", { timeout
 		await writeFile(scriptPath, "globalThis.__only = 1; // a trailing comment");
 		const outputPath = join(directory, "out.html");
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", url, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, url, outputPath,
 			"--browser-script", scriptPath
 		], { cwd: cliDirectory });
 		assert.match(await readFile(outputPath, "utf8"), /<h1>page<\/h1>/,

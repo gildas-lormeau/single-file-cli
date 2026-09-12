@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Buffer } from "node:buffer";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const USERNAME = "single";
@@ -37,7 +37,7 @@ test("proxy credentials answer the 407 challenge of the proxy", { timeout: 12000
 	try {
 		const outputPath = join(directory, "out.html");
 		await execFileAsync(process.execPath, [
-			"single-file-node.js", PAGE_URL, outputPath,
+			"single-file-node.js", ...fastCaptureArgs, PAGE_URL, outputPath,
 			"--http-proxy-server", "127.0.0.1:" + proxy.address().port,
 			"--http-proxy-username", USERNAME,
 			"--http-proxy-password", PASSWORD

@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
 const { configure, ZipReader, Uint8ArrayReader, TextWriter } = await importLibModule("single-file-archive.js");
-import { cliDirectory, importLibModule } from "../target.js";
+import { cliDirectory, importLibModule, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
@@ -66,7 +66,7 @@ test("--crawl-save-archive-dedup replaces duplicate resources with symlink alias
 
 test("--crawl-save-archive-dedup requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
-		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-dedup"], { cwd: cliDirectory }),
+		execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, "http://localhost/", "--compress-content", "--crawl-save-archive-dedup"], { cwd: cliDirectory }),
 		error => error.stderr.includes("--crawl-save-archive-dedup requires --crawl-save-archive"));
 });
 
@@ -91,25 +91,25 @@ test("--crawl-save-archive-toc stores a table of contents page", { timeout: TEST
 
 test("--crawl-save-archive-toc requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
-		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-toc"], { cwd: cliDirectory }),
+		execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, "http://localhost/", "--compress-content", "--crawl-save-archive-toc"], { cwd: cliDirectory }),
 		error => error.stderr.includes("--crawl-save-archive-toc requires --crawl-save-archive"));
 });
 
 test("--crawl-save-archive-page-list requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
-		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-page-list"], { cwd: cliDirectory }),
+		execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, "http://localhost/", "--compress-content", "--crawl-save-archive-page-list"], { cwd: cliDirectory }),
 		error => error.stderr.includes("--crawl-save-archive-page-list requires --crawl-save-archive"));
 });
 
 test("--crawl-save-archive-mark-unarchived-links requires --crawl-save-archive", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
-		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--compress-content", "--crawl-save-archive-mark-unarchived-links"], { cwd: cliDirectory }),
+		execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, "http://localhost/", "--compress-content", "--crawl-save-archive-mark-unarchived-links"], { cwd: cliDirectory }),
 		error => error.stderr.includes("--crawl-save-archive-mark-unarchived-links requires --crawl-save-archive"));
 });
 
 test("--crawl-save-archive requires --compress-content", { timeout: TEST_TIMEOUT }, async () => {
 	await assert.rejects(
-		execFileAsync(process.execPath, ["single-file-node.js", "http://localhost/", "--crawl-save-archive"], { cwd: cliDirectory }),
+		execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, "http://localhost/", "--crawl-save-archive"], { cwd: cliDirectory }),
 		error => error.stderr.includes("--crawl-save-archive requires --compress-content"));
 });
 
@@ -142,7 +142,7 @@ async function runCrawl(dedup) {
 	try {
 		const origin = "http://localhost:" + server.address().port;
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js", origin + "/", join(directory, "archive.html"),
+			"single-file-node.js", ...fastCaptureArgs, origin + "/", join(directory, "archive.html"),
 			"--crawl-links",
 			"--crawl-save-archive",
 			"--compress-content",

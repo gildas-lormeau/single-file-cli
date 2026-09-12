@@ -7,7 +7,7 @@ import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -22,7 +22,7 @@ test("duplicate urls in a urls file are captured once", { timeout: 120000 }, asy
 		const urlsFilePath = join(directory, "urls.txt");
 		await writeFile(urlsFilePath, url + "\n\n" + url + "\n");
 		const { stderr } = await execFileAsync(process.execPath, [
-			"single-file-node.js",
+			"single-file-node.js", ...fastCaptureArgs,
 			"--urls-file", urlsFilePath,
 			"--output-directory", directory,
 			"--filename-template", "{page-title}.html"
@@ -48,7 +48,7 @@ test("a failed capture in a urls file batch sets a nonzero exit code without abo
 		let exitCode = 0, stderr = "";
 		try {
 			({ stderr } = await execFileAsync(process.execPath, [
-				"single-file-node.js",
+				"single-file-node.js", ...fastCaptureArgs,
 				"--urls-file", urlsFilePath,
 				"--output-directory", directory,
 				"--filename-template", "{page-title}.html"
