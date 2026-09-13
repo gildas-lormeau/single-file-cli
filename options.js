@@ -196,6 +196,7 @@ const OPTIONS_INFO = [{
 	"insert-meta-csp": { key: "insertMetaCSP", description: "Include a <meta> tag with a CSP to avoid potential requests to internet when viewing a page", type: "boolean", defaultValue: true },
 	"insert-meta-noindex": { key: "insertMetaNoIndex", description: "Insert a <meta name=robots content=noindex> element, so a saved page served on a public host is not indexed. Ignored when the page already declares noindex", type: "boolean" },
 	"remove-saved-date": { description: "Remove saved date metadata in HTML header", type: "boolean" },
+	"read-maff-metadata": { description: "Read the original URL and the archive time from the index.rdf file stored next to a page extracted from a MAFF archive, and save those instead of the path and the date of the extracted copy. Fetches index.rdf next to every page saved, a request that 404s on the open web, so leave it off unless you are saving extracted MAFF pages", type: "boolean" },
 	"save-original-urls": { key: "saveOriginalURLs", description: "Save the original URLS in the embedded contents", type: "boolean" },
 	"insert-single-file-comment": { description: "Insert a comment in the HTML header with the URL of the page", type: "boolean", defaultValue: true },
 	"resolve-links": { description: "Resolve link URLs to absolute URLs", type: "boolean", defaultValue: true }
