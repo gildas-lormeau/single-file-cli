@@ -7,7 +7,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory, useDevBuild, fastCaptureArgs } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -19,7 +19,6 @@ const execFileAsync = promisify(execFile);
 //
 // The sanitizer used to read the resolved IDL property, so it skipped SVG links, whose href is an
 // SVGAnimatedString and not a string, and it never saw xlink:href, which no [href] selector matches.
-const skip = useDevBuild ? false : "the fix is in an unreleased single-file-core — run ./build-dev.sh && npm run test:dev";
 
 const PAGE = "<html><head><title>Script URIs</title></head><body>" +
 	"<svg id=svg width=60 height=60 xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">" +
@@ -58,13 +57,13 @@ async function capture() {
 	}
 }
 
-test("no javascript: URI survives in a saved page", { timeout: 120000, skip }, async () => {
+test("no javascript: URI survives in a saved page", { timeout: 120000 }, async () => {
 	const content = await capture();
 	assert.ok(!content.includes("javascript:alert"), "a javascript: URI was kept: " + (content.match(/[^\s"']*javascript:alert[^\s"']*/) || []));
 	assert.ok(content.includes("javascript:void(0)"), "expected the links to be rewritten, got: " + content);
 });
 
-test("a neutralized xlink:href stays in the xlink namespace", { timeout: 120000, skip }, async () => {
+test("a neutralized xlink:href stays in the xlink namespace", { timeout: 120000 }, async () => {
 	const content = await capture();
 	// setAttribute would have added a second, null-namespace href and left the xlink one live, and on
 	// re-parse the first of the two duplicates wins — which would be the original.
@@ -73,7 +72,7 @@ test("a neutralized xlink:href stays in the xlink namespace", { timeout: 120000,
 	assert.ok(!/<a id=svg-xlink[^>]*\shref=/.test(content), "a duplicate null-namespace href was added: " + (content.match(/<a id=svg-xlink[^>]*>/) || []));
 });
 
-test("event handler attributes are removed whatever their case or namespace", { timeout: 120000, skip }, async () => {
+test("event handler attributes are removed whatever their case or namespace", { timeout: 120000 }, async () => {
 	const content = await capture();
 	assert.ok(!/alert\(3\)/.test(content), "a mixed-case ONLOAD survived: " + (content.match(/<div id=mixed[^>]*>/) || []));
 	assert.ok(!/alert\(4\)/.test(content), "a namespaced ONERROR survived: " + (content.match(/<div id=namespaced[^>]*>/) || []));
@@ -81,7 +80,7 @@ test("event handler attributes are removed whatever their case or namespace", { 
 	assert.ok(!/alert\(6\)/.test(content), "an obfuscated mixed-case HREF survived: " + (content.match(/<a id=svg-runtime[^>]*>/) || []));
 });
 
-test("the saved page forbids form submission", { timeout: 120000, skip }, async () => {
+test("the saved page forbids form submission", { timeout: 120000 }, async () => {
 	const content = await capture();
 	// The one channel the rest of the policy leaves open: default-src does not cover form-action, so
 	// without this a surviving javascript: form action could post the page anywhere.
