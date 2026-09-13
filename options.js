@@ -192,6 +192,7 @@ const OPTIONS_INFO = [{
 	"infobar-position-left": { description: "Position the infobar at the left of the page", type: "string", defaultValue: "" },
 }, {
 	"include-bom": { key: "includeBOM", description: "Include the UTF-8 BOM into the HTML page, ignored when the page is compressed unless --extract-data-from-page is disabled and no image is embedded", type: "boolean" },
+	"insert-canonical-link": { description: "Insert a <link rel=canonical> element pointing at the URL of the page, ignored when the page is not saved from an HTTP(S) URL", type: "boolean", defaultValue: true },
 	"insert-meta-csp": { key: "insertMetaCSP", description: "Include a <meta> tag with a CSP to avoid potential requests to internet when viewing a page", type: "boolean", defaultValue: true },
 	"insert-meta-noindex": { key: "insertMetaNoIndex", description: "Insert a <meta name=robots content=noindex> element, so a saved page served on a public host is not indexed. Ignored when the page already declares noindex", type: "boolean" },
 	"remove-saved-date": { description: "Remove saved date metadata in HTML header", type: "boolean" },
