@@ -28,46 +28,28 @@ import * as cdpBackend from "./lib/cdp-client.js";
 import * as bidiBackend from "./lib/bidi-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
 import { createPagesArchive, PROCESS_OPTION_NAMES } from "./lib/single-file-archive.js";
+import { getDefaultOptions } from "./options.js";
 import { Deno, path } from "./lib/deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
 
 const ARCHIVE_EXCLUDED_OPTION_NAMES = ["disableCompression", "insertTextBody", "password", "url"];
 
-const DEFAULT_OPTIONS = {
-	removeHiddenElements: true,
-	removeUnusedStyles: true,
-	removeUnusedFonts: true,
-	compressHTML: true,
-	loadDeferredContent: true,
-	loadDeferredContentMaxIdleTime: 1500,
-	loadDeferredContentDispatchScrollEvent: true,
-	filenameTemplate: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}",
-	filenameMaxLength: 192,
-	filenameMaxLengthUnit: "bytes",
-	filenameReplacedCharacters: ["~", "+", "?", "%", "*", ":", "|", "\"", "<", ">", "\\\\", "\x00-\x1f", "\x7F"],
-	filenameReplacementCharacter: "_",
-	filenameReplacementCharacters: ["～", "＋", "？", "％", "＊", "：", "｜", "＂", "＜", "＞", "＼"],
-	maxResourceSize: 10,
+// the command line is the single source of the defaults. only the two options it has no
+// defaultValue for are set here, and the agreement test asserts this overlay stays exactly
+// these two, so a third can only be added deliberately.
+const API_ONLY_DEFAULTS = {
 	backgroundSave: true,
-	removeAlternativeFonts: true,
-	removeAlternativeMedias: true,
-	removeAlternativeImages: true,
-	groupDuplicateImages: true,
-	saveFavicon: true,
-	insertMetaCSP: true,
-	insertSingleFileComment: true,
-	blockScripts: true,
-	blockVideos: true,
-	blockAudios: true
+	saveFavicon: true
 };
+const DEFAULT_OPTIONS = Object.assign(getDefaultOptions(), API_ONLY_DEFAULTS);
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
 
 const { readTextFile, writeTextFile, readFile, writeFile, stdout, mkdir, makeTempDir, remove, stat, errors } = Deno;
 let backend = cdpBackend, tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, errorCount = 0;
 
-export { initialize, closeBrowser, getArchiveOptions, ARCHIVE_EXCLUDED_OPTION_NAMES, DEFAULT_OPTIONS };
+export { initialize, closeBrowser, getArchiveOptions, ARCHIVE_EXCLUDED_OPTION_NAMES, DEFAULT_OPTIONS, API_ONLY_DEFAULTS };
 
 async function closeBrowser() {
 	await backend.closeBrowser();

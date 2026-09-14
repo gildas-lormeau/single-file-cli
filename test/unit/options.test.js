@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseArgs, applySettings, parseUrlsFile } from "../../options.js";
-import { DEFAULT_OPTIONS } from "../../single-file-cli-api.js";
+import { parseArgs, getDefaultOptions, applySettings, parseUrlsFile } from "../../options.js";
+import { DEFAULT_OPTIONS, API_ONLY_DEFAULTS } from "../../single-file-cli-api.js";
 
 const parse = args => parseArgs(args).options;
 
@@ -144,35 +144,16 @@ test("values are parsed from both spaced and equal forms", () => {
 	assert.equal(parse(["--filename-template={page-title}.html"]).filenameTemplate, "{page-title}.html");
 });
 
-// the api applies its own defaults table, a subset of the command line's. an option present in
-// both must agree: a falsy default deleted from the api table in 2024 silently diverged years
-// later when the command line flipped that default to true, and nothing failed.
-test("the api defaults agree with the command line defaults on every shared option", () => {
-	// the two tables spell the control range differently, with no behavioural difference: the api
-	// uses real control characters where the command line uses the literal \x00-\x1f text, and
-	// both reach the same regular expression because only a single character is ever escaped.
-	const knownDivergent = ["filenameReplacedCharacters"];
-	const commandLineDefaults = parseArgs([], true).options;
-	const shared = Object.keys(DEFAULT_OPTIONS)
-		.filter(name => name in commandLineDefaults)
-		.filter(name => !knownDivergent.includes(name));
-	assert.ok(shared.length > 10, "expected the two tables to share options, found " + shared.length);
-	const fromApi = {};
-	const fromCommandLine = {};
-	for (const name of shared) {
-		fromApi[name] = DEFAULT_OPTIONS[name];
-		fromCommandLine[name] = commandLineDefaults[name];
-	}
-	assert.deepEqual(fromApi, fromCommandLine);
-});
-
-// the api defaults the switch that turns this family on, so it has to default the whole family.
-// an option left out of the table arrives as undefined, which core reads as false, so the pass
-// silently runs in a shape the caller never chose. a 2024 cleanup dropped the falsy members of
-// this family, which was a no-op until the command line flipped one of them to true in 2026.
-test("the api defaults the whole deferred content family, not just the switch", () => {
-	const commandLineDefaults = parseArgs([], true).options;
-	const family = Object.keys(commandLineDefaults).filter(name => name.startsWith("loadDeferredContent"));
-	assert.ok(family.length > 1, "expected the command line to default several of them, found " + family.length);
-	assert.deepEqual(family.filter(name => !(name in DEFAULT_OPTIONS)), []);
+// the command line is the single source of the defaults: the api derives its table from
+// getDefaultOptions() and layers a named overlay on top. this asserts the overlay is exactly
+// the two options the command line has no defaultValue for, so a third cannot be added by
+// accident and the two tables cannot drift apart the way they did between 2024 and 2026.
+test("the api defaults are the command line defaults plus a named overlay", () => {
+	const commandLineDefaults = getDefaultOptions();
+	assert.ok(Object.keys(commandLineDefaults).length > 40, "expected the command line to default many options");
+	const differing = Object.keys(DEFAULT_OPTIONS).filter(name =>
+		!(name in commandLineDefaults) ||
+		JSON.stringify(DEFAULT_OPTIONS[name]) !== JSON.stringify(commandLineDefaults[name]));
+	assert.deepEqual(differing, Object.keys(API_ONLY_DEFAULTS));
+	assert.deepEqual(Object.keys(API_ONLY_DEFAULTS), ["backgroundSave", "saveFavicon"]);
 });

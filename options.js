@@ -235,7 +235,7 @@ const CRAWL_LINKS_DEPENDENT_OPTIONS = {
 	crawlExternalLinksMaxDepth: "--crawl-external-links-max-depth",
 	crawlRewriteRules: "--crawl-rewrite-rule"
 };
-export { getOptions, parseArgs, applySettings, parseUrlsFile };
+export { getOptions, getDefaultOptions, parseArgs, applySettings, parseUrlsFile };
 
 function parseUrlsFile(content) {
 	return content.split("\n")
@@ -302,6 +302,10 @@ function applySettings(options, settings, explicitOptions = parseArgs(Array.from
 	}
 	Object.assign(options, profiles[profileName], explicitOptions);
 	delete options.settingsFile;
+}
+
+function getDefaultOptions() {
+	return parseArgs([]).options;
 }
 
 function getOptions() {
