@@ -108,10 +108,20 @@ const PAGES = {
 
 test("a lazy image below the fold is loaded only when the option is on", { timeout: TIMEOUT }, async () => {
 	await withFixture(async capture => {
-		const off = await capture("/native-lazy.html", ["--load-deferred-images", "false"]);
+		const off = await capture("/native-lazy.html", ["--load-deferred-content", "false"]);
 		const on = await capture("/native-lazy.html");
 		assert.ok(!off.includes(PIXEL), "the deferred image was inlined with the option off");
 		assert.ok(on.includes(PIXEL), "the deferred image was not inlined with the option on");
+	});
+});
+
+test("the deprecated load-deferred-images spelling still works", { timeout: TIMEOUT }, async () => {
+	await withFixture(async capture => {
+		// the options were renamed to load-deferred-content in single-file-core 1.6.0, because they
+		// never applied to images only. Scripts and cron jobs in the wild pass the old flags, so both
+		// spellings stay accepted and the old one has to keep reaching the same core option
+		const off = await capture("/native-lazy.html", ["--load-deferred-images", "false"]);
+		assert.ok(!off.includes(PIXEL), "the deprecated flag did not turn the pass off");
 	});
 });
 
@@ -128,7 +138,7 @@ test("an IntersectionObserver sentinel does not make the page append the next ar
 test("content revealed by a scroll listener needs the dispatch-scroll-event option", { timeout: TIMEOUT }, async () => {
 	await withFixture(async capture => {
 		const off = await capture("/scroll-reveal.html");
-		const on = await capture("/scroll-reveal.html", ["--load-deferred-images-dispatch-scroll-event", "true"]);
+		const on = await capture("/scroll-reveal.html", ["--load-deferred-content-dispatch-scroll-event", "true"]);
 		assert.ok(!off.includes("class=revealed"), "the page was revealed without the option");
 		assert.ok(on.includes("class=revealed"), "the page was not revealed with the option");
 	});
@@ -136,9 +146,9 @@ test("content revealed by a scroll listener needs the dispatch-scroll-event opti
 
 test("a stylesheet injected late is captured, and is lost when the idle time is too short", { timeout: TIMEOUT }, async () => {
 	await withFixture(async capture => {
-		const scrollEvent = ["--load-deferred-images-dispatch-scroll-event", "true"];
+		const scrollEvent = ["--load-deferred-content-dispatch-scroll-event", "true"];
 		const patient = await capture("/late-stylesheet.html", scrollEvent);
-		const impatient = await capture("/late-stylesheet.html", scrollEvent.concat(["--load-deferred-images-max-idle-time", "100"]));
+		const impatient = await capture("/late-stylesheet.html", scrollEvent.concat(["--load-deferred-content-max-idle-time", "100"]));
 		assert.ok(patient.includes("LATE_RULE"), "the late stylesheet was not captured with the default idle time");
 		assert.ok(!impatient.includes("LATE_RULE"), "the late stylesheet was captured despite a 100ms idle time");
 	});
@@ -156,7 +166,7 @@ test("a block sized from innerHeight keeps the real viewport height in the saved
 
 test("the zoom-out leaves no transform behind in the saved page", { timeout: TIMEOUT }, async () => {
 	await withFixture(async capture => {
-		for (const options of [[], ["--load-deferred-images-keep-zoom-level", "true"]]) {
+		for (const options of [[], ["--load-deferred-content-keep-zoom-level", "true"]]) {
 			const content = await capture("/native-lazy.html", options);
 			assert.ok(!/scale3d/.test(content), "a zoom-out transform was left in the saved page");
 			assert.ok(!/-sf-transform/.test(content), "an internal transform property was left in the saved page");

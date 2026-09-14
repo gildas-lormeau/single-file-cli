@@ -107,11 +107,14 @@ const OPTIONS_INFO = [{
 	"block-mixed-content": { description: "Block active content (i.e. stylesheets, scripts, fonts) served from HTTP in HTTPS pages, like browsers do; images, videos and audios are unaffected", type: "boolean" },
 	"blocked-url-pattern": { key: "blockedURLPatterns", description: "Regular expression matching URLs to block (e.g. 'annoying-banners\\.com')", type: "string[]" }
 }, {
-	"load-deferred-images": { description: "Load deferred (a.k.a. lazy-loaded) images", type: "boolean", defaultValue: true },
-	"load-deferred-images-dispatch-scroll-event": { description: "Dispatch 'scroll' event when loading deferred images", type: "boolean" },
-	"load-deferred-images-max-idle-time": { description: "Maximum delay of time to wait for deferred images in ms", type: "number", defaultValue: 1500 },
-	"load-deferred-images-keep-zoom-level": { description: "Load deferred images by keeping zoomed out the page", type: "boolean" },
-	"load-deferred-images-before-frames": { description: "Load deferred frames before before saving fame contents", type: "boolean" },
+	"load-deferred-content": { key: "loadDeferredContent", alias: "load-deferred-images", description: "Load deferred (a.k.a. lazy-loaded) content, i.e. images, frames, and the messages a page unmounts while you scroll", type: "boolean", defaultValue: true },
+	"load-deferred-content-dispatch-scroll-event": { key: "loadDeferredContentDispatchScrollEvent", alias: "load-deferred-images-dispatch-scroll-event", description: "Dispatch 'scroll' event when loading deferred content", type: "boolean" },
+	"load-deferred-content-max-idle-time": { key: "loadDeferredContentMaxIdleTime", alias: "load-deferred-images-max-idle-time", description: "Maximum delay of time to wait for deferred content in ms", type: "number", defaultValue: 1500 },
+	"load-deferred-content-keep-zoom-level": { key: "loadDeferredContentKeepZoomLevel", alias: "load-deferred-images-keep-zoom-level", description: "Keep the page zoomed out while loading deferred content, instead of zooming out only for the moment the page is measured", type: "boolean" },
+	"load-deferred-content-before-frames": { key: "loadDeferredContentBeforeFrames", alias: "load-deferred-images-before-frames", description: "Load deferred content in frames before saving their contents", type: "boolean" },
+	"load-deferred-content-min-zoom-factor": { description: "Smallest zoom factor used while loading deferred content, between 0 and 1. The page is zoomed out to make the site believe the whole document is on screen, which also shrinks every measurement the site takes at that moment. Raise this to bound that effect, or set it to 1 to load deferred content without zooming out at all", type: "number" },
+	"load-deferred-content-block-cookies": { description: "Block access to document.cookie while loading deferred content", type: "boolean" },
+	"load-deferred-content-block-storage": { description: "Block access to localStorage and indexedDB while loading deferred content", type: "boolean" },
 	"max-resource-size-enabled": { description: "Enable removal of embedded resources exceeding a given size", type: "boolean" },
 	"max-resource-size": { description: "Maximum size of embedded resources in MB. It applies to every fetched resource, i.e. images, fonts, stylesheets, scripts, frames, videos and audios; a resource above the limit is left out of the saved page", type: "number", defaultValue: 10 }
 }, {

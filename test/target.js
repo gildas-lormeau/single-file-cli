@@ -82,10 +82,10 @@ function importLibModule(name) {
 // of the 4.5 a capture takes: the deferred-image pass waits its full idle time even on a page with no
 // lazy images, and browser-wait-until-delay is a flat second after the load condition is reached.
 // Measured on one page: 5.29 s with the defaults, 3.21 s with the idle time at zero, 2.16 s with both.
-// The idle time rather than --load-deferred-images=false, so the pass still runs and a fixture with
+// The idle time rather than --load-deferred-content=false, so the pass still runs and a fixture with
 // lazy images still gets them. Options are last-wins, so a case that sets either of these after
 // spreading this list overrides it, and a case whose subject IS the waiting leaves the list out:
 // lazy-loading, frame-gate, slow-response, timeouts, navigation, service-worker and fidelity do.
-const fastCaptureArgs = ["--load-deferred-images-max-idle-time=0", "--browser-wait-until-delay=0"];
+const fastCaptureArgs = ["--load-deferred-content-max-idle-time=0", "--browser-wait-until-delay=0"];
 
 export { cliDirectory, repositoryDirectory, useDevBuild, importLibModule, browserEngine, firefox, fastCaptureArgs };
