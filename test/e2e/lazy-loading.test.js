@@ -135,12 +135,14 @@ test("an IntersectionObserver sentinel does not make the page append the next ar
 	});
 });
 
-test("content revealed by a scroll listener needs the dispatch-scroll-event option", { timeout: TIMEOUT }, async () => {
+test("content revealed by a scroll listener is captured, and the option can turn that off", { timeout: TIMEOUT }, async () => {
 	await withFixture(async capture => {
-		const off = await capture("/scroll-reveal.html");
-		const on = await capture("/scroll-reveal.html", ["--load-deferred-content-dispatch-scroll-event", "true"]);
-		assert.ok(!off.includes("class=revealed"), "the page was revealed without the option");
-		assert.ok(on.includes("class=revealed"), "the page was not revealed with the option");
+		// the scroll event is dispatched by default, as it already is in both extensions; a site
+		// driven by a scroll handler rather than by an observer loads nothing at all without it
+		const on = await capture("/scroll-reveal.html");
+		const off = await capture("/scroll-reveal.html", ["--load-deferred-content-dispatch-scroll-event", "false"]);
+		assert.ok(on.includes("class=revealed"), "the page was not revealed by default");
+		assert.ok(!off.includes("class=revealed"), "the page was revealed with the option turned off");
 	});
 });
 

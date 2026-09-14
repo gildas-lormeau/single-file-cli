@@ -108,7 +108,7 @@ const OPTIONS_INFO = [{
 	"blocked-url-pattern": { key: "blockedURLPatterns", description: "Regular expression matching URLs to block (e.g. 'annoying-banners\\.com')", type: "string[]" }
 }, {
 	"load-deferred-content": { key: "loadDeferredContent", alias: "load-deferred-images", description: "Load deferred (a.k.a. lazy-loaded) content, i.e. images, frames, and the messages a page unmounts while you scroll", type: "boolean", defaultValue: true },
-	"load-deferred-content-dispatch-scroll-event": { key: "loadDeferredContentDispatchScrollEvent", alias: "load-deferred-images-dispatch-scroll-event", description: "Dispatch 'scroll' event when loading deferred content", type: "boolean" },
+	"load-deferred-content-dispatch-scroll-event": { key: "loadDeferredContentDispatchScrollEvent", alias: "load-deferred-images-dispatch-scroll-event", description: "Dispatch 'scroll' event when loading deferred content", type: "boolean", defaultValue: true },
 	"load-deferred-content-max-idle-time": { key: "loadDeferredContentMaxIdleTime", alias: "load-deferred-images-max-idle-time", description: "Maximum delay of time to wait for deferred content in ms", type: "number", defaultValue: 1500 },
 	"load-deferred-content-keep-zoom-level": { key: "loadDeferredContentKeepZoomLevel", alias: "load-deferred-images-keep-zoom-level", description: "Keep the page zoomed out while loading deferred content, instead of zooming out only for the moment the page is measured", type: "boolean" },
 	"load-deferred-content-before-frames": { key: "loadDeferredContentBeforeFrames", alias: "load-deferred-images-before-frames", description: "Load deferred content in frames before saving their contents", type: "boolean" },
