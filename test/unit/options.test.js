@@ -148,11 +148,10 @@ test("values are parsed from both spaced and equal forms", () => {
 // both must agree: a falsy default deleted from the api table in 2024 silently diverged years
 // later when the command line flipped that default to true, and nothing failed.
 test("the api defaults agree with the command line defaults on every shared option", () => {
-	// the two filename character tables diverge for a different, pre-existing reason and are
-	// excluded rather than silently normalized: the api lists 11 replacements against 13 replaced
-	// characters where the command line lists 13, and it spells the control range with real
-	// control characters where the command line uses the literal \x00-\x1f text.
-	const knownDivergent = ["filenameReplacedCharacters", "filenameReplacementCharacters"];
+	// the two tables spell the control range differently, with no behavioural difference: the api
+	// uses real control characters where the command line uses the literal \x00-\x1f text, and
+	// both reach the same regular expression because only a single character is ever escaped.
+	const knownDivergent = ["filenameReplacedCharacters"];
 	const commandLineDefaults = parseArgs([], true).options;
 	const shared = Object.keys(DEFAULT_OPTIONS)
 		.filter(name => name in commandLineDefaults)
