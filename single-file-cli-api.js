@@ -41,6 +41,7 @@ const DEFAULT_OPTIONS = {
 	compressHTML: true,
 	loadDeferredContent: true,
 	loadDeferredContentMaxIdleTime: 1500,
+	loadDeferredContentDispatchScrollEvent: true,
 	filenameTemplate: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}",
 	filenameMaxLength: 192,
 	filenameMaxLengthUnit: "bytes",
@@ -66,7 +67,7 @@ const STATE_PROCESSED = "processed";
 const { readTextFile, writeTextFile, readFile, writeFile, stdout, mkdir, makeTempDir, remove, stat, errors } = Deno;
 let backend = cdpBackend, tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, errorCount = 0;
 
-export { initialize, closeBrowser, getArchiveOptions, ARCHIVE_EXCLUDED_OPTION_NAMES };
+export { initialize, closeBrowser, getArchiveOptions, ARCHIVE_EXCLUDED_OPTION_NAMES, DEFAULT_OPTIONS };
 
 async function closeBrowser() {
 	await backend.closeBrowser();
