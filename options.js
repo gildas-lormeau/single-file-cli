@@ -393,7 +393,7 @@ function printUsage() {
 				optionType = optionType.replace("[]", "*");
 			}
 			const optionDescription = optionInfo.description;
-			const optionDefaultValue = optionInfo.defaultValue === undefined ? "" : `(default: ${JSON.stringify(optionInfo.defaultValue).replace(/[\u007f-\u009f]/g, character => "\\u" + character.charCodeAt(0).toString(16).padStart(4, "0"))})`;
+			const optionDefaultValue = optionInfo.defaultValue === undefined ? "" : `(default: ${formatDefaultValue(optionInfo.defaultValue)})`;
 			console.log(`    --${optionName}: ${optionDescription} <${optionType}> ${optionDefaultValue}`); // eslint-disable-line no-console
 		});
 		console.log(""); // eslint-disable-line no-console
@@ -636,6 +636,20 @@ function getOptionInfo(optionName) {
 
 function kebabToCamelCase(optionName) {
 	return optionName.replace(/-([a-zA-Z])/g, g => g[1].toUpperCase());
+}
+
+function formatDefaultValue(defaultValue) {
+	if (Array.isArray(defaultValue) && defaultValue.every(value => typeof value == "string" && !value.includes("'"))) {
+		return "[" + defaultValue.map(value => "'" + escapeControlCharacters(value) + "'").join(", ") + "]";
+	}
+	return escapeControlCharacters(JSON.stringify(defaultValue));
+}
+
+function escapeControlCharacters(text) {
+	return Array.from(text).map(character => {
+		const characterCode = character.charCodeAt(0);
+		return characterCode < 0x20 || (characterCode >= 0x7f && characterCode <= 0x9f) ? "\\u" + characterCode.toString(16).padStart(4, "0") : character;
+	}).join("");
 }
 
 function formatCharacters(characters) {

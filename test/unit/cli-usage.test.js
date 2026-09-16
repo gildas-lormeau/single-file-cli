@@ -5,6 +5,7 @@ import { promisify } from "node:util";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import process from "node:process";
+import { parseArgs } from "../../options.js";
 
 const execFileAsync = promisify(execFile);
 const cliDirectory = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -29,6 +30,22 @@ test("every option of the help is named in lowercase", async () => {
 	const optionNames = Array.from(stdout.matchAll(/^\s+--(\S+):/gm)).map(([, name]) => name);
 	assert.ok(optionNames.length > 100);
 	assert.deepEqual(optionNames.filter(name => name != name.toLowerCase()), []);
+});
+
+// the defaults are printed so they can be adjusted, which means they have to be printed in the form
+// the option reads back. JSON.stringify doubled every backslash, and the doubled control range
+// "\\x00-\\x1f" is not a slower form of the same class, it selects digits and uppercase letters
+test("the defaults printed in the help can be passed back unchanged", async () => {
+	const { stdout } = await runCli(["--help"]);
+	const printedDefaults = stdout.match(/--filename-replaced-character:[\s\S]*?\(default: \[([\s\S]*?)\]\)/);
+	assert.ok(printedDefaults, "the default list was not found in the help");
+	const printed = Array.from(printedDefaults[1].matchAll(/'([^']*)'/g)).map(([, value]) => value);
+	const args = [];
+	printed.forEach(value => args.push("--filename-replaced-character", value));
+	const fromHelp = parseArgs(args).options;
+	const fromDefaults = parseArgs([]).options;
+	assert.deepEqual(fromHelp.filenameReplacedCharacters, fromDefaults.filenameReplacedCharacters);
+	assert.deepEqual(fromHelp.filenameReplacementCharacters, fromDefaults.filenameReplacementCharacters);
 });
 
 test("a byte order mark that cannot be written is reported as a warning", async () => {
