@@ -195,6 +195,7 @@ const OPTIONS_INFO = [{
 	"include-infobar": { description: "Include the infobar", type: "boolean" },
 	"infobar-template": { description: "Template used to generate the infobar content (see help page of the extension for more info)", type: "string" },
 	"open-infobar": { description: "Keep the infobar open when using --include-infobar", type: "boolean" },
+	"animate-infobar": { description: "Make the infobar blink and display an expanding ring when the saved page is opened, ignored when the reader's system is set to reduce motion", type: "boolean", defaultValue: true },
 	"infobar-position-absolute": { description: "Position the infobar absolutely (fixed otherwise)", type: "boolean" },
 	"infobar-position-top": { description: "Position the infobar at the top of the page", type: "string", defaultValue: "16px" },
 	"infobar-position-bottom": { description: "Position the infobar at the bottom of the page", type: "string", defaultValue: "" },
