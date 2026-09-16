@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseArgs, getDefaultOptions, applySettings, parseUrlsFile } from "../../options.js";
 import { DEFAULT_OPTIONS, API_ONLY_DEFAULTS } from "../../single-file-cli-api.js";
+import { DEFAULT_REPLACED_CHARACTERS, DEFAULT_REPLACEMENT_CHARACTER, DEFAULT_REPLACEMENT_CHARACTERS } from "../../lib/single-file-filename.js";
 
 const parse = args => parseArgs(args).options;
 
@@ -75,26 +76,55 @@ test("http headers keep characters after the first equals sign", () => {
 });
 
 // filenameReplacedCharacters and filenameReplacementCharacters are read positionally by
-// getValidFilename, so an entry given without a replacement used to shift every later pair by one:
-// "? ？", "*", ": ：" made "*" take "：" and left ":" with nothing. The shipped default table was
-// safe only because its two replacement-less entries happen to sit last.
-test("a replacement-less entry does not shift the pairs after it", () => {
+// getValidFilename, which since core 1.6.2 takes any falsy replacement as "use the fallback
+// character". The parser therefore keeps the order it was given and writes "" where a replacement is
+// missing. It used to move those entries to the end instead, because an older core read a missing
+// index as undefined and wrote that word into the filename.
+test("a replacement-less entry keeps its place among the pairs", () => {
 	const options = parse(["--filename-replaced-character", "? ？", "--filename-replaced-character", "*", "--filename-replaced-character", ": ："]);
-	assert.deepEqual(options.filenameReplacedCharacters, ["?", ":", "*"]);
-	assert.deepEqual(options.filenameReplacementCharacters, ["？", "："]);
+	assert.deepEqual(options.filenameReplacedCharacters, ["?", "*", ":"]);
+	assert.deepEqual(options.filenameReplacementCharacters, ["？", "", "："]);
 });
 
 test("an entry with an empty replacement takes the fallback character", () => {
 	const options = parse(["--filename-replaced-character", "* ", "--filename-replaced-character", ": ："]);
-	assert.deepEqual(options.filenameReplacedCharacters, [":", "*"]);
-	assert.deepEqual(options.filenameReplacementCharacters, ["："]);
+	assert.deepEqual(options.filenameReplacedCharacters, ["*", ":"]);
+	assert.deepEqual(options.filenameReplacementCharacters, ["", "："]);
 });
 
-test("the default replaced characters keep their order and their replacements", () => {
+// the default table is derived from the core one rather than written out again, and the two hold the
+// control characters differently: core holds them as themselves, while the option prints them in the
+// help text and reads them back, so it escapes them. Comparing the strings fails; what has to match
+// is the characters their classes SELECT.
+test("the default replaced characters select the same characters as the core table", () => {
 	const options = parse([]);
-	assert.deepEqual(options.filenameReplacedCharacters, ["~", "+", "?", "%", "*", ":", "|", "\"", "<", ">", "\\\\", "\\x00-\\x1f", "\x7F"]);
-	assert.deepEqual(options.filenameReplacementCharacters, ["～", "＋", "？", "％", "＊", "：", "｜", "＂", "＜", "＞", "＼"]);
+	assert.equal(options.filenameReplacedCharacters.length, DEFAULT_REPLACED_CHARACTERS.length);
+	options.filenameReplacedCharacters.forEach((characters, indexCharacter) => {
+		assert.deepEqual(selectedCharacterCodes(characters), selectedCharacterCodes(DEFAULT_REPLACED_CHARACTERS[indexCharacter]), JSON.stringify(characters));
+	});
+	assert.deepEqual(options.filenameReplacementCharacters, DEFAULT_REPLACEMENT_CHARACTERS.concat(["", ""]));
+	assert.equal(options.filenameReplacementCharacter, DEFAULT_REPLACEMENT_CHARACTER);
 });
+
+test("the default replaced characters carry no raw control character", () => {
+	parse([]).filenameReplacedCharacters.forEach(characters => {
+		Array.from(characters).forEach(character => {
+			const characterCode = character.charCodeAt(0);
+			assert.ok(characterCode >= 0x20 && characterCode != 0x7f, JSON.stringify(characters));
+		});
+	});
+});
+
+function selectedCharacterCodes(characters) {
+	const regExp = new RegExp("[" + characters + "]");
+	const characterCodes = [];
+	for (let characterCode = 0; characterCode < 0x10000; characterCode++) {
+		if (regExp.test(String.fromCharCode(characterCode))) {
+			characterCodes.push(characterCode);
+		}
+	}
+	return characterCodes;
+}
 
 test("media features are split on the first colon", () => {
 	assert.deepEqual(parse(["--emulate-media-feature", "prefers-color-scheme:dark"]).emulateMediaFeatures, [{ name: "prefers-color-scheme", value: "dark" }]);
