@@ -92,6 +92,33 @@ test("an entry with an empty replacement takes the fallback character", () => {
 	assert.deepEqual(options.filenameReplacementCharacters, ["", "："]);
 });
 
+// the value is split on the FIRST space, not on every space, so everything after it is the
+// replacement. Splitting on every space and keeping the first two tokens used to drop the rest.
+test("a replacement can contain a space", () => {
+	const options = parse(["--filename-replaced-character", "> _G T_"]);
+	assert.deepEqual(options.filenameReplacedCharacters, [">"]);
+	assert.deepEqual(options.filenameReplacementCharacters, ["_G T_"]);
+});
+
+// a value starting with a space leaves nothing on the left, and the core turns that into the
+// character class [], which matches nothing — so the option used to do nothing at all, without a
+// word. There is no reading under which an empty replaced character means something.
+test("a value starting with a space is reported rather than silently matching nothing", () => {
+	assert.deepEqual(parseArgs(["--filename-replaced-character", " _"]).invalidOptions, [{ name: "filename-replaced-character", value: " _" }]);
+	assert.deepEqual(parse(["--filename-replaced-character", " _"]).filenameReplacedCharacters, []);
+});
+
+// the space-separated form cannot express a space as the replaced character, because the separator
+// has to be found before either side is parsed. A JSON array says both sides outright.
+test("a json array expresses what the space-separated form cannot", () => {
+	const options = parse(["--filename-replaced-character", "[\" \", \"_\"]"]);
+	assert.deepEqual(options.filenameReplacedCharacters, [" "]);
+	assert.deepEqual(options.filenameReplacementCharacters, ["_"]);
+	const withoutReplacement = parse(["--filename-replaced-character", "[\" \"]"]);
+	assert.deepEqual(withoutReplacement.filenameReplacedCharacters, [" "]);
+	assert.deepEqual(withoutReplacement.filenameReplacementCharacters, [""]);
+});
+
 // the default table is derived from the core one rather than written out again, and the two hold the
 // control characters differently: core holds them as themselves, while the option prints them in the
 // help text and reads them back, so it escapes them. Comparing the strings fails; what has to match

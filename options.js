@@ -162,7 +162,7 @@ const OPTIONS_INFO = [{
 	"filename-template": { description: "Template used to generate the output filename (see https://github.com/gildas-lormeau/SingleFile/wiki/Template-variables-and-functions)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
 	"filename-conflict-action": { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"", type: "string", defaultValue: "uniquify" },
 	"filename-replacement-character": { description: "The character used for replacing invalid characters in filenames", type: "string", defaultValue: DEFAULT_REPLACEMENT_CHARACTER },
-	"filename-replaced-character": { description: "Character to replace in filenames followed by the replacement character(s), both in a single value separated by a space, e.g. --filename-replaced-character \"> _GT_\" to replace \">\" with \"_GT_\" (repeat the option to replace multiple characters, omit the replacement to use --filename-replacement-character instead)", type: "string[]", defaultValue: DEFAULT_FILENAME_REPLACED_CHARACTERS },
+	"filename-replaced-character": { description: "Character to replace in filenames followed by the replacement character(s), both in a single value separated by the first space, e.g. --filename-replaced-character \"> _GT_\" to replace \">\" with \"_GT_\" (repeat the option to replace multiple characters, omit the replacement to use --filename-replacement-character instead). The value can also be a JSON array, which is how to express what the space-separated form cannot, e.g. [\" \", \"_\"] to replace spaces with underscores", type: "string[]", defaultValue: DEFAULT_FILENAME_REPLACED_CHARACTERS },
 	"filename-max-length": { description: "Specify the maximum length of the filename", type: "number", defaultValue: 192 },
 	"filename-max-length-unit": { description: "Specify the unit of the maximum length of the filename ('bytes' or 'chars')", type: "string", defaultValue: "bytes" },
 	"replace-emojis-in-filename": { description: "Replace emojis in the filename with their unicode text representation", type: "boolean" },
@@ -520,12 +520,25 @@ function parseArgs(args, setDefaultValues = true) {
 		invalidOptions.push({ name: "browser-engine", value: result.options.browserEngine });
 	}
 	if (result.options.filenameReplacedCharacters) {
-		const replacements = result.options.filenameReplacedCharacters.map(replacement => {
-			const [replacedCharacter, replacementCharacter] = replacement.split(" ");
-			return {
-				replacedCharacter: parseCharacters(replacedCharacter),
-				replacementCharacter: parseCharacters(replacementCharacter)
-			};
+		const replacements = [];
+		result.options.filenameReplacedCharacters.forEach(replacement => {
+			const parsedReplacement = parseCharacters(replacement);
+			if (Array.isArray(parsedReplacement)) {
+				const [replacedCharacter, replacementCharacter] = parsedReplacement;
+				replacements.push({ replacedCharacter, replacementCharacter });
+			} else {
+				const separatorIndex = replacement.indexOf(" ");
+				if (separatorIndex == 0) {
+					invalidOptions.push({ name: "filename-replaced-character", value: replacement });
+				} else if (separatorIndex == -1) {
+					replacements.push({ replacedCharacter: parseCharacters(replacement) });
+				} else {
+					replacements.push({
+						replacedCharacter: parseCharacters(replacement.substring(0, separatorIndex)),
+						replacementCharacter: parseCharacters(replacement.substring(separatorIndex + 1))
+					});
+				}
+			}
 		});
 		result.options.filenameReplacedCharacters = replacements.map(({ replacedCharacter }) => replacedCharacter);
 		result.options.filenameReplacementCharacters = replacements.map(({ replacementCharacter }) => replacementCharacter || "");
