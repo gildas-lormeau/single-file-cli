@@ -2,7 +2,7 @@
 
 set -e
 
-CORE_PACKAGE="npm:single-file-core@1.6.1"
+CORE_PACKAGE="npm:single-file-core@1.6.3"
 ESBUILD_PACKAGE="npm:esbuild@0.27.7"
 WEB_STREAMS_PACKAGE="npm:web-streams-polyfill@4.3.0"
 
@@ -80,6 +80,19 @@ await build({
   ],
   bundle: true,
   outfile: lib + '/single-file-archive.js',
+  platform: 'neutral',
+  sourcemap: false,
+  minify: true,
+  format: 'esm',
+  plugins: [],
+});
+
+await build({
+  entryPoints: [
+    core + '/core/filename.js'
+  ],
+  bundle: true,
+  outfile: lib + '/single-file-filename.js',
   platform: 'neutral',
   sourcemap: false,
   minify: true,
