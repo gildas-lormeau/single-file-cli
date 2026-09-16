@@ -156,7 +156,7 @@ const OPTIONS_INFO = [{
 	"filename-template": { description: "Template used to generate the output filename (see https://github.com/gildas-lormeau/SingleFile/wiki/Template-variables-and-functions)", type: "string", defaultValue: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}" },
 	"filename-conflict-action": { description: "Action when the filename is conflicting with existing one on the filesystem. The possible values are \"uniquify\" (default), \"overwrite\" and \"skip\"", type: "string", defaultValue: "uniquify" },
 	"filename-replacement-character": { description: "The character used for replacing invalid characters in filenames", type: "string", defaultValue: "_" },
-	"filename-replaced-character": { description: "Character to replace in filenames followed by the replacement character(s), both in a single value separated by a space, e.g. --filename-replaced-character \"> _GT_\" to replace \">\" with \"_GT_\" (repeat the option to replace multiple characters)", type: "string[]", defaultValue: ["~ ～", "+ ＋", "? ？", "% ％", "* ＊", ": ：", "| ｜", "\" ＂", "< ＜", "> ＞", "\\\\ ＼", "\\x00-\\x1f", "\x7F"] },
+	"filename-replaced-character": { description: "Character to replace in filenames followed by the replacement character(s), both in a single value separated by a space, e.g. --filename-replaced-character \"> _GT_\" to replace \">\" with \"_GT_\" (repeat the option to replace multiple characters, omit the replacement to use --filename-replacement-character instead)", type: "string[]", defaultValue: ["~ ～", "+ ＋", "? ？", "% ％", "* ＊", ": ：", "| ｜", "\" ＂", "< ＜", "> ＞", "\\\\ ＼", "\\x00-\\x1f", "\x7F"] },
 	"filename-max-length": { description: "Specify the maximum length of the filename", type: "number", defaultValue: 192 },
 	"filename-max-length-unit": { description: "Specify the unit of the maximum length of the filename ('bytes' or 'chars')", type: "string", defaultValue: "bytes" },
 	"replace-emojis-in-filename": { description: "Replace emojis in the filename with their unicode text representation", type: "boolean" },
@@ -514,28 +514,17 @@ function parseArgs(args, setDefaultValues = true) {
 		invalidOptions.push({ name: "browser-engine", value: result.options.browserEngine });
 	}
 	if (result.options.filenameReplacedCharacters) {
-		const filenameReplacedCharacters = result.options.filenameReplacedCharacters;
-		result.options.filenameReplacedCharacters = [];
-		result.options.filenameReplacementCharacters = [];
-		filenameReplacedCharacters.forEach(replacement => {
-			let [replacedCharacter, replacementCharacter] = replacement.split(" ");
-			try {
-				replacedCharacter = JSON.parse(replacedCharacter);
-				// eslint-disable-next-line no-unused-vars
-			} catch (_error) {
-				// ignored
-			}
-			result.options.filenameReplacedCharacters.push(replacedCharacter);
-			if (replacementCharacter !== undefined) {
-				try {
-					replacementCharacter = JSON.parse(replacementCharacter);
-					// eslint-disable-next-line no-unused-vars
-				} catch (_error) {
-					// ignored
-				}
-				result.options.filenameReplacementCharacters.push(replacementCharacter);
-			}
+		const replacements = result.options.filenameReplacedCharacters.map(replacement => {
+			const [replacedCharacter, replacementCharacter] = replacement.split(" ");
+			return {
+				replacedCharacter: parseCharacters(replacedCharacter),
+				replacementCharacter: parseCharacters(replacementCharacter)
+			};
 		});
+		const replacedWithCharacter = replacements.filter(({ replacementCharacter }) => replacementCharacter);
+		const replacedWithFallback = replacements.filter(({ replacementCharacter }) => !replacementCharacter);
+		result.options.filenameReplacedCharacters = replacedWithCharacter.concat(replacedWithFallback).map(({ replacedCharacter }) => replacedCharacter);
+		result.options.filenameReplacementCharacters = replacedWithCharacter.map(({ replacementCharacter }) => replacementCharacter);
 	}
 	if (result.options.httpHeaders) {
 		const headers = {};
@@ -630,6 +619,15 @@ function getOptionInfo(optionName) {
 
 function kebabToCamelCase(optionName) {
 	return optionName.replace(/-([a-zA-Z])/g, g => g[1].toUpperCase());
+}
+
+function parseCharacters(characters) {
+	try {
+		return JSON.parse(characters);
+		// eslint-disable-next-line no-unused-vars
+	} catch (_error) {
+		return characters;
+	}
 }
 
 function isValid(type, value) {

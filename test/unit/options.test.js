@@ -74,6 +74,28 @@ test("http headers keep characters after the first equals sign", () => {
 	assert.deepEqual(parseArgs(["--http-header", "no-separator"]).invalidOptions, [{ name: "http-header", value: "no-separator" }]);
 });
 
+// filenameReplacedCharacters and filenameReplacementCharacters are read positionally by
+// getValidFilename, so an entry given without a replacement used to shift every later pair by one:
+// "? ？", "*", ": ：" made "*" take "：" and left ":" with nothing. The shipped default table was
+// safe only because its two replacement-less entries happen to sit last.
+test("a replacement-less entry does not shift the pairs after it", () => {
+	const options = parse(["--filename-replaced-character", "? ？", "--filename-replaced-character", "*", "--filename-replaced-character", ": ："]);
+	assert.deepEqual(options.filenameReplacedCharacters, ["?", ":", "*"]);
+	assert.deepEqual(options.filenameReplacementCharacters, ["？", "："]);
+});
+
+test("an entry with an empty replacement takes the fallback character", () => {
+	const options = parse(["--filename-replaced-character", "* ", "--filename-replaced-character", ": ："]);
+	assert.deepEqual(options.filenameReplacedCharacters, [":", "*"]);
+	assert.deepEqual(options.filenameReplacementCharacters, ["："]);
+});
+
+test("the default replaced characters keep their order and their replacements", () => {
+	const options = parse([]);
+	assert.deepEqual(options.filenameReplacedCharacters, ["~", "+", "?", "%", "*", ":", "|", "\"", "<", ">", "\\\\", "\\x00-\\x1f", "\x7F"]);
+	assert.deepEqual(options.filenameReplacementCharacters, ["～", "＋", "？", "％", "＊", "：", "｜", "＂", "＜", "＞", "＼"]);
+});
+
 test("media features are split on the first colon", () => {
 	assert.deepEqual(parse(["--emulate-media-feature", "prefers-color-scheme:dark"]).emulateMediaFeatures, [{ name: "prefers-color-scheme", value: "dark" }]);
 	assert.deepEqual(parseArgs(["--emulate-media-feature", "no-separator"]).invalidOptions, [{ name: "emulate-media-feature", value: "no-separator" }]);
