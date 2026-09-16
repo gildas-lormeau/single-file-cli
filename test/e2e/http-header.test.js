@@ -46,9 +46,14 @@ test("extra HTTP headers do not make cross-origin resources send a preflight", {
 		], { cwd: cliDirectory });
 		const content = await readFile(outputPath, "utf8");
 		assert.ok(!requests.some(({ method }) => method === "OPTIONS"), "the extra HTTP header made the request send a preflight");
-		// the browser is what fetched the resource, the backend fetch sends no
-		// sec-fetch-mode and would hide a preflight failure behind a working save
-		const corsRequest = requests.find(({ headers }) => headers["sec-fetch-mode"] === "cors");
+		// a request the browser made carries a destination and a site, which a runtime has no notion
+		// of. Node sends sec-fetch-mode on every fetch and the backend lane presents the browser's
+		// user agent, so neither of those tells the two apart. It matters here because a preflight
+		// failure loses the resource in the browser and the backend fetch then gets it anyway,
+		// hiding the regression behind a working save
+		const browserRequests = requests.filter(({ headers }) => headers["sec-fetch-dest"] && headers["sec-fetch-site"]);
+		assert.equal(browserRequests.length, requests.length, "the backend fetch ran, which hides a preflight failure behind a working save");
+		const corsRequest = browserRequests.find(({ headers }) => headers["sec-fetch-mode"] === "cors");
 		assert.ok(corsRequest, "the resource was not fetched by the browser");
 		assert.equal(corsRequest.headers["x-test-header"], "yes", "the extra HTTP header was not sent");
 		assert.ok(content.includes(STYLE), "the cross-origin stylesheet was not inlined");
