@@ -15,7 +15,7 @@ jobs:
   # so this waits for its run on that exact commit and refuses to publish unless it succeeded
   check_tests:
     name: 'Check tests'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       actions: read
@@ -84,7 +84,7 @@ jobs:
 
   publish_npm:
     needs: check_tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
         with:
@@ -99,7 +99,7 @@ jobs:
   publish_docker:
     name: 'Publish Docker image'
     needs: publish_npm
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       # the image installs single-file-cli from npm, so building before the registry serves the
       # released version would silently ship the previous one

@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       -
@@ -35,7 +35,7 @@ jobs:
   # build.sh is reproducible: it pins both the core package and esbuild, so rebuilding here and
   # diffing catches either case before it ships.
   build-output:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       -
