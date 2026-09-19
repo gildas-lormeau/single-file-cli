@@ -22,11 +22,10 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory, useDevBuild, fastCaptureArgs } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
-const skip = useDevBuild ? false : "the fix is in an unreleased single-file-core — run ./build-dev.sh && npm run test:dev";
 const PAGE = "<!DOCTYPE html><html><head><style>" +
 	"@font-face{font-family:BodyFace;src:url(data:font/woff2;base64,AAAAAAAAAAAA)}" +
 	"@font-face{font-family:MarkerFace;src:url(data:font/woff2;base64,AAAAAAAAAAAB)}" +
@@ -53,7 +52,7 @@ for (const [pseudoElement, family] of [
 	["::placeholder", "PlaceholderFace"],
 	["::file-selector-button", "ButtonFace"]
 ]) {
-	test("a face declared on " + pseudoElement + " alone is kept", { timeout: TEST_TIMEOUT, skip }, async () => {
+	test("a face declared on " + pseudoElement + " alone is kept", { timeout: TEST_TIMEOUT }, async () => {
 		const families = await getCaptureResult();
 		assert.equal(families.filter(name => name === family).length, 1,
 			"the @font-face rule of " + family + " was dropped, so the " + pseudoElement + " it styles falls back to another font in the saved page");
