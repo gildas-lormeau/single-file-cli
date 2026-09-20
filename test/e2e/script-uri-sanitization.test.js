@@ -7,7 +7,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory, fastCaptureArgs } from "../target.js";
+import { cliDirectory, useDevBuild, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -27,6 +27,10 @@ const PAGE = "<html><head><title>Script URIs</title></head><body>" +
 	"</svg>" +
 	"<div id=mixed>a</div><div id=namespaced>b</div><div id=plain>c</div>" +
 	"<a id=svg-runtime>d</a>" +
+	"<svg id=smil width=60 height=60 xmlns=\"http://www.w3.org/2000/svg\"><rect width=25 height=25>" +
+	"<animate id=smil-animate attributeName=x from=0 to=1 dur=0.1s onbegin=\"void(7)\" onend=\"void(8)\" onrepeat=\"void(9)\"/>" +
+	"<set id=smil-set attributeName=y to=1 onbegin=\"void(10)\"/>" +
+	"</rect></svg>" +
 	"<script>" +
 	"document.getElementById(\"mixed\").setAttributeNS(null, \"ONLOAD\", \"alert(3)\");" +
 	"document.getElementById(\"namespaced\").setAttributeNS(\"http://example.org/ns\", \"ONERROR\", \"alert(4)\");" +
@@ -78,6 +82,24 @@ test("event handler attributes are removed whatever their case or namespace", { 
 	assert.ok(!/alert\(4\)/.test(content), "a namespaced ONERROR survived: " + (content.match(/<div id=namespaced[^>]*>/) || []));
 	assert.ok(!/alert\(5\)/.test(content), "a plain onclick survived: " + (content.match(/<div id=plain[^>]*>/) || []));
 	assert.ok(!/alert\(6\)/.test(content), "an obfuscated mixed-case HREF survived: " + (content.match(/<a id=svg-runtime[^>]*>/) || []));
+});
+
+const skip = useDevBuild ? false : "the fix is in an unreleased single-file-core — run ./build-dev.sh && npm run test:dev";
+
+test("SMIL event handler attributes on svg animation elements are removed", { timeout: 120000, skip }, async () => {
+	const content = await capture();
+	// onbegin, onend and onrepeat exist on SVGAnimationElement only, so a handler set built from the
+	// on* properties of document.body never held them, and each one ran when the saved page was opened.
+	// The saved page's own CSP allows inline handlers, so nothing downstream caught it either. The
+	// handlers are void() rather than alert(): unlike the others on this page they fire on load in the
+	// live page, and an alert dialog there stalls the capture until its network-idle timeout.
+	const animate = () => content.match(/<animate id=smil-animate[^>]*>/) || [];
+	const set = () => content.match(/<set id=smil-set[^>]*>/) || [];
+	assert.ok(!/void\(7\)/.test(content), "onbegin survived on <animate>: " + animate());
+	assert.ok(!/void\(8\)/.test(content), "onend survived on <animate>: " + animate());
+	assert.ok(!/void\(9\)/.test(content), "onrepeat survived on <animate>: " + animate());
+	assert.ok(!/void\(10\)/.test(content), "onbegin survived on <set>: " + set());
+	assert.ok(animate().length && set().length, "the animation elements themselves were dropped rather than their handlers: " + (content.match(/<svg id=smil[^]*?<\/svg>/) || []));
 });
 
 test("the saved page forbids form submission", { timeout: 120000 }, async () => {
