@@ -7,7 +7,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory, useDevBuild, fastCaptureArgs } from "../target.js";
+import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -84,9 +84,7 @@ test("event handler attributes are removed whatever their case or namespace", { 
 	assert.ok(!/alert\(6\)/.test(content), "an obfuscated mixed-case HREF survived: " + (content.match(/<a id=svg-runtime[^>]*>/) || []));
 });
 
-const skip = useDevBuild ? false : "the fix is in an unreleased single-file-core — run ./build-dev.sh && npm run test:dev";
-
-test("SMIL event handler attributes on svg animation elements are removed", { timeout: 120000, skip }, async () => {
+test("SMIL event handler attributes on svg animation elements are removed", { timeout: 120000 }, async () => {
 	const content = await capture();
 	// onbegin, onend and onrepeat exist on SVGAnimationElement only, so a handler set built from the
 	// on* properties of document.body never held them, and each one ran when the saved page was opened.
