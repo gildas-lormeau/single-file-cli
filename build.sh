@@ -2,7 +2,7 @@
 
 set -e
 
-CORE_PACKAGE="npm:single-file-core@1.6.7"
+CORE_PACKAGE="npm:single-file-core@1.6.8"
 ESBUILD_PACKAGE="npm:esbuild@0.27.7"
 WEB_STREAMS_PACKAGE="npm:web-streams-polyfill@4.3.0"
 
