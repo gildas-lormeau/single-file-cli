@@ -100,11 +100,14 @@ test("the first existing path is returned", async () => {
 });
 
 // Brave and Vivaldi exit at launch with --single-process on Windows, so each run paid a
-// relaunch of 4 to 8 seconds, and Edge hung until the relaunch, about 65 seconds
-// (gildas-lormeau/tmp, runs 35913823718 and 35916329206).
-test("only Chrome runs as a single process on Windows", () => {
+// relaunch of 4 to 8 seconds, and Edge hung until the relaunch, about 65 seconds. Chromium
+// and Chrome for Testing, also named chrome.exe, exit too (gildas-lormeau/tmp, runs
+// 35913823718, 35916329206 and 35918456353).
+test("only Google Chrome runs as a single process on Windows", () => {
 	assert.equal(useSingleProcess("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", true, "windows"), true);
-	assert.equal(useSingleProcess("C:\\Program Files\\Google\\Chrome SxS\\Application\\CHROME.EXE", true, "windows"), true);
+	assert.equal(useSingleProcess(LOCAL_APP_DATA + "\\GOOGLE\\CHROME\\APPLICATION\\CHROME.EXE", true, "windows"), true);
+	assert.equal(useSingleProcess("C:\\Program Files\\Chromium\\Application\\chrome.exe", true, "windows"), false);
+	assert.equal(useSingleProcess("D:\\pb\\chrome\\win64-154.0.8037.57\\chrome-win64\\chrome.exe", true, "windows"), false);
 	assert.equal(useSingleProcess("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", true, "windows"), false);
 	assert.equal(useSingleProcess(LOCAL_APP_DATA + "\\BraveSoftware\\Brave-Browser\\Application\\brave.exe", true, "windows"), false);
 	assert.equal(useSingleProcess(LOCAL_APP_DATA + "\\Vivaldi\\Application\\vivaldi.exe", true, "windows"), false);
