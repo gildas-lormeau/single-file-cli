@@ -36,7 +36,7 @@
 		"single-file": "single-file-node.js"
 	},
 	"dependencies": {
-		"simple-cdp": "^1.10.1"
+		"simple-cdp": "^1.10.2"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.5",
