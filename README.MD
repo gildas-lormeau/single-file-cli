@@ -10,7 +10,7 @@ It runs through Deno as a standalone script injected into the web page via the C
 
 SingleFile can be run without installing it, just download the executable file and save it in the directory of your choice here: https://github.com/gildas-lormeau/single-file-cli/releases
 
-Make sure Chrome or a Chromium-based browser is installed in the default folder. Installations for the current user are also found (`%LOCALAPPDATA%` on Windows, `~/Applications` on macOS, snap and the `PATH` on Linux). Otherwise you might need to set the `--browser-executable-path` option to help SingleFile locating the path of the executable file. Firefox can be used instead by setting the `--browser-engine firefox` option, with some limitations described in the help. The Flatpak version of Firefox is not supported.
+Make sure Chrome or a Chromium-based browser is installed in the default folder. Installations for the current user are also found (`%LOCALAPPDATA%` on Windows, `~/Applications` on macOS, snap and the `PATH` on Linux). Otherwise you might need to set the `--browser-executable-path` option to help SingleFile locating the path of the executable file. Firefox can be used instead by setting the `--browser-engine firefox` option, with some limitations described in the help. The Flatpak version of Firefox needs access to `/tmp`, where the temporary profile is created. Allow it with `flatpak override --user --filesystem=/tmp org.mozilla.firefox` and set `--browser-executable-path` to `/var/lib/flatpak/exports/bin/org.mozilla.firefox`.
 
 ## Installation with Docker
 
