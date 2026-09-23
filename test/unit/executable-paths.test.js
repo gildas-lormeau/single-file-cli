@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, writeFile, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getExecutablePaths, findExecutablePath } from "../../lib/browser.js";
@@ -43,6 +43,13 @@ test("a per-user Firefox on Windows is searched", () => {
 	assert.ok(paths.includes(LOCAL_APP_DATA + "\\Mozilla Firefox\\firefox.exe"));
 });
 
+// winget --scope user installs Firefox as an MSIX package, reachable only through this
+// execution alias (gildas-lormeau/tmp, run 35913823718).
+test("the Microsoft Store Firefox on Windows is searched last", () => {
+	const paths = getExecutablePaths(FIREFOX_PATHS, "windows", variables({ LOCALAPPDATA: LOCAL_APP_DATA }));
+	assert.equal(paths.at(-1), LOCAL_APP_DATA + "\\Microsoft\\WindowsApps\\firefox.exe");
+});
+
 test("apps in ~/Applications are searched on macOS", () => {
 	const paths = getExecutablePaths(FIREFOX_PATHS, "darwin", variables({ HOME: "/Users/user" }));
 	assert.deepEqual(paths.slice(0, FIREFOX_PATHS.darwin.length), FIREFOX_PATHS.darwin);
@@ -61,6 +68,22 @@ test("snap Chromium and browsers on the PATH are searched on Linux", () => {
 	assert.deepEqual(paths.slice(0, listedPaths.length), listedPaths);
 });
 
+// The execution alias of a Microsoft Store app cannot be stat-ed (os error 1920 in Deno,
+// EACCES in Node, gildas-lormeau/tmp run 35915512036) but can be lstat-ed. A dangling
+// symlink stands in for it here.
+test("a path that only lstat can see is found on Windows only", async () => {
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const alias = join(directory, "alias");
+		await symlink(join(directory, "missing"), alias);
+		assert.equal(await findExecutablePath([alias], "windows"), alias);
+		assert.equal(await findExecutablePath([alias], "linux"), undefined);
+		assert.equal(await findExecutablePath([join(directory, "missing")], "windows"), undefined);
+	} finally {
+		await rm(directory, { recursive: true });
+	}
+});
+
 test("the first existing path is returned", async () => {
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
@@ -74,3 +97,4 @@ test("the first existing path is returned", async () => {
 		await rm(directory, { recursive: true });
 	}
 });
+
