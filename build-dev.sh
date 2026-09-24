@@ -3,9 +3,12 @@
 set -e
 
 ESBUILD_PACKAGE="npm:esbuild@0.27.7"
+WEB_STREAMS_PACKAGE="npm:web-streams-polyfill@4.3.0"
 
 build_dir=$(mktemp -d)
 trap 'rm -rf "$build_dir"' EXIT
+
+(cd "$build_dir" && deno install --vendor --quiet --minimum-dependency-age=0 "$WEB_STREAMS_PACKAGE")
 
 echo "
 import { build } from '$ESBUILD_PACKAGE';
@@ -92,7 +95,7 @@ const hookScript = await Deno.readTextFile('lib-dev/single-file-hooks-frames.js'
 script += 'const hookScript = ' + JSON.stringify(hookScript) + ';';
 const zipScript = await Deno.readTextFile('lib-dev/zip.min.js');
 script += 'const zipScript = ' + JSON.stringify(zipScript) + ';';
-const webStreamsPonyfill = await Deno.readTextFile('node_modules/web-streams-polyfill/dist/ponyfill.js');
+const webStreamsPonyfill = await Deno.readTextFile('$build_dir/node_modules/web-streams-polyfill/dist/ponyfill.js');
 script += 'const webStreamsPonyfill = ' + JSON.stringify(webStreamsPonyfill) + ';';
 script += 'export { script, zipScript, hookScript, webStreamsPonyfill };';
 await Deno.writeTextFile('lib-dev/single-file-bundle.js', script)
