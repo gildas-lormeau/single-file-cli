@@ -120,8 +120,10 @@ core_revision=$(git -C ../single-file-core rev-parse --short HEAD 2>/dev/null ||
 if [ -n "$(git -C ../single-file-core status --porcelain 2>/dev/null | head -1)" ]; then
 	core_revision="$core_revision+uncommitted"
 fi
+version=$(deno eval "console.log(JSON.parse(Deno.readTextFileSync('deno.json')).version)")
+echo "export const version = \"$version-dev+$core_revision\";" > .dev/lib/version.js
 
 echo
-echo "Dev build ready: single-file-core $core_revision"
+echo "Dev build ready: $version-dev+$core_revision"
 echo "  run it with:  node .dev/single-file <url> <output>"
 echo "  tracked lib/ is untouched; .dev/ and lib-dev/ are git-ignored"
