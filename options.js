@@ -125,7 +125,7 @@ const OPTIONS_INFO = [{
 	"max-resource-size-enabled": { description: "Enable removal of embedded resources exceeding a given size", type: "boolean" },
 	"max-resource-size": { description: "Maximum size of embedded resources in MB. It applies to every fetched resource, i.e. images, fonts, stylesheets, scripts, frames, videos and audios; a resource above the limit is left out of the saved page", type: "number", defaultValue: 10 }
 }, {
-	"compress-css": { key: "compressCSS", description: "Compress CSS stylesheets", type: "boolean" },
+	"compress-css": { key: "compressCSS", description: "Deprecated, it has no effect", type: "boolean" },
 	"compress-html": { key: "compressHTML", description: "Compress HTML content", type: "boolean", defaultValue: true },
 	"remove-frames": { description: "Remove frames", type: "boolean" },
 	"remove-hidden-elements": { description: "Remove HTML elements which are not displayed", type: "boolean", defaultValue: true },
@@ -139,7 +139,8 @@ const OPTIONS_INFO = [{
 	"move-styles-in-head": { description: "Move style elements outside the head element into the head element", type: "boolean" },
 	"group-duplicate-images": { description: "Group duplicate images into CSS custom properties", type: "boolean", defaultValue: true },
 	"max-size-duplicate-images": { description: "Maximum size in bytes of duplicate images stored as CSS custom properties", type: "number", defaultValue: 512 * 1024 },
-	"image-reduction-factor": { description: "Divide the dimensions of PNG, JPEG and WEBP images by this factor in order to reduce the size of the page (e.g. 2 halves them)", type: "number", defaultValue: 1 },
+	"image-reduction-factor": { description: "Divide the dimensions of PNG, JPEG and WEBP images by this factor in order to reduce the size of the page (e.g. 2 halves them). Images whose size is not set by the page (e.g. icons, logos) are displayed smaller", type: "number", defaultValue: 1 },
+	"image-quality": { description: "Quality of the JPEG and WEBP images resized with --image-reduction-factor, between 0 and 1 (1 saves WEBP images without loss)", type: "number", defaultValue: 0.8 },
 	"group-duplicate-stylesheets": { description: "Group duplicate inline stylesheets into a single stylesheet in order to reduce the size of the page", type: "boolean", defaultValue: false }
 }, {
 	"compress-content": { description: "Create a ZIP file instead of an HTML file", type: "boolean" },
