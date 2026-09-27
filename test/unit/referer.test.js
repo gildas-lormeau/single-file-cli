@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getReferer, getReferrerPolicy, getDocumentReferrerPolicy, getDocumentHeaderReferrerPolicy } from "../../lib/cdp-client-util.js";
+import { isStylesheetReferrerEmpty } from "../../lib/single-file-script.js";
 
 // the fetches made outside the browser must present the referrer the browser would have computed
 // from the referrer policy of the document, i.e. strict-origin-when-cross-origin, otherwise servers
@@ -173,4 +174,26 @@ test("the Firefox rule keeps a relaxing policy on the same host and a stricter o
 	assert.equal(getReferer("http://127.0.0.1:8802/image.png", "http://127.0.0.1:8801/page.html", "unsafe-url", options), "http://127.0.0.1:8801/page.html");
 	assert.equal(getReferer("http://localhost:8802/image.png", "http://127.0.0.1:8801/page.html", "no-referrer", options), "");
 	assert.equal(getReferer("http://localhost:8802/image.png", "http://127.0.0.1:8801/page.html", "same-origin", options), "");
+});
+
+// the fetch made in the page presents the page as the referrer of the resources of a stylesheet,
+// and cannot present the stylesheet. When the browser sent no referer for such a resource, the
+// fetch is made with the no-referrer policy so that it sends none either
+
+test("the in-page fetch sends no referer exactly when the stylesheet would give none", () => {
+	const stylesheetURLs = ["https://cdn.example.com/css/style.css", "http://cdn.example.com/css/style.css", "https://example.com/style.css"];
+	const urls = ["https://example.com/image.png", "http://example.com/image.png", "https://cdn.example.com/css/image.png", "http://cdn.example.com/image.png", "image.png"];
+	const policies = [undefined, "", "no-referrer", "No-Referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-url", "no-referrer, unknown", "unsafe-url, same-origin", "no-referrer, origin"];
+	stylesheetURLs.forEach(stylesheetURL => urls.forEach(url => policies.forEach(stylesheetReferrerPolicy => {
+		const resourceURL = new globalThis.URL(url, stylesheetURL).href;
+		assert.equal(isStylesheetReferrerEmpty(resourceURL, { stylesheetURL, stylesheetReferrerPolicy }),
+			getReferer(resourceURL, stylesheetURL, stylesheetReferrerPolicy) == "",
+			`${resourceURL} from ${stylesheetURL} with ${stylesheetReferrerPolicy}`);
+	})));
+});
+
+test("the in-page fetch keeps its options when no stylesheet references the resource", () => {
+	assert.equal(isStylesheetReferrerEmpty("https://example.com/image.png", {}), false);
+	assert.equal(isStylesheetReferrerEmpty("https://example.com/image.png", { referrerPolicy: "no-referrer" }), false);
+	assert.equal(isStylesheetReferrerEmpty("https://example.com/image.png"), false);
 });
