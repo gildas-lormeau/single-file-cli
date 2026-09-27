@@ -149,3 +149,28 @@ test("a document with no captured information falls back to the meta alone", () 
 	assert.equal(getDocumentReferrerPolicy(PAGE_URL, undefined, "same-origin"), "same-origin");
 	assert.equal(getDocumentReferrerPolicy(PAGE_URL, {}, ""), "");
 });
+
+// Firefox ignores the policies that relax the default for a cross-site request
+// (network.http.referer.disallowCrossSiteRelaxingDefault): measured with the firefox engine on
+// <img referrerpolicy=unsafe-url> from 127.0.0.1 to localhost, Firefox sent the origin only.
+// Without a public suffix list, a different host counts as cross-site, so a same-site request
+// under such a policy gets the default, which never sends more than Firefox did
+
+test("an element policy is used as given without the Firefox rule", () => {
+	assert.equal(getReferer("http://localhost:8802/image.png", "http://127.0.0.1:8801/page.html", "unsafe-url"),
+		"http://127.0.0.1:8801/page.html");
+});
+
+test("the Firefox rule replaces a relaxing policy by the default for another host", () => {
+	const options = { disallowCrossSiteRelaxing: true };
+	assert.equal(getReferer("http://localhost:8802/image.png", "http://127.0.0.1:8801/page.html", "unsafe-url", options), "http://127.0.0.1:8801/");
+	assert.equal(getReferer("https://cdn.example.org/image.png", "https://example.com/page.html", "origin-when-cross-origin", options), "https://example.com/");
+	assert.equal(getReferer("http://cdn.example.org/image.png", "https://example.com/page.html", "no-referrer-when-downgrade", options), "");
+});
+
+test("the Firefox rule keeps a relaxing policy on the same host and a stricter one anywhere", () => {
+	const options = { disallowCrossSiteRelaxing: true };
+	assert.equal(getReferer("http://127.0.0.1:8802/image.png", "http://127.0.0.1:8801/page.html", "unsafe-url", options), "http://127.0.0.1:8801/page.html");
+	assert.equal(getReferer("http://localhost:8802/image.png", "http://127.0.0.1:8801/page.html", "no-referrer", options), "");
+	assert.equal(getReferer("http://localhost:8802/image.png", "http://127.0.0.1:8801/page.html", "same-origin", options), "");
+});
