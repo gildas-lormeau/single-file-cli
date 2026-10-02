@@ -32,6 +32,10 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
 
   `docker run singlefile "https://www.wikipedia.org"`
 
+- Run with Firefox
+
+  `docker run singlefile "https://www.wikipedia.org" --browser-engine firefox`
+
 - Run and redirect the result into a file
 
   `docker run singlefile "https://www.wikipedia.org" > wikipedia.html`

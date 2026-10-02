@@ -2,7 +2,7 @@ FROM node:24-alpine
 
 ARG VERSION=latest
 
-RUN apk add --no-cache chromium ttf-freefont font-noto-emoji
+RUN apk add --no-cache chromium firefox ttf-freefont font-noto-emoji
 
 USER node
 
@@ -13,7 +13,6 @@ RUN npm install --omit=dev single-file-cli@${VERSION}
 ENTRYPOINT [ \
     "npx", \
     "single-file", \
-    "--browser-executable-path", "/usr/bin/chromium-browser", \
     "--browser-single-process=false", \
     "--output-directory", "./out/", \
     "--dump-content" ]
