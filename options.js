@@ -189,6 +189,7 @@ const OPTIONS_INFO = [{
 }, {
 	"browser-script": { description: "Path of a script executed in the page (and all the frames) before it is loaded", type: "string[]" },
 	"browser-stylesheet": { description: "Path of a stylesheet file inserted into the page (and all the frames) after it is loaded", type: "string[]" },
+	"custom-stylesheet": { description: "CSS inserted into the page (and all the frames) just before it is saved, e.g. to expand a text clamped to a few lines. Unlike --browser-stylesheet it takes the rules themselves, not a path, and it is in effect when SingleFile reads the page, so it can also keep an element that would otherwise be removed as hidden", type: "string" },
 	"browser-cookie": { description: "Ordered list of cookie parameters separated by a comma (name,value,domain,path,expires,httpOnly,secure,sameSite,url)", type: "string[]" },
 	"browser-cookies-file": { description: "Path of the cookies file formatted as a JSON file or a Netscape text file", type: "string" },
 	"user-script-enabled": { description: "Enable the event API allowing to execute scripts before the page is saved", type: "boolean", defaultValue: true },
