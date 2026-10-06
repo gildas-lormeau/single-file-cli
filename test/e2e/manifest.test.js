@@ -17,6 +17,7 @@ import { cliDirectory, fastCaptureArgs, firefox, importLibModule } from "../targ
 const execFileAsync = promisify(execFile);
 const FIXTURES_DIRECTORY = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
 const STYLESHEET = "h2 { background: url(pic.png); color: rgb(1,2,3); }";
+const PROTECTED_STYLESHEET = "h3 { color: rgb(4,5,6); }";
 const PAGE = "<html><head><link rel=\"stylesheet\" href=\"/cors.css\"><script src=\"/missing.js\"></script></head><body><h2>styled</h2></body></html>";
 const PNG = Uint8Array.from(atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="), character => character.charCodeAt(0));
 
@@ -40,7 +41,19 @@ function sha256(data) {
 }
 
 test("--manifest writes a canonical sidecar joining what the page and the network layer saw", { timeout: 120000 }, async () => {
-	const server = createServer(serve);
+	// served from another host without access-control-allow-origin: the browser loads the
+	// sheet, the page cannot read it and the fetch that reads it runs outside the browser
+	const protectedServer = createServer((request, response) => response.writeHead(200, { "content-type": "text/css" }).end(PROTECTED_STYLESHEET));
+	await new Promise(resolve => protectedServer.listen(0, "127.0.0.1", resolve));
+	const protectedUrl = "http://127.0.0.1:" + protectedServer.address().port + "/protected.css";
+	const servedPage = PAGE.replace("</head>", "<link rel=\"stylesheet\" href=\"" + protectedUrl + "\"></head>");
+	const server = createServer((request, response) => {
+		if (new URL(request.url, "http://localhost").pathname === "/") {
+			response.writeHead(200, { "content-type": "text/html" }).end(servedPage);
+		} else {
+			serve(request, response);
+		}
+	});
 	await new Promise(resolve => server.listen(0, "localhost", resolve));
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
@@ -69,7 +82,7 @@ test("--manifest writes a canonical sidecar joining what the page and the networ
 		const document = requests.find(request => request.finalUrl === url);
 		assert.ok(document, "the document is not in the transport requests");
 		assert.equal(document.status, 200);
-		assert.equal(document.body.sha256, sha256(PAGE), "the document body hash is not the hash of the served page");
+		assert.equal(document.body.sha256, sha256(servedPage), "the document body hash is not the hash of the served page");
 		// Firefox hands a text body back as a string, Chromium as the bytes
 		assert.equal(document.body.encoding, firefox ? "text" : "decoded");
 		assert.equal(document.redirects.length, 0);
@@ -86,6 +99,15 @@ test("--manifest writes a canonical sidecar joining what the page and the networ
 		const missing = requests.find(request => request.url === url + "missing.js");
 		assert.equal(missing.status, 404);
 		assert.equal(missing.body, undefined, "an error body was hashed");
+		const backendFetch = requests.find(request => request.fetchedBy === "cli");
+		assert.ok(backendFetch, "the fetch made outside the browser is not in the transport requests");
+		assert.equal(backendFetch.url, protectedUrl);
+		assert.equal(backendFetch.status, 200);
+		assert.equal(backendFetch.body.sha256, sha256(PROTECTED_STYLESHEET));
+		assert.equal(backendFetch.redirected, false);
+		const protectedStylesheet = manifest.frames[0].resources.find(resource => resource.url === protectedUrl);
+		assert.equal(protectedStylesheet.fetchedBy, "cli", "the page's record of the resource does not say the CLI fetched it");
+		assert.equal(stylesheet.fetchedBy, "page");
 		assert.ok(manifest.crossChecks.length >= 2, "fewer than two cross-checks: " + JSON.stringify(manifest.crossChecks));
 		assert.ok(manifest.crossChecks.every(check => check.match), "a cross-check failed: " + JSON.stringify(manifest.crossChecks));
 		assert.ok(manifest.crossChecks.some(check => check.url === stylesheetUrl), "the stylesheet was not cross-checked");
@@ -106,6 +128,7 @@ test("--manifest writes a canonical sidecar joining what the page and the networ
 	} finally {
 		await rm(directory, { recursive: true });
 		server.close();
+		protectedServer.close();
 	}
 });
 
