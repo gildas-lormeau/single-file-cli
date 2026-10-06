@@ -7,7 +7,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
-import { cliDirectory, fastCaptureArgs } from "../target.js";
+import { cliDirectory, fastCaptureArgs, firefox } from "../target.js";
 
 const execFileAsync = promisify(execFile);
 const STYLE = "rgb(11,22,33)";
@@ -68,8 +68,10 @@ test("a document asking for no referrer gets none", { timeout: 120000 }, async (
 	assert.equal(backendRequests[0].referer, undefined, "the referer was sent although the document asked for none");
 });
 
+// Firefox does not let a policy relax the default for a cross-site request: unsafe-url falls back
+// to strict-origin-when-cross-origin there, and the fetch lane sends what the browser would have
 test("a meta asking for the full URL gets it", { timeout: 120000 }, async () => {
-	const { backendRequests, pageUrl } = await capture({ meta: "<meta name=\"referrer\" content=\"unsafe-url\">" });
+	const { backendRequests, pageUrl, pageOrigin } = await capture({ meta: "<meta name=\"referrer\" content=\"unsafe-url\">" });
 	assert.ok(backendRequests.length, "the stylesheet was never fetched outside the browser");
-	assert.equal(backendRequests[0].referer, pageUrl, "the meta asking for unsafe-url did not widen the referer");
+	assert.equal(backendRequests[0].referer, firefox ? pageOrigin + "/" : pageUrl, "the meta asking for unsafe-url did not widen the referer");
 });
