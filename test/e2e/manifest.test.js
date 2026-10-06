@@ -73,8 +73,12 @@ test("--manifest writes a canonical sidecar joining what the page and the networ
 		// Firefox hands a text body back as a string, Chromium as the bytes
 		assert.equal(document.body.encoding, firefox ? "text" : "decoded");
 		assert.equal(document.redirects.length, 0);
+		assert.equal(document.redirectCount, 0);
 		const redirected = requests.find(request => request.url === url + "cors.css");
 		assert.ok(redirected, "the redirected stylesheet request is not in the transport requests");
+		// the count the browser reports and the hops it reported agree for a server redirect;
+		// Firefox counts an internal HSTS upgrade without reporting the hop, so the two can differ
+		assert.equal(redirected.redirectCount, 1);
 		assert.equal(redirected.redirects[0].status, 302);
 		assert.equal(redirected.redirects[0].location, "/styles/final.css");
 		assert.equal(redirected.finalUrl, stylesheetUrl);
