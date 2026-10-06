@@ -426,7 +426,8 @@ async function capturePage(options) {
 		if (filename) {
 			const outputDirectory = getOutputDirectory(options);
 			pageData.filename = filename.startsWith(outputDirectory) ? filename.substring(outputDirectory.length) : filename;
-			if (options.manifest && pageData.manifest) {
+			// the JSON written by --output-json already holds the manifest, so no sidecar beside it
+			if (options.manifest && pageData.manifest && !options.outputJson) {
 				pageData.manifest.output.filename = pageData.filename;
 				await writeTextFile(filename + MANIFEST_FILENAME_SUFFIX, canonicalize(pageData.manifest));
 				pageData.manifestFilename = pageData.filename + MANIFEST_FILENAME_SUFFIX;
@@ -462,7 +463,6 @@ async function capturePage(options) {
 async function setManifestOutput(pageData, content) {
 	const bytes = typeof content == "string" ? new TextEncoder().encode(content) : content;
 	pageData.manifest.output = {
-		filename: pageData.filename,
 		mimeType: pageData.mimeType,
 		size: bytes.length,
 		sha256: await sha256(bytes)

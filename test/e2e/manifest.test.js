@@ -70,7 +70,8 @@ test("--manifest writes a canonical sidecar joining what the page and the networ
 		assert.ok(document, "the document is not in the transport requests");
 		assert.equal(document.status, 200);
 		assert.equal(document.body.sha256, sha256(PAGE), "the document body hash is not the hash of the served page");
-		assert.equal(document.body.encoding, "decoded");
+		// Firefox hands a text body back as a string, Chromium as the bytes
+		assert.equal(document.body.encoding, firefox ? "text" : "decoded");
 		assert.equal(document.redirects.length, 0);
 		const redirected = requests.find(request => request.url === url + "cors.css");
 		assert.ok(redirected, "the redirected stylesheet request is not in the transport requests");
