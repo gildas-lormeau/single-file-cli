@@ -102,7 +102,9 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       # the image installs single-file-cli from npm, so building before the registry serves the
-      # released version would silently ship the previous one
+      # released version would silently ship the previous one. The package metadata carries
+      # the version minutes before the tarball is downloadable (v2.18.0: 5 minutes), and the
+      # build needs the tarball, so that is what is waited for
       - name: Wait for npm to serve the released version
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
@@ -110,11 +112,11 @@ jobs:
           version="${TAG_NAME#v}"
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           for attempt in $(seq 1 40); do
-            available=$(npm view "single-file-cli@$version" version 2>/dev/null || true)
-            if [ "$available" = "$version" ]; then
+            tarball=$(npm view "single-file-cli@$version" dist.tarball 2>/dev/null || true)
+            if [ -n "$tarball" ] && curl -fs -r 0-0 -o /dev/null "$tarball"; then
               exit 0
             fi
-            echo "npm does not serve $version yet"
+            echo "npm does not serve the tarball of $version yet"
             sleep 30
           done
           echo "::error::timed out waiting for npm to serve $version"
