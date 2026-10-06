@@ -114,6 +114,12 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file --help
   ```
 
+- Record what was observed while saving, for later verification: see [MANIFEST.md](MANIFEST.md)
+
+  ```sh
+  single-file https://www.wikipedia.org wikipedia.html --manifest
+  ```
+
 - Examples
 
   - Dump the HTML content of https://www.wikipedia.org into the console
