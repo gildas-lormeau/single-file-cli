@@ -21,9 +21,10 @@
  *   Source.
  */
 
-/* global URL */
+/* global URL, TextEncoder */
 
 import { Buffer } from "node:buffer";
+import { canonicalize, sha256 } from "./lib/manifest.js";
 import * as cdpBackend from "./lib/cdp-client.js";
 import * as bidiBackend from "./lib/bidi-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
@@ -45,6 +46,7 @@ const API_ONLY_DEFAULTS = {
 const DEFAULT_OPTIONS = Object.assign(getDefaultOptions(), API_ONLY_DEFAULTS);
 const STATE_PROCESSING = "processing";
 const STATE_PROCESSED = "processed";
+const MANIFEST_FILENAME_SUFFIX = ".manifest.json";
 
 const { readTextFile, writeTextFile, readFile, writeFile, stdout, mkdir, makeTempDir, remove, stat, errors } = Deno;
 let backend = cdpBackend, tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, errorCount = 0;
@@ -93,6 +95,9 @@ async function initialize(options) {
 		}
 		if (options.outputJson || options.insertTextBody || options.password) {
 			throw new Error("--crawl-save-archive is not compatible with --output-json, --insert-text-body and --password");
+		}
+		if (options.manifest) {
+			throw new Error("--crawl-save-archive is not compatible with --manifest, which describes one saved file");
 		}
 		archiveTempDirectory = await makeTempDir();
 	}
@@ -379,6 +384,9 @@ async function capturePage(options) {
 		if (options.includeBOM && typeof content == "string") {
 			content = "\ufeff" + content;
 		}
+		if (options.manifest && pageData.manifest) {
+			await setManifestOutput(pageData, content);
+		}
 		if (options.consoleMessagesFile && pageData.consoleMessages) {
 			await writeTextFile(options.consoleMessagesFile, JSON.stringify(pageData.consoleMessages, null, 2));
 		}
@@ -418,6 +426,11 @@ async function capturePage(options) {
 		if (filename) {
 			const outputDirectory = getOutputDirectory(options);
 			pageData.filename = filename.startsWith(outputDirectory) ? filename.substring(outputDirectory.length) : filename;
+			if (options.manifest && pageData.manifest) {
+				pageData.manifest.output.filename = pageData.filename;
+				await writeTextFile(filename + MANIFEST_FILENAME_SUFFIX, canonicalize(pageData.manifest));
+				pageData.manifestFilename = pageData.filename + MANIFEST_FILENAME_SUFFIX;
+			}
 		}
 		dumpJsonMetadata(pageData, options);
 		return pageData;
@@ -442,6 +455,18 @@ async function capturePage(options) {
 				`[${new Date(timestamp).toISOString()}] ${message.join(" ")}`).join("\n"));
 		}
 	}
+}
+
+// core hashed the page it produced; the file on disk can differ from it by the BOM
+// added above, so the hash of the saved bytes is taken here
+async function setManifestOutput(pageData, content) {
+	const bytes = typeof content == "string" ? new TextEncoder().encode(content) : content;
+	pageData.manifest.output = {
+		filename: pageData.filename,
+		mimeType: pageData.mimeType,
+		size: bytes.length,
+		sha256: await sha256(bytes)
+	};
 }
 
 function dumpJsonMetadata(pageData, options) {
