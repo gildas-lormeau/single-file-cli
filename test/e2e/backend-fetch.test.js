@@ -9,6 +9,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
+import { Buffer } from "node:buffer";
 import { cliDirectory, fastCaptureArgs } from "../target.js";
 
 const execFileAsync = promisify(execFile);
@@ -83,6 +84,46 @@ test("the backend fetch presents the user agent given on the command line", { ti
 		assert.ok(requests.length, "the resource was not fetched");
 		assert.ok(requests.every(({ headers }) => headers["user-agent"] === USER_AGENT),
 			"a request presented another user agent: " + JSON.stringify(requests.map(({ headers }) => headers["user-agent"])));
+	} finally {
+		await rm(directory, { recursive: true });
+		server.close();
+		resourceServer.close();
+	}
+});
+
+test("the backend fetch reports the final URL after a redirect", { timeout: 120000 }, async () => {
+	const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
+	const requests = [];
+	// the stylesheet is redirected into a folder and references its image relatively, so the
+	// image is only found when the relative URL is resolved against the URL the redirect led to
+	const resourceServer = createServer((request, response) => {
+		const { pathname } = new URL(request.url, "http://127.0.0.1");
+		requests.push(pathname);
+		if (pathname === "/cors.css") {
+			response.writeHead(302, { location: "/styles/final.css" }).end();
+		} else if (pathname === "/styles/final.css") {
+			response.writeHead(200, { "content-type": "text/css" }).end("h2 { background: url(pic.png); }");
+		} else if (pathname === "/styles/pic.png") {
+			response.writeHead(200, { "content-type": "image/png" }).end(PNG);
+		} else {
+			response.writeHead(404).end();
+		}
+	});
+	await new Promise(resolve => resourceServer.listen(0, "127.0.0.1", resolve));
+	const styleUrl = "http://127.0.0.1:" + resourceServer.address().port + "/cors.css";
+	const server = createServer((request, response) => {
+		response.writeHead(200, { "content-type": "text/html" }).end(
+			"<html><head><link rel=\"stylesheet\" href=\"" + styleUrl + "\"></head><body><h2>styled</h2></body></html>");
+	});
+	await new Promise(resolve => server.listen(0, "localhost", resolve));
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const outputPath = join(directory, "out.html");
+		const url = "http://localhost:" + server.address().port + "/top.html";
+		await execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, url, outputPath], { cwd: cliDirectory });
+		assert.ok(requests.includes("/styles/final.css"), "the stylesheet was not fetched through the redirect: " + JSON.stringify(requests));
+		assert.ok(requests.includes("/styles/pic.png"), "the image was not resolved against the final URL of the stylesheet: " + JSON.stringify(requests));
+		assert.ok(!requests.includes("/pic.png"), "the image was resolved against the URL before the redirect: " + JSON.stringify(requests));
 	} finally {
 		await rm(directory, { recursive: true });
 		server.close();
