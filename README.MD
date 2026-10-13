@@ -79,12 +79,12 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
     You can also install SingleFile globally with `-g` when running `npm install`.
 
   - Download and unzip manually the
-    [master archive](https://github.com/gildas-lormeau/single-file-cli/archive/master.zip)
+    [main archive](https://github.com/gildas-lormeau/single-file-cli/archive/main.zip)
     provided by Github
 
     ```sh
-    unzip master.zip .
-    cd single-file-cli-master
+    unzip main.zip .
+    cd single-file-cli-main
     ```
 
   - Download with `git`
