@@ -191,7 +191,7 @@ const OPTIONS_INFO = [{
 	"custom-stylesheet": { description: "CSS inserted into the page (and all the frames) just before it is saved, e.g. to expand a text clamped to a few lines. Unlike --browser-stylesheet it takes the rules themselves, not a path, and it is in effect when SingleFile reads the page, so it can also keep an element that would otherwise be removed as hidden", type: "string" },
 	"browser-cookie": { description: "Ordered list of cookie parameters separated by a comma (name,value,domain,path,expires,httpOnly,secure,sameSite,url)", type: "string[]" },
 	"browser-cookies-file": { description: "Path of the cookies file formatted as a JSON file or a Netscape text file", type: "string" },
-	"user-script-enabled": { description: "Enable the event API allowing to execute scripts before the page is saved", type: "boolean", defaultValue: true },
+	"user-script-enabled": { description: "Enable the event API allowing to execute scripts before the page is saved, enabled by default only when --browser-script is set", type: "boolean" },
 }, {
 	"include-infobar": { description: "Include the infobar", type: "boolean" },
 	"infobar-template": { description: "Template used to generate the infobar content (see help page of the extension for more info)", type: "string" },
@@ -474,6 +474,9 @@ function parseArgs(args, setDefaultValues = true) {
 				}
 			});
 		});
+		if (result.options.userScriptEnabled === undefined) {
+			result.options.userScriptEnabled = Boolean(result.options.browserScripts && result.options.browserScripts.length);
+		}
 	}
 	if (result.options.acceptHeaderFont ||
 		result.options.acceptHeaderImage ||
