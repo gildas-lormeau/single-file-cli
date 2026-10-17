@@ -317,6 +317,11 @@ function getDefaultOptions() {
 	return parseArgs([]).options;
 }
 
+function testFirefoxExecutable(executablePath) {
+	const name = executablePath.split(/[/\\]/).pop().toLowerCase();
+	return name.startsWith("firefox") || name.endsWith(".firefox");
+}
+
 function getOptions() {
 	const { positionals, options, invalidOptions } = parseArgs(Array.from(args));
 	const explicitOptions = parseArgs(Array.from(args), false).options;
@@ -348,6 +353,9 @@ function getOptions() {
 	}
 	if (urls.length > 2) {
 		errorMessages.push(`Unexpected arguments: ${urls.slice(2).join(", ")}`);
+	}
+	if (options.browserExecutablePath && options.browserEngine != "firefox" && explicitOptions.browserEngine === undefined && testFirefoxExecutable(options.browserExecutablePath)) {
+		errorMessages.push("--browser-executable-path points to Firefox, add --browser-engine firefox to drive it");
 	}
 	if (options.createBrowserProfile) {
 		if (options.browserEngine == "firefox") {
