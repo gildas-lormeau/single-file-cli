@@ -33,6 +33,8 @@ import { getDefaultOptions } from "./options.js";
 import { Deno, path } from "./lib/deno-polyfill.js";
 
 const VALID_URL_TEST = /^(https?|file):\/\//;
+const INVALID_STRING_LENGTH_ERROR_MESSAGE = "Invalid string length";
+const PAGE_TOO_LARGE_ERROR_MESSAGE = "The page is too large to be written as one HTML string, save it as a self-extracting ZIP file with --compress-content, or reduce its resources with --remove-alternative-images, --max-resource-size or --block-images";
 
 const ARCHIVE_EXCLUDED_OPTION_NAMES = ["disableCompression", "insertTextBody", "password", "url"];
 
@@ -438,6 +440,9 @@ async function capturePage(options) {
 	} catch (error) {
 		errorCount++;
 		const date = new Date();
+		if (error && typeof error.message == "string" && error.message.includes(INVALID_STRING_LENGTH_ERROR_MESSAGE)) {
+			error.message = PAGE_TOO_LARGE_ERROR_MESSAGE + " (" + error.message + ")";
+		}
 		let message = `[${date.toISOString()}] URL: ${options.url} Error: ${error.message || error}`;
 		if (!options.errorsTracesDisabled) {
 			message += "\nStack: " + error.stack;
