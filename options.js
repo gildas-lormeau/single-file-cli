@@ -95,7 +95,7 @@ const OPTIONS_INFO = [{
 	"emulate-media-feature": { description: "Emulate a media feature. The syntax is <name>:<value>, e.g. \"prefers-color-scheme:dark\"", type: "string[]" }
 }, {
 	"http-header": { description: "Extra HTTP header", type: "string[]" },
-	"http-proxy-server": { description: "Proxy address", type: "string" },
+	"http-proxy-server": { description: "Proxy address. It also applies to the requests made outside the browser when running on Deno; on Node.js, these requests are refused instead of bypassing the proxy", type: "string" },
 	"http-proxy-username": { description: "HTTP username", type: "string" },
 	"http-proxy-password": { description: "HTTP password", type: "string" },
 	"accept-header-font": { description: "Accept header for fonts", type: "string", defaultValue: "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8" },
