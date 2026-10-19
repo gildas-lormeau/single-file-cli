@@ -122,7 +122,8 @@ const OPTIONS_INFO = [{
 	"load-deferred-content-block-cookies": { description: "Block access to document.cookie while loading deferred content", type: "boolean" },
 	"load-deferred-content-block-storage": { description: "Block access to localStorage and indexedDB while loading deferred content", type: "boolean" },
 	"max-resource-size-enabled": { description: "Enable removal of embedded resources exceeding a given size", type: "boolean" },
-	"max-resource-size": { description: "Maximum size of embedded resources in MB. It applies to every fetched resource, i.e. images, fonts, stylesheets, scripts, frames, videos and audios; a resource above the limit is left out of the saved page", type: "number", defaultValue: 10 }
+	"max-resource-size": { description: "Maximum size of embedded resources in MB. It applies to every fetched resource, i.e. images, fonts, stylesheets, scripts, frames, videos and audios; a resource above the limit is left out of the saved page", type: "number", defaultValue: 10 },
+	"max-parallel-requests-per-host": { description: "Maximum number of resources fetched at the same time from one host, what browsers allow over HTTP/1.1. HTTP/2 and HTTP/3 would let every resource of a page leave at once, and sites behind a rate limiter then answer 429 to part of them; 0 removes the limit", type: "number", defaultValue: 6 }
 }, {
 	"compress-css": { key: "compressCSS", description: "Deprecated, it has no effect", type: "boolean" },
 	"compress-html": { key: "compressHTML", description: "Compress HTML content", type: "boolean", defaultValue: true },
