@@ -29,6 +29,7 @@ const VIEWPORT = ["--browser-width", "1280", "--browser-height", "900"];
 // a 1x1 gif, small enough to read as a marker in the saved page
 const PIXEL = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
 const BELOW_THE_FOLD = "min-height:3000px";
+const LATE_RULE = "rgb(1,2,3)";
 // what a lazy-loading library does, reduced to its essentials
 const LAZY_IMAGE_SCRIPT = `new IntersectionObserver(entries => entries.forEach(entry => {
 	if (entry.isIntersecting) { entry.target.src = entry.target.dataset.src; }
@@ -151,8 +152,11 @@ test("a stylesheet injected late is captured, and is lost when the idle time is 
 		const scrollEvent = ["--load-deferred-content-dispatch-scroll-event", "true"];
 		const patient = await capture("/late-stylesheet.html", scrollEvent);
 		const impatient = await capture("/late-stylesheet.html", scrollEvent.concat(["--load-deferred-content-max-idle-time", "100"]));
-		assert.ok(patient.includes("LATE_RULE"), "the late stylesheet was not captured with the default idle time");
-		assert.ok(!impatient.includes("LATE_RULE"), "the late stylesheet was captured despite a 100ms idle time");
+		// the marker is the colour the rule sets, not a custom property: since single-file-core 1.6.36
+		// the unused-styles pass removes a custom property nothing reads, and a marker written that way
+		// vanished from a stylesheet that had been captured
+		assert.ok(patient.includes(LATE_RULE), "the late stylesheet was not captured with the default idle time");
+		assert.ok(!impatient.includes(LATE_RULE), "the late stylesheet was captured despite a 100ms idle time");
 	});
 });
 
@@ -192,7 +196,7 @@ async function withFixture(run) {
 			response.writeHead(200, { "content-type": "image/gif" })
 				.end(Buffer.from(PIXEL.slice(PIXEL.indexOf(",") + 1), "base64"));
 		} else if (pathname === "/late.css") {
-			response.writeHead(200, { "content-type": "text/css" }).end("#styled { color: rgb(1,2,3); --marker: LATE_RULE; }");
+			response.writeHead(200, { "content-type": "text/css" }).end("#styled { color: " + LATE_RULE + "; }");
 		} else if (PAGES[pathname]) {
 			response.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(PAGES[pathname]);
 		} else {
