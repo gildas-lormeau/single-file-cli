@@ -132,7 +132,7 @@ const OPTIONS_INFO = [{
 	"removed-elements-selector": { description: "Remove specific HTML elements matching the given CSS selectors (comma separated)", type: "string" },
 	"remove-unused-styles": { description: "Remove unused CSS rules and unneeded declarations", type: "boolean", defaultValue: true },
 	"remove-unused-fonts": { description: "Remove unused CSS font rules", type: "boolean", defaultValue: true },
-	"remove-unused-glyphs": { description: "Remove the glyphs not displayed in the page from the TrueType and WOFF fonts (experimental)", type: "boolean" },
+	"remove-unused-glyphs": { description: "Remove the glyphs not displayed in the page from the TrueType, WOFF and WOFF2 fonts (experimental)", type: "boolean" },
 	"remove-alternative-fonts": { description: "Remove alternative fonts to the ones displayed", type: "boolean", defaultValue: true },
 	"remove-alternative-medias": { description: "Remove alternative CSS stylesheets", type: "boolean", defaultValue: true },
 	"remove-alternative-images": { description: "Remove images for alternative sizes of screen, they are not downloaded either", type: "boolean", defaultValue: true, alias: "block-alternative-images" },
