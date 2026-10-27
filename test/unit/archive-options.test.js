@@ -26,7 +26,7 @@ const FORWARDED = [
 	"insertSingleFileComment", "removeSavedDate", "createRootDirectory", "declareAppendedData",
 	"embeddedImage", "embeddedPdf", "extractDataFromPage", "includeBOM", "insertCanonicalLink",
 	"insertMetaCSP", "insertMetaNoIndex", "maxAppendedDataLength", "preventAppendedData",
-	"selfExtractingArchive"
+	"selfExtractingArchive", "zipWorkerURI"
 ];
 
 test("every compression option is either forwarded to the archive or deliberately withheld", () => {
