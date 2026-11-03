@@ -155,6 +155,14 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file --urls-file=list-urls.txt
   ```
 
+  - Save a page whose content is split into tabs, with the rules of `tabs.css`
+    keeping the hidden tabs in the page and the code of `tabs.js` switching
+    them in the saved file (the page's own scripts are not kept)
+
+  ```sh
+  single-file https://www.example.com/scorecard scorecard.html --custom-stylesheet-file=tabs.css --embedded-script-file=tabs.js
+  ```
+
   - Save https://www.wikipedia.org and crawl its internal links with the query
     parameters removed from the URL
 

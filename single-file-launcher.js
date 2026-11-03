@@ -69,6 +69,14 @@ async function run() {
 				options.browserCookies = parseCookies(cookiesContent);
 			}
 		}
+		if (options.customStylesheetFile) {
+			options.customStylesheet = await readTextFile(options.customStylesheetFile);
+			delete options.customStylesheetFile;
+		}
+		if (options.embeddedScriptFile) {
+			options.embeddedScript = await readTextFile(options.embeddedScriptFile);
+			delete options.embeddedScriptFile;
+		}
 		if (options.embeddedImage) {
 			options.embeddedImage = Array.from(await readFile(options.embeddedImage));
 			checkSignature(options.embeddedImage, PNG_SIGNATURE, "--embedded-image", "PNG");

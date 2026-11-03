@@ -10,7 +10,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
@@ -32,6 +32,32 @@ test("a custom stylesheet is in effect when the page is saved", { timeout: TEST_
 		assert.match(content, /revealed text/, "the element the stylesheet reveals was removed as hidden");
 		assert.match(content, /#hidden\{display:block\s*!important\}/, "the rules are not in the saved page");
 		assert.doesNotMatch(content, /data-single-file-custom-stylesheet/, "the marker attribute reached the saved page");
+	});
+});
+
+test("--custom-stylesheet-file reads the rules from a file", { timeout: TEST_TIMEOUT }, async () => {
+	await withPage(async ({ url, directory }) => {
+		const stylesheetPath = join(directory, "custom.css");
+		await writeFile(stylesheetPath, "#hidden {\n\tdisplay: block !important;\n}\n");
+		const outputPath = join(directory, "out.html");
+		await execFileAsync(process.execPath, [
+			"single-file-node.js", ...fastCaptureArgs, "--remove-hidden-elements", url, outputPath,
+			"--custom-stylesheet-file", stylesheetPath
+		], { cwd: cliDirectory });
+		const content = await readFile(outputPath, "utf8");
+		assert.match(content, /revealed text/, "the element the stylesheet reveals was removed as hidden");
+		assert.match(content, /#hidden\{display:block\s*!important\}/, "the rules are not in the saved page");
+	});
+});
+
+test("--custom-stylesheet and --custom-stylesheet-file together are refused", { timeout: TEST_TIMEOUT }, async () => {
+	await withPage(async ({ url, directory }) => {
+		const stylesheetPath = join(directory, "custom.css");
+		await writeFile(stylesheetPath, CUSTOM_CSS);
+		await assert.rejects(execFileAsync(process.execPath, [
+			"single-file-node.js", ...fastCaptureArgs, url, join(directory, "out.html"),
+			"--custom-stylesheet", CUSTOM_CSS, "--custom-stylesheet-file", stylesheetPath
+		], { cwd: cliDirectory }), error => /--custom-stylesheet cannot be used with --custom-stylesheet-file/.test(error.stderr));
 	});
 });
 

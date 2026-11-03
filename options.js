@@ -191,7 +191,9 @@ const OPTIONS_INFO = [{
 	"browser-script": { description: "Path of a script executed in the page (and all the frames) before it is loaded", type: "string[]" },
 	"browser-stylesheet": { description: "Path of a stylesheet file inserted into the page (and all the frames) after it is loaded", type: "string[]" },
 	"custom-stylesheet": { description: "CSS inserted into the page (and all the frames) just before it is saved, e.g. to expand a text clamped to a few lines. Unlike --browser-stylesheet it takes the rules themselves, not a path, and it is in effect when SingleFile reads the page, so it can also keep an element that would otherwise be removed as hidden", type: "string" },
+	"custom-stylesheet-file": { description: "Path of a file holding the CSS of --custom-stylesheet, for rules too long or too awkward to quote on the command line", type: "string" },
 	"embedded-script": { description: "JavaScript code inserted at the end of the saved page, e.g. to restore the tabs of a page whose scripts are removed. It takes the code itself, not a path, it is kept in the saved page even when --block-scripts is enabled, and it does not run while the page is saved, use --browser-script for that", type: "string" },
+	"embedded-script-file": { description: "Path of a file holding the code of --embedded-script, for a script too long or too awkward to quote on the command line", type: "string" },
 	"browser-cookie": { description: "Ordered list of cookie parameters separated by a comma (name,value,domain,path,expires,httpOnly,secure,sameSite,url)", type: "string[]" },
 	"browser-cookies-file": { description: "Path of the cookies file formatted as a JSON file or a Netscape text file", type: "string" },
 	"user-script-enabled": { description: "Enable the event API allowing to execute scripts before the page is saved, enabled by default only when --browser-script is set", type: "boolean" },
@@ -372,6 +374,12 @@ function getOptions() {
 		}
 	} else if (options.browserProfile && options.browserServer) {
 		errorMessages.push("--browser-profile cannot be used with --browser-server");
+	}
+	if (options.customStylesheet && options.customStylesheetFile) {
+		errorMessages.push("--custom-stylesheet cannot be used with --custom-stylesheet-file");
+	}
+	if (options.embeddedScript && options.embeddedScriptFile) {
+		errorMessages.push("--embedded-script cannot be used with --embedded-script-file");
 	}
 	if (!options.crawlLinks) {
 		Object.keys(CRAWL_LINKS_DEPENDENT_OPTIONS)
