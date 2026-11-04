@@ -99,7 +99,7 @@ const OPTIONS_INFO = [{
 	"http-proxy-username": { description: "HTTP username", type: "string" },
 	"http-proxy-password": { description: "HTTP password", type: "string" },
 	"accept-header-font": { description: "Accept header for fonts", type: "string", defaultValue: "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8" },
-	"accept-header-image": { description: "Accept header for images", type: "string", defaultValue: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8" },
+	"accept-header-image": { description: "Accept header for images", type: "string", defaultValue: "image/jxl,image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8" },
 	"accept-header-stylesheet": { description: "Accept header for stylesheets", type: "string", defaultValue: "text/css,*/*;q=0.1" },
 	"accept-header-script": { description: "Accept header for scripts", type: "string", defaultValue: "*/*" },
 	"accept-header-document": { description: "Accept header for documents", type: "string", defaultValue: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" }
