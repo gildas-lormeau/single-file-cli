@@ -25,6 +25,10 @@ import { cliDirectory } from "../target.js";
 const execFileAsync = promisify(execFile);
 
 const TIMEOUT = 180000;
+// the committed lib/ is a build of the pinned single-file-core release, so a test of an option
+// added in core runs only once the pin carries it, and always against the dev build
+const BUNDLE = await readFile(join(cliDirectory, "lib", "single-file-bundle.js"), "utf8");
+const KEEP_EMULATED_SCREEN_SIZE_SUPPORTED = BUNDLE.includes("keepEmulatedScreenSize");
 const VIEWPORT = ["--browser-width", "1280", "--browser-height", "900"];
 // a 1x1 gif, small enough to read as a marker in the saved page
 const PIXEL = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
@@ -172,7 +176,7 @@ test("a block sized from innerHeight keeps the real viewport height in the saved
 
 // the opposite choice, for pages that unmount what is off screen: the emulated size is kept until
 // the page has been read, so a block sized from it is saved at the emulated size
-test("keeping the emulated screen size saves a block sized from innerHeight at the emulated height", { timeout: TIMEOUT }, async () => {
+test("keeping the emulated screen size saves a block sized from innerHeight at the emulated height", { timeout: TIMEOUT, skip: KEEP_EMULATED_SCREEN_SIZE_SUPPORTED ? false : "the pinned single-file-core does not carry the option yet" }, async () => {
 	await withFixture(async capture => {
 		const content = await capture("/viewport-height.html", ["--load-deferred-content-keep-emulated-screen-size", "true"]);
 		const height = Number((content.match(/id=cover style="?height:(\d+)px/) || [])[1]);
