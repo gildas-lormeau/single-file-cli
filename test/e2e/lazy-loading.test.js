@@ -170,6 +170,17 @@ test("a block sized from innerHeight keeps the real viewport height in the saved
 	});
 });
 
+// the opposite choice, for pages that unmount what is off screen: the emulated size is kept until
+// the page has been read, so a block sized from it is saved at the emulated size
+test("keeping the emulated screen size saves a block sized from innerHeight at the emulated height", { timeout: TIMEOUT }, async () => {
+	await withFixture(async capture => {
+		const content = await capture("/viewport-height.html", ["--load-deferred-content-keep-emulated-screen-size", "true"]);
+		const height = Number((content.match(/id=cover style="?height:(\d+)px/) || [])[1]);
+		assert.ok(height, "the cover carries no inline height");
+		assert.ok(height > 1000, "the cover was restored to the real screen height: " + height + "px");
+	});
+});
+
 test("the zoom-out leaves no transform behind in the saved page", { timeout: TIMEOUT }, async () => {
 	await withFixture(async capture => {
 		for (const options of [[], ["--load-deferred-content-keep-zoom-level", "true"]]) {
