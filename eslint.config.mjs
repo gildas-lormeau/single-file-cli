@@ -12,6 +12,13 @@ export default [
 			}
 		},
 		rules: {
+			"indent": [
+				"error",
+				"tab",
+				{
+					"SwitchCase": 1
+				}
+			],
 			"linebreak-style": [
 				"error",
 				"unix"
@@ -26,6 +33,12 @@ export default [
 			],
 			"no-console": [
 				"warn"
+			],
+			"no-empty": [
+				"error",
+				{
+					"allowEmptyCatch": true
+				}
 			]
 		}
 	}

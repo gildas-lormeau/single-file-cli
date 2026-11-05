@@ -115,7 +115,7 @@ async function initialize(options) {
 			} else {
 				message += "Set the path using the --browser-executable-path option.";
 			}
-			throw new Error(message);
+			throw new Error(message, { cause: error });
 		} else {
 			throw error;
 		}
