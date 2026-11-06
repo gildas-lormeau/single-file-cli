@@ -130,6 +130,7 @@ const OPTIONS_INFO = [{
 	"compress-html": { key: "compressHTML", description: "Compress HTML content", type: "boolean", defaultValue: true },
 	"remove-frames": { description: "Remove frames", type: "boolean" },
 	"remove-hidden-elements": { description: "Remove HTML elements which are not displayed", type: "boolean", defaultValue: true },
+	"selected-elements-selector": { description: "Save only the HTML elements matching the given CSS selectors (comma separated), with their ancestors, like \"Save selection\" in the extension. The elements before them are hidden, the elements after them are removed, and --removed-elements-selector is applied afterwards. The whole page is saved when no element matches", type: "string" },
 	"removed-elements-selector": { description: "Remove specific HTML elements matching the given CSS selectors (comma separated)", type: "string" },
 	"remove-unused-styles": { description: "Remove unused CSS rules and unneeded declarations", type: "boolean", defaultValue: true },
 	"remove-unused-fonts": { description: "Remove unused CSS font rules", type: "boolean", defaultValue: true },
