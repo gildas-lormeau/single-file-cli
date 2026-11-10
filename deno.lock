@@ -4,7 +4,6 @@
     "jsr:@simple-cdp/simple-cdp@^1.10.2": "1.10.2",
     "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/path@^1.1.6": "1.1.6",
-    "npm:@eslint/js@^9.39.5": "9.39.5",
     "npm:esbuild@~0.27.7": "0.27.7",
     "npm:eslint@^10.8.1": "10.8.1"
   },
@@ -562,7 +561,7 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@eslint/js@^9.39.5",
+        "npm:@eslint/js@^10.0.1",
         "npm:esbuild@~0.27.7",
         "npm:eslint@^10.8.1",
         "npm:simple-cdp@^1.10.2"
