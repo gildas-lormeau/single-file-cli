@@ -139,6 +139,7 @@ const OPTIONS_INFO = [{
 	"remove-alternative-medias": { description: "Remove alternative CSS stylesheets", type: "boolean", defaultValue: true },
 	"remove-alternative-images": { description: "Remove images for alternative sizes of screen, they are not downloaded either", type: "boolean", defaultValue: true, alias: "block-alternative-images" },
 	"remove-no-script-tags": { description: "Remove <noscript> tags", type: "boolean", defaultValue: true },
+	"remove-link-query-strings": { description: "Remove the query strings of the links (a and area elements with a relative or http(s) URL), e.g. tracking parameters, session ids and signed URLs; the fragment is kept", type: "boolean" },
 	"move-styles-in-head": { description: "Move style elements outside the head element into the head element", type: "boolean" },
 	"group-duplicate-images": { description: "Group duplicate images into CSS custom properties", type: "boolean", defaultValue: true },
 	"max-size-duplicate-images": { description: "Maximum size in bytes of duplicate images stored as CSS custom properties", type: "number", defaultValue: 512 * 1024 },
