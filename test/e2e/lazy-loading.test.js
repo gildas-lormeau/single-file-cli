@@ -100,6 +100,25 @@ const PAGES = {
 		</script>
 	</body></html>`,
 
+	// the shape of a page that never asks the window for its size: a hidden element is sized with
+	// the vh unit and the page reads its height. No getter can be faked for it, the layout engine
+	// answers, so the emulation leaves this page convinced that the image is far below the fold.
+	// The URL is kept in the script: an image carrying it in a data attribute is resolved by
+	// SingleFile itself, whatever the page decides.
+	"/viewport-unit.html": `<html><head><title>viewport unit</title></head><body style="margin:0">
+		<div id="tracker" style="position:fixed;visibility:hidden;width:1px;height:100vh"></div>
+		<div style="${BELOW_THE_FOLD}">filler</div>
+		<img id="below" width="10" height="10">
+		<script>
+			function load() {
+				const image = document.querySelector("#below");
+				if (image.offsetTop < document.querySelector("#tracker").clientHeight) { image.src = "/deferred.gif"; }
+			}
+			addEventListener("resize", load);
+			load();
+		</script>
+	</body></html>`,
+
 	// content in a nested scroller, which the emulation does not reach: the document itself does not
 	// scroll, so every faked getter is set to the value it already had
 	"/nested-scroller.html": `<html><head><title>nested scroller</title></head><body style="margin:0">
@@ -182,6 +201,31 @@ test("keeping the emulated screen size saves a block sized from innerHeight at t
 		const height = Number((content.match(/id=cover style="?height:(\d+)px/) || [])[1]);
 		assert.ok(height, "the cover carries no inline height");
 		assert.ok(height > 1000, "the cover was restored to the real screen height: " + height + "px");
+	});
+});
+
+// the limit the option below exists for, kept as a test so that the fixture is known to need it
+test("a lazy image loaded from the height of a vh-sized element is not loaded by the emulation", { timeout: TIMEOUT }, async () => {
+	await withFixture(async capture => {
+		const content = await capture("/viewport-unit.html");
+		assert.ok(!content.includes(PIXEL), "the emulation loaded the image, the fixture does not isolate the viewport unit");
+	});
+});
+
+test("expanding the viewport loads a lazy image loaded from the height of a vh-sized element", { timeout: TIMEOUT }, async () => {
+	await withFixture(async capture => {
+		const content = await capture("/viewport-unit.html", ["--load-deferred-content-expand-viewport", "true"]);
+		assert.ok(content.includes(PIXEL), "the deferred image was not inlined");
+	});
+});
+
+// the viewport is restored before the page is read, and the page is told so by a real resize
+test("expanding the viewport saves a block sized from innerHeight at the real viewport height", { timeout: TIMEOUT }, async () => {
+	await withFixture(async capture => {
+		const content = await capture("/viewport-height.html", ["--load-deferred-content-expand-viewport", "true"]);
+		const height = Number((content.match(/id=cover style="?height:(\d+)px/) || [])[1]);
+		assert.ok(height, "the cover carries no inline height");
+		assert.ok(height < 1000, "the cover kept the height of the expanded viewport: " + height + "px");
 	});
 });
 
