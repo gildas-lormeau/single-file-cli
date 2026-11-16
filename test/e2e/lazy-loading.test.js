@@ -119,8 +119,9 @@ const PAGES = {
 		</script>
 	</body></html>`,
 
-	// content in a nested scroller, which the emulation does not reach: the document itself does not
-	// scroll, so every faked getter is set to the value it already had
+	// content in a nested scroller: the document itself does not scroll, so the pass used not to run
+	// at all. It now starts when a large enough element scrolls, and the image is then saved from
+	// its data-src attribute
 	"/nested-scroller.html": `<html><head><title>nested scroller</title></head><body style="margin:0">
 		<div id="scroller" style="height:400px;overflow-y:auto">
 			<div style="${BELOW_THE_FOLD}">filler</div>
@@ -239,7 +240,7 @@ test("the zoom-out leaves no transform behind in the saved page", { timeout: TIM
 	});
 });
 
-test("a lazy image inside a nested scroller is loaded", { timeout: TIMEOUT, todo: "the emulation only measures document.scrollingElement, so a page that scrolls in a nested container is never enlarged" }, async () => {
+test("a lazy image inside a nested scroller is loaded", { timeout: TIMEOUT }, async () => {
 	await withFixture(async capture => {
 		const content = await capture("/nested-scroller.html");
 		assert.ok(content.includes(PIXEL), "the deferred image inside the scroller was not inlined");
