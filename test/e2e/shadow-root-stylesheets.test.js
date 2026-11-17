@@ -89,8 +89,10 @@ test("control: with --remove-unused-styles=false the stylesheet is saved whole",
 	});
 });
 
+// The first style element of each shadow root of the component. The adopted stylesheets are saved
+// after the content of the shadow root, see adopted-stylesheets-order.test.js.
 function getShadowRootStyles(content, tagName) {
-	return Array.from(content.matchAll(new RegExp("<" + tagName + "[^>]*>\\s*<template[^>]*>\\s*<style>([^<]*)</style>", "g"))).map(match => match[1]);
+	return Array.from(content.matchAll(new RegExp("<" + tagName + "[^>]*>\\s*<template[^>]*>(?:(?!</template>|<style>).)*<style>([^<]*)</style>", "gs"))).map(match => match[1]);
 }
 
 async function withSavedPage(args, check) {
