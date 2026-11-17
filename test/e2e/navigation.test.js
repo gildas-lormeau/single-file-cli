@@ -41,3 +41,39 @@ test("a page that navigates after its network went quiet is captured once the ne
 		server.close();
 	}
 });
+
+// The first page replaces itself as soon as its document is parsed, while an image keeps its load
+// event pending. That is what the challenge page of reddit.com does. Firefox reports the first
+// navigation as failed when the second one interrupts it, after its document was displayed, and
+// the tool took that for an unreachable URL: no page of reddit.com could be saved with
+// --browser-engine firefox.
+test("a page that navigates before its load event is captured once the new page loaded", { timeout: 120000 }, async () => {
+	const pendingResponses = [];
+	const server = createServer((request, response) => {
+		if (request.url == "/pending.png") {
+			pendingResponses.push(response);
+		} else if (request.url == "/second") {
+			response.writeHead(200, { "content-type": "text/html" });
+			response.end("<!doctype html><title>second</title><p>second page content</p>");
+		} else {
+			response.writeHead(200, { "content-type": "text/html" });
+			response.end("<!doctype html><title>first</title><p id=first>first page content</p><img src=/pending.png>" +
+				"<script>addEventListener('DOMContentLoaded', () => location.replace('/second'))</script>");
+		}
+	});
+	await new Promise(resolve => server.listen(0, "localhost", resolve));
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const url = "http://localhost:" + server.address().port + "/";
+		const output = join(directory, "out.html");
+		await execFileAsync(process.execPath, ["single-file-node.js", url, output], { cwd: cliDirectory });
+		const content = await readFile(output, "utf8");
+		assert.ok(content.includes("second page content"), "the second page was not captured");
+		assert.ok(!content.includes("first page content"), "the first page was captured");
+	} finally {
+		await rm(directory, { recursive: true });
+		pendingResponses.forEach(response => response.destroy());
+		server.closeAllConnections();
+		server.close();
+	}
+});
