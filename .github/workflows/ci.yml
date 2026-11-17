@@ -30,6 +30,12 @@ jobs:
       -
         name: Run linter
         run: npm run lint
+      # The first launch of the browser on a runner takes from 3 to 35 seconds, and the test files that
+      # run first all paid for it at once, inside their own time limits. One capture before the suite
+      # moves that cost out of the tests. A failure here is not the suite's verdict.
+      -
+        name: Launch the browser once
+        run: node single-file-node.js about:blank --dump-content > /dev/null || true
       -
         name: Run tests
         run: npm test
