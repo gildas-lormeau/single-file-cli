@@ -18,7 +18,6 @@
 import { options as cdpOptions, CDP } from "simple-cdp";
 import { importLibModule } from "../target.js";
 
-const LOCALHOST = "http://localhost:";
 const EMPTY_PAGE_URL = "about:blank";
 const BAND_HEIGHT = 1000;
 const VIEWPORT_WIDTH = 1200;
@@ -44,7 +43,7 @@ export { openBrowser, BAND_HEIGHT };
 
 async function openBrowser({ headless = true } = {}) {
 	const { launchChromium, closeChromium } = await importLibModule("chromium.js");
-	cdpOptions.apiUrl = LOCALHOST + (await launchChromium({ headless }));
+	cdpOptions.apiUrl = await launchChromium({ headless });
 	// A command with no limit waits for its answer for ever, and that is the default. One that never
 	// came back took a whole CI run with it: the suite reported nothing but its own test timeout,
 	// the connection stayed wedged, and every check after it in the file was never reached. With a

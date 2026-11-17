@@ -29,7 +29,6 @@ import { Deno } from "./../lib/deno-polyfill.js";
 
 const { args, writeTextFile, writeFile, stdout, exit } = Deno;
 
-const LOCALHOST = "http://localhost:";
 const EMPTY_PAGE_URL = "about:blank";
 const OUTER_HTML_EXPRESSION = "document.documentElement.outerHTML";
 const DEFAULT_MAX_DELAY = 30000;
@@ -92,12 +91,12 @@ try {
 exit(exitCode);
 
 async function capture(options) {
-	cdpOptions.apiUrl = LOCALHOST + (await launchChromium({
+	cdpOptions.apiUrl = await launchChromium({
 		headless: !options.showBrowser,
 		executablePath: options.browserExecutablePath,
 		width: options.browserWidth,
 		height: options.browserHeight
-	}));
+	});
 	const targetInfo = await CDP.createTarget(EMPTY_PAGE_URL);
 	const cdp = new CDP(targetInfo);
 	const { Page, Runtime } = cdp;
