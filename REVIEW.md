@@ -28,6 +28,11 @@ checks a workflow already enforces, the others rely on the reviewer.
   clients). Several captures run at the same time on one machine. A process must only drive the
   browser it launched: `launchChromium` returns the URL of that browser, checked against its profile
   directory, and nothing else may be used to reach it. `test/e2e/parallel-captures.test.js` covers it.
+- **`--no-sandbox` comes back in the default arguments, or the launch is changed.** The browser is
+  launched with its sandbox, and again with `--no-sandbox` only when it exits at startup (root, a
+  container with the default seccomp profile, Ubuntu with a browser that has no AppArmor profile).
+  The warning is displayed once the second launch has worked. `test/e2e/sandbox-fallback.test.js`
+  covers it, and its first test fails on a machine where the sandbox is silently not in use.
 - **A Chromium command line switch is added or removed.** Check `navigator.webdriver` and the user
   agent with `test/e2e/automation-detection.test.js`: some switches make pages see the capture as
   automated (`--remote-debugging-port=0` does).

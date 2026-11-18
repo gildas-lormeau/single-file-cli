@@ -186,6 +186,16 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
 
   The exit code is 0 when all the pages have been saved, 1 when at least one capture failed (the other pages of the batch or the crawl are still saved), and 255 when an error prevented the process from running.
 
+## Browser sandbox
+
+A Chromium-based browser is launched with its sandbox, which confines the processes that render
+the pages: a page that exploits a flaw of the browser cannot read your files. The sandbox cannot be
+set up everywhere on Linux, e.g. when the tool is run as root, in a Docker container with the
+default security profile, or on Ubuntu with a browser that was not installed from a package. The
+browser then exits at startup: `single-file` launches it again with `--no-sandbox` and displays a
+warning. Pass `--browser-arg=--no-sandbox` to launch the browser without its sandbox from the
+start, which skips the failed attempt and the warning. The Docker image does it.
+
 ## Compile executables
 
  - Compile executables into `/dist`

@@ -30,6 +30,13 @@ jobs:
       -
         name: Run linter
         run: npm run lint
+      # Ubuntu denies user namespaces to a program without an AppArmor profile, and the Chromium of
+      # the runner has none: it exits with "No usable sandbox!" (measured in run 44365817342). Every
+      # launch of the suite would then fall back to --no-sandbox, and the default launch, with the
+      # sandbox, would never be tested here. test/e2e/sandbox-fallback.test.js fails when it is not.
+      -
+        name: Allow the browser to set up its sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       # The first launch of the browser on a runner takes from 3 to 35 seconds, and the test files that
       # run first all paid for it at once, inside their own time limits. One capture before the suite
       # moves that cost out of the tests. A failure here is not the suite's verdict.

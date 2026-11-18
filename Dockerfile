@@ -14,5 +14,6 @@ ENTRYPOINT [ \
     "npx", \
     "single-file", \
     "--browser-single-process=false", \
+    "--browser-arg=--no-sandbox", \
     "--output-directory", "./out/", \
     "--dump-content" ]
