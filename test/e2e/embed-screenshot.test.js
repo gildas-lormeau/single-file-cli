@@ -76,7 +76,7 @@ test("--embed-screenshot captures the whole of a page taller than 16,384 px", { 
 		rows.push(y - 1, y, y + 1);
 	}
 	for (const y of rows) {
-		const offset = (y * width + width / 2) * channels;
+		const offset = (y * width + (width >> 1)) * channels;
 		assert.deepEqual(Array.from(pixels.subarray(offset, offset + 3)), getBandColor(Math.floor(y / LONG_PAGE_BAND_HEIGHT)), "row " + y);
 	}
 });
