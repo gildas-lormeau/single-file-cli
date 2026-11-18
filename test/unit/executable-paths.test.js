@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getExecutablePaths, findExecutablePath } from "../../lib/browser.js";
 import { CHROMIUM_PATHS, FIREFOX_PATHS } from "../../lib/constants.js";
-import { useSingleProcess, getReportedSwitch } from "../../lib/chromium.js";
+import { useSingleProcess, getReportedSwitch, getDefaultArgs } from "../../lib/chromium.js";
 
 const LOCAL_APP_DATA = "C:\\Users\\user\\AppData\\Local";
 
@@ -137,4 +137,12 @@ test("the profile switch is searched as it was given on the other systems", () =
 	const PREFIX = "--user-data-dir=";
 	assert.equal(getReportedSwitch(PREFIX, "/tmp/my profile/a\\b", "linux"), "--user-data-dir=/tmp/my profile/a\\b");
 	assert.equal(getReportedSwitch(PREFIX, "/var/folders/x/T/a1b2", "darwin"), "--user-data-dir=/var/folders/x/T/a1b2");
+});
+
+// with the sandbox, a page that runs out of memory is not reported as crashed on Linux, and the
+// sandbox cannot be set up in a container or as root: the reasons are in lib/chromium.js
+test("--no-sandbox is a default argument on Linux only", () => {
+	assert.equal(getDefaultArgs("linux").includes("--no-sandbox"), true);
+	assert.equal(getDefaultArgs("darwin").includes("--no-sandbox"), false);
+	assert.equal(getDefaultArgs("windows").includes("--no-sandbox"), false);
 });

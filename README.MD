@@ -188,13 +188,15 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
 
 ## Browser sandbox
 
-A Chromium-based browser is launched with its sandbox, which confines the processes that render
-the pages: a page that exploits a flaw of the browser cannot read your files. The sandbox cannot be
-set up everywhere on Linux, e.g. when the tool is run as root, in a Docker container with the
-default security profile, or on Ubuntu with a browser that was not installed from a package. The
-browser then exits at startup: `single-file` launches it again with `--no-sandbox` and displays a
-warning. Pass `--browser-arg=--no-sandbox` to launch the browser without its sandbox from the
-start, which skips the failed attempt and the warning. The Docker image does it.
+On macOS and Windows, a Chromium-based browser is launched with its sandbox, which confines the
+processes that render the pages: a page that exploits a flaw of the browser cannot read your files.
+If the browser exits at startup, `single-file` launches it again with `--no-sandbox` and displays a
+warning. Pass `--browser-arg=--no-sandbox` to launch it without its sandbox from the start.
+
+On Linux, the browser is launched with `--no-sandbox`. Its sandbox cannot be set up when the tool
+is run as root, in a Docker container with the default security profile, or on Ubuntu with a
+browser that was not installed from a package, and where it can, a page that runs out of memory is
+no longer reported as crashed.
 
 ## Compile executables
 
