@@ -178,6 +178,19 @@ test("invalid browser args json is reported", () => {
 	assert.deepEqual(parseArgs(["--browser-args", "not json"]).invalidOptions, [{ name: "browser-args", value: "not json" }]);
 });
 
+// the option took the key of its alias, a name single-file-core treats as deprecated: the page was
+// processed with a copy of the options, and a profile defining `removeAlternativeImages` silently
+// won over the command line (issue #212)
+test("--remove-alternative-images and its alias fill the key single-file-core reads", () => {
+	assert.equal(parse([]).removeAlternativeImages, true);
+	assert.equal(parse(["--remove-alternative-images", "false"]).removeAlternativeImages, false);
+	assert.equal(parse(["--block-alternative-images", "false"]).removeAlternativeImages, false);
+	assert.equal("blockAlternativeImages" in parse(["--block-alternative-images", "false"]), false);
+	const options = getDefaultOptions();
+	applySettings(options, { profiles: { __Default_Settings__: { removeAlternativeImages: true } } }, { removeAlternativeImages: false });
+	assert.equal(options.removeAlternativeImages, false);
+});
+
 test("explicit options win over settings file profiles", () => {
 	const options = parse(["--settings-file-profile", "custom", "--browser-width", "1024"]);
 	const settings = { profiles: { custom: { compressHTML: false, browserWidth: 800 } } };

@@ -138,7 +138,7 @@ const OPTIONS_INFO = [{
 	"remove-unused-glyphs": { description: "Remove the glyphs not displayed in the page from the TrueType, WOFF and WOFF2 fonts (experimental)", type: "boolean" },
 	"remove-alternative-fonts": { description: "Remove alternative fonts to the ones displayed", type: "boolean", defaultValue: true },
 	"remove-alternative-medias": { description: "Remove alternative CSS stylesheets", type: "boolean", defaultValue: true },
-	"remove-alternative-images": { description: "Remove images for alternative sizes of screen, they are not downloaded either", type: "boolean", defaultValue: true, alias: "block-alternative-images" },
+	"remove-alternative-images": { key: "removeAlternativeImages", description: "Remove images for alternative sizes of screen, they are not downloaded either", type: "boolean", defaultValue: true, alias: "block-alternative-images" },
 	"remove-no-script-tags": { description: "Remove <noscript> tags", type: "boolean", defaultValue: true },
 	"remove-link-query-strings": { description: "Remove the query strings of the links (a and area elements with a relative or http(s) URL), e.g. tracking parameters, session ids and signed URLs; the fragment is kept", type: "boolean" },
 	"move-styles-in-head": { description: "Move style elements outside the head element into the head element", type: "boolean" },
