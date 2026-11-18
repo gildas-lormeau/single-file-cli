@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getExecutablePaths, findExecutablePath } from "../../lib/browser.js";
 import { CHROMIUM_PATHS, FIREFOX_PATHS } from "../../lib/constants.js";
-import { useSingleProcess } from "../../lib/chromium.js";
+import { useSingleProcess, getReportedSwitch } from "../../lib/chromium.js";
 
 const LOCAL_APP_DATA = "C:\\Users\\user\\AppData\\Local";
 
@@ -113,4 +113,28 @@ test("only Google Chrome runs as a single process on Windows", () => {
 	assert.equal(useSingleProcess(LOCAL_APP_DATA + "\\Vivaldi\\Application\\vivaldi.exe", true, "windows"), false);
 	assert.equal(useSingleProcess("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", false, "windows"), false);
 	assert.equal(useSingleProcess("/usr/bin/vivaldi", true, "linux"), true);
+});
+
+// The browser launched by the tool is recognized from the profile switch found in the command line
+// it reports. On Windows, Chromium reports the value of a switch between quotes as soon as it
+// contains a space, a tab, a backslash or a quote, with the escaping of CommandLineToArgvW. The
+// expected strings are the ones QuoteForCommandLineToArgvWInternal (base/command_line.cc) gives.
+test("the profile switch is searched in the form Chromium reports it on Windows", () => {
+	const PREFIX = "--user-data-dir=";
+	assert.equal(getReportedSwitch(PREFIX, "C:\\Users\\john\\AppData\\Local\\Temp\\a1b2", "windows"), "--user-data-dir=\"C:\\Users\\john\\AppData\\Local\\Temp\\a1b2\"");
+	assert.equal(getReportedSwitch(PREFIX, "C:\\Users\\John Doe\\profile", "windows"), "--user-data-dir=\"C:\\Users\\John Doe\\profile\"");
+	// a run of backslashes is doubled at the end, where the closing quote follows it
+	assert.equal(getReportedSwitch(PREFIX, "C:\\profile\\", "windows"), "--user-data-dir=\"C:\\profile\\\\\"");
+	assert.equal(getReportedSwitch(PREFIX, "\\\\server\\share\\profile", "windows"), "--user-data-dir=\"\\\\server\\share\\profile\"");
+	// and before a quote, which is escaped
+	assert.equal(getReportedSwitch(PREFIX, "a\\\"b", "windows"), "--user-data-dir=\"a\\\\\\\"b\"");
+	assert.equal(getReportedSwitch(PREFIX, "with\ttab", "windows"), "--user-data-dir=\"with\ttab\"");
+	// nothing to quote
+	assert.equal(getReportedSwitch(PREFIX, "profile", "windows"), "--user-data-dir=profile");
+});
+
+test("the profile switch is searched as it was given on the other systems", () => {
+	const PREFIX = "--user-data-dir=";
+	assert.equal(getReportedSwitch(PREFIX, "/tmp/my profile/a\\b", "linux"), "--user-data-dir=/tmp/my profile/a\\b");
+	assert.equal(getReportedSwitch(PREFIX, "/var/folders/x/T/a1b2", "darwin"), "--user-data-dir=/var/folders/x/T/a1b2");
 });
