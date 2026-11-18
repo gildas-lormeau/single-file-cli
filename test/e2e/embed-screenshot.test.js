@@ -18,12 +18,21 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
 import { cliDirectory, fastCaptureArgs } from "../target.js";
+import { decodeImage } from "../png.js";
 
 const execFileAsync = promisify(execFile);
 const TEST_TIMEOUT = 120000;
 const PAGE = "<!doctype html><html><head><title>embedded</title></head><body><p>content</p></body></html>";
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 const PDF_SIGNATURE = "%PDF-";
+const LONG_PAGE_WIDTH = 200;
+const LONG_PAGE_BANDS = 20;
+const LONG_PAGE_BAND_HEIGHT = 1000;
+// the height of the regions a long page is captured in, where a wrong join would show
+const LONG_PAGE_REGION_HEIGHT = 8192;
+const LONG_PAGE = "<!doctype html><html><head><title>long page</title><style>body { margin: 0 } div { height: " + LONG_PAGE_BAND_HEIGHT + "px }</style></head><body>" +
+	Array.from({ length: LONG_PAGE_BANDS }, (_, indexBand) => "<div style=\"background: rgb(" + getBandColor(indexBand).join(", ") + ")\"></div>").join("") +
+	"</body></html>";
 // an option that has no default value, so that nothing but the profile defines it
 const DEPRECATED_SETTINGS = { profiles: { __Default_Settings__: { loadDeferredImagesKeepZoomLevel: true } }, rules: [] };
 
@@ -49,9 +58,36 @@ test("a settings file with a deprecated option name does not lose the screenshot
 	assert.deepEqual(Array.from(content.subarray(0, PNG_SIGNATURE.length)), PNG_SIGNATURE);
 });
 
-async function getSavedPage(args, settings) {
+// Chromium renders 16,384 px of height at most in one capture: the image has the height of the page
+// and shows its top again past that row (issue #213), so a longer page is captured in regions that
+// are joined. The page is made of bands of 1000 px, each of its own colour, and every band of the
+// image must be the one of the page. The rows around the places where two regions meet are checked
+// as well, and so is the row where the image used to start again.
+test("--embed-screenshot captures the whole of a page taller than 16,384 px", { timeout: TEST_TIMEOUT }, async () => {
+	const content = await getSavedPage(["--compress-content", "--embed-screenshot", "--browser-width", String(LONG_PAGE_WIDTH)], undefined, LONG_PAGE);
+	const { width, height, channels, pixels } = decodeImage(content);
+	assert.equal(width, LONG_PAGE_WIDTH);
+	assert.equal(height, LONG_PAGE_BANDS * LONG_PAGE_BAND_HEIGHT);
+	const rows = [];
+	for (let indexBand = 0; indexBand < LONG_PAGE_BANDS; indexBand++) {
+		rows.push(indexBand * LONG_PAGE_BAND_HEIGHT + LONG_PAGE_BAND_HEIGHT / 2);
+	}
+	for (let y = LONG_PAGE_REGION_HEIGHT; y < height; y += LONG_PAGE_REGION_HEIGHT) {
+		rows.push(y - 1, y, y + 1);
+	}
+	for (const y of rows) {
+		const offset = (y * width + width / 2) * channels;
+		assert.deepEqual(Array.from(pixels.subarray(offset, offset + 3)), getBandColor(Math.floor(y / LONG_PAGE_BAND_HEIGHT)), "row " + y);
+	}
+});
+
+function getBandColor(indexBand) {
+	return [(indexBand * 37) % 256, (indexBand * 91) % 256, 128];
+}
+
+async function getSavedPage(args, settings, page = PAGE) {
 	const server = createServer((request, response) =>
-		response.writeHead(200, { "content-type": "text/html" }).end(PAGE));
+		response.writeHead(200, { "content-type": "text/html" }).end(page));
 	await new Promise(resolve => server.listen(0, "localhost", resolve));
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
