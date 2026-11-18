@@ -5,15 +5,21 @@ import assert from "node:assert/strict";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import process from "node:process";
 import { path } from "../../lib/deno-polyfill.js";
 import { fetch as fetchWithFileSupport } from "../../lib/cdp-client-util.js";
 
+// on Windows, a file URL without a drive letter is not a path and is refused
+const windows = process.platform == "win32";
+const ROOT_URL = windows ? "file:///C:/" : "file:///";
+const ROOT_PATH = windows ? "C:\\" : "/";
+
 test("fromFileUrl decodes percent-encoded characters", async () => {
-	assert.equal(await path.fromFileUrl("file:///tmp/some%20dir/page.html"), "/tmp/some dir/page.html");
+	assert.equal(await path.fromFileUrl(ROOT_URL + "tmp/some%20dir/page.html"), join(ROOT_PATH, "tmp", "some dir", "page.html"));
 });
 
 test("fromFileUrl ignores query and fragment", async () => {
-	assert.equal(await path.fromFileUrl("file:///tmp/page.html?query=1#fragment"), "/tmp/page.html");
+	assert.equal(await path.fromFileUrl(ROOT_URL + "tmp/page.html?query=1#fragment"), join(ROOT_PATH, "tmp", "page.html"));
 });
 
 test("fetch reads a file URL with a query", async () => {

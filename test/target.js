@@ -11,7 +11,7 @@
 // The missing-directory check is deliberately loud. A silent fallback to the repository root would
 // reintroduce exactly the failure this exists to prevent — tests passing against the wrong code.
 import { join, dirname, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import process from "node:process";
 
@@ -75,7 +75,8 @@ function getNewestSource(directory, newest) {
 // Unit tests import generated modules directly. They have to go through here too, or they keep
 // testing the released build while the e2e tests exercise the dev one.
 function importLibModule(name) {
-	return import(join(cliDirectory, "lib", name));
+	// as a file URL: on Windows, a path starting with a drive letter is read as a URL with an unknown scheme
+	return import(pathToFileURL(join(cliDirectory, "lib", name)).href);
 }
 
 // Two waits a fixture served from node:http on localhost never needs, and which cost about 3 seconds
