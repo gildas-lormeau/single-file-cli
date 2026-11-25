@@ -108,9 +108,41 @@ test("--add-proof does not overwrite a proof that is already there", { timeout: 
 	}
 });
 
+test("--add-proof makes the proofs of the pages as --crawl-replace-urls leaves them", { timeout: 120000 }, async () => {
+	// the links are rewritten once every page is saved: a proof made when a page is saved would
+	// be the proof of a file that is replaced
+	const server = createServer((request, response) => {
+		const origin = "http://localhost:" + server.address().port;
+		const pages = {
+			"/": "<html><head><title>first</title></head><body><a href=\"" + origin + "/second\">second</a></body></html>",
+			"/second": "<html><head><title>second</title></head><body><a href=\"" + origin + "/\">first</a></body></html>"
+		};
+		response.writeHead(pages[request.url] ? 200 : 404, { "content-type": "text/html" }).end(pages[request.url] || "");
+	});
+	await new Promise(resolve => server.listen(0, "localhost", resolve));
+	const calendar = await startCalendar();
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const url = "http://localhost:" + server.address().port + "/";
+		const { exitCode, stderr } = await run([url, "--output-directory", directory, "--crawl-links", "--crawl-replace-urls", "--add-proof", "--proof-calendar-url", calendar.url, "--filename-template", "{page-title}.html"]);
+		assert.equal(exitCode, 0, stderr);
+		assert.deepEqual((await readdir(directory)).sort(), ["first.html", "first.html.ots", "second.html", "second.html.ots"]);
+		for (const [name, linkedName] of [["first.html", "second.html"], ["second.html", "first.html"]]) {
+			const page = await readFile(join(directory, name));
+			assert.ok(page.toString().includes("href=" + linkedName) || page.toString().includes("href=\"" + linkedName + "\""), "the link of " + name + " was not rewritten: the test does not cover the rewrite");
+			const { digest, attestations } = readProof(await readFile(join(directory, name + ".ots")));
+			assert.deepEqual(digest, sha256(page), "the proof of " + name + " is not the proof of the file on disk");
+			assert.ok(calendar.requests.some(request => request.message.equals(attestations[0].message)), "the proof of " + name + " does not lead to a commitment of the server");
+		}
+	} finally {
+		await calendar.close();
+		await new Promise(resolve => server.close(resolve));
+		await rm(directory, { recursive: true });
+	}
+});
+
 const INCOMPATIBLE_OPTIONS = {
 	"--dump-content": ["--dump-content"],
-	"--crawl-replace-urls": ["out.html", "--crawl-replace-urls"],
 	"--crawl-save-archive": ["out.zip", "--crawl-links", "--crawl-save-archive", "--compress-content"]
 };
 

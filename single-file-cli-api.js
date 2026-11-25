@@ -53,7 +53,7 @@ const STATE_PROCESSED = "processed";
 const MANIFEST_FILENAME_SUFFIX = ".manifest.json";
 
 const { readTextFile, writeTextFile, readFile, writeFile, stdout, mkdir, makeTempDir, remove, stat, errors } = Deno;
-let backend = cdpBackend, tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, errorCount = 0;
+let backend = cdpBackend, tasks = [], maxParallelWorkers, sessionFilename, archiveTempDirectory, pagesRewritten, errorCount = 0;
 
 export { initialize, closeBrowser, getArchiveOptions, ARCHIVE_EXCLUDED_OPTION_NAMES, DEFAULT_OPTIONS, API_ONLY_DEFAULTS };
 
@@ -78,9 +78,6 @@ async function initialize(options) {
 		}
 		if (options.crawlSaveArchive) {
 			throw new Error("--add-proof is not compatible with --crawl-save-archive: the pages are not saved as files");
-		}
-		if (options.crawlReplaceURLs && !options.compressContent) {
-			throw new Error("--add-proof is not compatible with --crawl-replace-urls unless --compress-content is set: the pages are rewritten after they are saved, which would invalidate their proofs");
 		}
 	}
 	if (options.crawlSaveArchiveDedup && !options.crawlSaveArchive) {
@@ -117,6 +114,7 @@ async function initialize(options) {
 		archiveTempDirectory = await makeTempDir();
 	}
 	maxParallelWorkers = options.maxParallelWorkers || 8;
+	pagesRewritten = Boolean(options.crawlReplaceURLs && !options.compressContent);
 	backend = options.browserEngine == "firefox" ? bidiBackend : cdpBackend;
 	try {
 		await backend.initialize(options);
@@ -179,7 +177,7 @@ async function finish(options) {
 	if (options.crawlSaveArchive) {
 		await savePagesArchive(options);
 	}
-	if (options.crawlReplaceURLs && !options.compressContent) {
+	if (pagesRewritten) {
 		for (const task of tasks) {
 			let rewritten;
 			try {
@@ -209,6 +207,21 @@ async function finish(options) {
 			}
 		}
 	}
+	// the proofs that were put off until the pages were rewritten: each one covers the file as
+	// it is left on disk, read back as bytes
+	for (const task of tasks) {
+		if (task.proofPending && task.filename) {
+			const filename = getOutputDirectory(options) + task.filename;
+			try {
+				await writeProofFile(filename, await readFile(filename), options);
+				task.proofPending = false;
+			} catch (error) {
+				error.message = "The page was saved without its proof of existence (" + error.message + ")";
+				await reportError(error, Object.assign({}, options, { url: task.url }));
+			}
+		}
+	}
+	await saveTasks();
 	if (!options.browserDebug) {
 		await backend.closeBrowser();
 	}
@@ -297,6 +310,7 @@ async function runNextTask() {
 			task.title = pageData.title;
 			task.archiveFilename = pageData.archiveFilename;
 			task.manifestFilename = pageData.manifestFilename;
+			task.proofPending = pageData.proofPending;
 			if (options.crawlLinks && testMaxDepth(task)) {
 				const urls = pageData.links;
 				let newTasks = await Promise.all(urls.map(url => createTask(url, options, task, task.rootTaskURL || task.url)));
@@ -456,7 +470,11 @@ async function capturePage(options) {
 				await writeTextFile(filename + MANIFEST_FILENAME_SUFFIX, canonicalize(pageData.manifest));
 				pageData.manifestFilename = pageData.filename + MANIFEST_FILENAME_SUFFIX;
 			}
-			if (options.addProof) {
+			// a page that --crawl-replace-urls rewrites once all the pages are saved gets its proof
+			// after that, in finish(): a proof made now would be the proof of a file that is replaced
+			if (options.addProof && pagesRewritten) {
+				pageData.proofPending = true;
+			} else if (options.addProof) {
 				// the page is saved at this point: a proof that cannot be made is counted and
 				// reported as an error, and the capture is not thrown away with it
 				try {
