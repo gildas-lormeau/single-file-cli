@@ -181,6 +181,7 @@ async function finish(options) {
 	}
 	if (options.crawlReplaceURLs && !options.compressContent) {
 		for (const task of tasks) {
+			let rewritten;
 			try {
 				const outputFilename = getOutputDirectory(options) + task.filename;
 				let pageContent = await readTextFile(outputFilename);
@@ -196,8 +197,15 @@ async function finish(options) {
 					}
 				});
 				await writeTextFile(outputFilename, pageContent);
+				rewritten = true;
 			} catch {
 				// ignored
+			}
+			// the manifest was written with the page, before the links of the other pages were
+			// known: its hash and size of the saved file are the ones of a file that was just
+			// replaced
+			if (rewritten && task.manifestFilename) {
+				await updateManifestOutput(getOutputDirectory(options) + task.filename, getOutputDirectory(options) + task.manifestFilename);
 			}
 		}
 	}
@@ -288,6 +296,7 @@ async function runNextTask() {
 			task.filename = pageData.filename;
 			task.title = pageData.title;
 			task.archiveFilename = pageData.archiveFilename;
+			task.manifestFilename = pageData.manifestFilename;
 			if (options.crawlLinks && testMaxDepth(task)) {
 				const urls = pageData.links;
 				let newTasks = await Promise.all(urls.map(url => createTask(url, options, task, task.rootTaskURL || task.url)));
@@ -512,6 +521,17 @@ async function setManifestOutput(pageData, content) {
 		size: bytes.length,
 		sha256: await sha256(bytes)
 	};
+}
+
+// the file is read back as bytes instead of hashing the text that was written: the manifest
+// states what is on disk, whatever the read and the write did to it (a byte order mark for
+// instance)
+async function updateManifestOutput(filename, manifestFilename) {
+	const manifest = JSON.parse(await readTextFile(manifestFilename));
+	const bytes = await readFile(filename);
+	manifest.output.size = bytes.length;
+	manifest.output.sha256 = await sha256(bytes);
+	await writeTextFile(manifestFilename, canonicalize(manifest));
 }
 
 function dumpJsonMetadata(pageData, options) {

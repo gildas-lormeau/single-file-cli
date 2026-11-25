@@ -162,6 +162,7 @@ With Firefox, `tls` is `handshake` and `remoteAddress` is `none`: WebDriver BiDi
 - With `--output-json`, the manifest is a `manifest` property of the JSON written instead of the page, and no sidecar is written. That JSON is not canonical, `output.filename` is absent, and `output.sha256` is the hash of the page content carried inside the JSON, not of the JSON file.
 - With `--dump-json`, the JSON printed on stdout carries `manifest` and `manifestFilename`, and the sidecar is written as usual.
 - With `--dump-content` and no output file, the manifest is only available through `--dump-json`, without `output.filename`.
+- With `--crawl-replace-urls` and without `--compress-content`, the saved pages are rewritten once they are all saved, to make their links point to each other. `output.size` and `output.sha256` of each sidecar are updated then, and describe the file as it is left on disk. The manifest printed by `--dump-json` is printed before, when the page is saved: its `output` describes the page before the links were rewritten, so verify against the sidecar.
 - `--manifest` is refused with `--crawl-save-archive`.
 
 ## Verifying a capture

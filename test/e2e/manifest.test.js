@@ -170,3 +170,34 @@ test("--manifest records the TLS certificate of a secure origin", { timeout: 120
 		server.close();
 	}
 });
+
+test("--manifest describes the pages as --crawl-replace-urls leaves them", { timeout: 120000 }, async () => {
+	// the links are rewritten once every page is saved, after the manifests were written
+	const server = createServer((request, response) => {
+		const origin = "http://localhost:" + server.address().port;
+		const pages = {
+			"/": "<html><head><title>first</title></head><body><a href=\"" + origin + "/second\">second</a></body></html>",
+			"/second": "<html><head><title>second</title></head><body><a href=\"" + origin + "/\">first</a></body></html>"
+		};
+		response.writeHead(pages[request.url] ? 200 : 404, { "content-type": "text/html" }).end(pages[request.url] || "");
+	});
+	await new Promise(resolve => server.listen(0, "localhost", resolve));
+	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
+	try {
+		const url = "http://localhost:" + server.address().port + "/";
+		await execFileAsync(process.execPath, ["single-file-node.js", ...fastCaptureArgs, url, "--output-directory", directory, "--crawl-links", "--crawl-replace-urls", "--manifest", "--filename-template", "{page-title}.html"], { cwd: cliDirectory });
+		const { canonicalize } = await importLibModule("manifest.js");
+		for (const [name, linkedName] of [["first.html", "second.html"], ["second.html", "first.html"]]) {
+			const page = await readFile(join(directory, name));
+			assert.ok(page.toString().includes("href=" + linkedName) || page.toString().includes("href=\"" + linkedName + "\""), "the link of " + name + " was not rewritten: the test does not cover the rewrite");
+			const text = await readFile(join(directory, name + ".manifest.json"), "utf8");
+			const manifest = JSON.parse(text);
+			assert.equal(manifest.output.sha256, sha256(page), "the output hash of " + name + " is not the hash of the file on disk");
+			assert.equal(manifest.output.size, page.length);
+			assert.equal(canonicalize(manifest), text, "the sidecar of " + name + " is not canonical JSON");
+		}
+	} finally {
+		await new Promise(resolve => server.close(resolve));
+		await rm(directory, { recursive: true });
+	}
+});
