@@ -120,17 +120,10 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file https://www.wikipedia.org wikipedia.html --manifest
   ```
 
-- Create a proof that the saved page existed at the time of the capture, with [OpenTimestamps](https://opentimestamps.org). The proof is written next to the page, as `wikipedia.html.ots`. Only a hash of the saved file, mixed with a random value, is sent to the public OpenTimestamps servers.
+- Create a proof that the saved page existed at the time of the capture: see [Proof of existence](#proof-of-existence)
 
   ```sh
   single-file https://www.wikipedia.org wikipedia.html --add-proof
-  ```
-
-  The proof is pending when it is written. Upgrade it a few hours later, then verify it, with an OpenTimestamps client or on [opentimestamps.org](https://opentimestamps.org). Keep the two files together and do not modify the page: the proof is only valid for the exact file that was saved, and it cannot be created again for the same date.
-
-  ```sh
-  ots upgrade wikipedia.html.ots
-  ots verify wikipedia.html.ots
   ```
 
 - Examples
@@ -198,6 +191,38 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
 - Exit code
 
   The exit code is 0 when all the pages have been saved, 1 when at least one capture failed (the other pages of the batch or the crawl are still saved), and 255 when an error prevented the process from running.
+
+## Proof of existence
+
+The option `--add-proof` writes an [OpenTimestamps](https://opentimestamps.org) proof next to the saved page. With the proof, anyone can check later that the saved file existed at the time of the capture, with the Bitcoin blockchain as the only reference.
+
+1. Save the page.
+
+   ```sh
+   single-file https://www.wikipedia.org wikipedia.html --add-proof
+   ```
+
+   Two files are written: `wikipedia.html` and `wikipedia.html.ots`, which is the proof. Only the SHA-256 hash of the saved file, mixed with a random value, is sent to the public OpenTimestamps servers. The page itself is not sent.
+
+2. Upgrade the proof, a few hours later. When it is written the proof is pending: it relies on the servers that received the hash. Once the hash is in a Bitcoin block, upgrading the proof makes it complete and independent of these servers. This needs [Node.js](https://nodejs.org).
+
+   ```sh
+   npx opentimestamps upgrade wikipedia.html.ots
+   ```
+
+   The command answers "Success! Timestamp complete" and keeps the previous file as `wikipedia.html.ots.bak`. If it answers that the timestamp is not complete, it is too early: run it again later.
+
+3. Verify the proof, at any time after that. The page must be next to its proof.
+
+   ```sh
+   npx opentimestamps verify wikipedia.html.ots
+   ```
+
+   The command answers with the Bitcoin block and the date that attest the existence of the file. You can also verify without installing anything on [opentimestamps.org](https://opentimestamps.org): drop the `.ots` file on the page, then the saved page.
+
+Keep the two files together and do not modify the saved page: the proof is only valid for the exact file that was saved, and a lost proof cannot be created again for the same date.
+
+The commands above use the JavaScript client of OpenTimestamps, which reads the Bitcoin blockchain through public block explorers. The Python client (`pip3 install opentimestamps-client`, then `ots upgrade` and `ots verify`) reads the same files, but it needs a local Bitcoin Core node to verify.
 
 ## Browser sandbox
 
