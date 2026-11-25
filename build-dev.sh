@@ -5,6 +5,7 @@ set -e
 ESBUILD_PACKAGE="npm:esbuild@0.27.7"
 WEB_STREAMS_PACKAGE="npm:web-streams-polyfill@4.3.0"
 
+project_dir=$(pwd)
 build_dir=$(mktemp -d)
 trap 'rm -rf "$build_dir"' EXIT
 
@@ -13,13 +14,16 @@ trap 'rm -rf "$build_dir"' EXIT
 echo "
 import { build } from '$ESBUILD_PACKAGE';
 
+const core = '$project_dir/../single-file-core';
+const lib = '$project_dir/lib-dev';
+
 await build({
   entryPoints: [
-    '../single-file-core/single-file.js'
+    core + '/single-file.js'
   ],
   bundle: true,
   globalName: 'singlefile',
-  outdir: 'lib-dev/',
+  outdir: lib,
   platform: 'browser',
   sourcemap: false,
   minify: false,
@@ -29,11 +33,11 @@ await build({
 
 await build({
   entryPoints: [
-    '../single-file-core/single-file-bootstrap.js'
+    core + '/single-file-bootstrap.js'
   ],
   bundle: true,
   globalName: 'singlefileBootstrap',
-  outdir: 'lib-dev/',
+  outdir: lib,
   platform: 'browser',
   sourcemap: false,
   minify: false,
@@ -43,10 +47,10 @@ await build({
 
 await build({
   entryPoints: [
-    '../single-file-core/single-file-hooks-frames.js'
+    core + '/single-file-hooks-frames.js'
   ],
   bundle: true,
-  outdir: 'lib-dev/',
+  outdir: lib,
   platform: 'browser',
   sourcemap: false,
   minify: false,
@@ -56,11 +60,11 @@ await build({
 
 await build({
   entryPoints: [
-    '../single-file-core/vendor/zip/zip.min.js'
+    core + '/vendor/zip/zip.min.js'
   ],
   bundle: true,
   globalName: 'zip',
-  outdir: 'lib-dev/',
+  outdir: lib,
   platform: 'browser',
   sourcemap: false,
   minify: false,
@@ -70,10 +74,10 @@ await build({
 
 await build({
   entryPoints: [
-    '../single-file-core/single-file-archive.js'
+    core + '/single-file-archive.js'
   ],
   bundle: true,
-  outfile: 'lib-dev/single-file-archive.js',
+  outfile: lib + '/single-file-archive.js',
   platform: 'neutral',
   sourcemap: false,
   minify: false,
@@ -82,28 +86,32 @@ await build({
 });
 
 const SCRIPTS = [
-	'lib-dev/single-file.js',
-	'lib-dev/single-file-bootstrap.js',
-	'lib-dev/zip.min.js'
+	lib + '/single-file.js',
+	lib + '/single-file-bootstrap.js',
+	lib + '/zip.min.js'
 ];
 
 let script = '';
 const scripts = SCRIPTS.map(script => Deno.readTextFile(script));
 const sources = await Promise.all(scripts);
 script += 'const script = ' + JSON.stringify(sources.join(';')) + ';';
-const hookScript = await Deno.readTextFile('lib-dev/single-file-hooks-frames.js');
+const hookScript = await Deno.readTextFile(lib + '/single-file-hooks-frames.js');
 script += 'const hookScript = ' + JSON.stringify(hookScript) + ';';
-const zipScript = await Deno.readTextFile('lib-dev/zip.min.js');
+const zipScript = await Deno.readTextFile(lib + '/zip.min.js');
 script += 'const zipScript = ' + JSON.stringify(zipScript) + ';';
 const webStreamsPonyfill = await Deno.readTextFile('$build_dir/node_modules/web-streams-polyfill/dist/ponyfill.js');
 script += 'const webStreamsPonyfill = ' + JSON.stringify(webStreamsPonyfill) + ';';
 script += 'export { script, zipScript, hookScript, webStreamsPonyfill };';
-await Deno.writeTextFile('lib-dev/single-file-bundle.js', script)
+await Deno.writeTextFile(lib + '/single-file-bundle.js', script)
 await Promise.all(SCRIPTS.map(script => Deno.remove(script)));
-await Deno.remove('lib-dev/single-file-hooks-frames.js');
-const version = JSON.parse(await Deno.readTextFile('./deno.json')).version;
-await Deno.writeTextFile('lib-dev/version.js', 'export const version = ' + JSON.stringify(version) + ';');
-" |  deno run --allow-read --allow-write --allow-net --allow-run --allow-env --lock="$build_dir/build.lock" -
+await Deno.remove(lib + '/single-file-hooks-frames.js');
+const version = JSON.parse(await Deno.readTextFile('$project_dir/deno.json')).version;
+await Deno.writeTextFile(lib + '/version.js', 'export const version = ' + JSON.stringify(version) + ';');
+" | (
+	# run from the temporary directory, as build.sh does: from here Deno would look for esbuild in
+	# this project's node_modules, which does not carry it
+	cd "$build_dir" && deno run --allow-read --allow-write --allow-net --allow-run --allow-env --lock="$build_dir/build.lock" -
+)
 
 # Stage a runnable tree in .dev/, with the freshly built artifacts overlaid on the hand-written
 # files from lib/. Generated code never lands in the tracked lib/ directory, so a dev build cannot
