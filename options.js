@@ -107,6 +107,7 @@ const OPTIONS_INFO = [{
 	"block-audios": { description: "Block audios", type: "boolean", defaultValue: true },
 	"block-fonts": { description: "Block fonts", type: "boolean" },
 	"block-images": { description: "Block images", type: "boolean" },
+	"link-blocked-images": { description: "With --block-images, keep the addresses of the blocked images instead of emptying them: the saved page is much smaller and displays its images from the original site, so it is not self-contained and it contacts that site when it is opened", type: "boolean" },
 	"block-scripts": { description: "Block scripts", type: "boolean", defaultValue: true },
 	"block-stylesheets": { description: "Block stylesheets", type: "boolean", defaultValue: false },
 	"block-videos": { description: "Block videos", type: "boolean", defaultValue: true },
