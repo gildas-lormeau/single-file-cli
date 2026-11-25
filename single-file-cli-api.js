@@ -25,6 +25,8 @@
 
 import { Buffer } from "node:buffer";
 import { canonicalize, sha256 } from "./lib/manifest.js";
+import { createProof, PROOF_FILENAME_SUFFIX } from "./lib/opentimestamps.js";
+import { getProxyFetchOptions } from "./lib/cdp-client-util.js";
 import * as cdpBackend from "./lib/cdp-client.js";
 import * as bidiBackend from "./lib/bidi-client.js";
 import { getZipScriptSource } from "./lib/single-file-script.js";
@@ -69,6 +71,17 @@ async function initialize(options) {
 	}
 	if (options.dumpJson && options.dumpContent && !options.output) {
 		throw new Error("--dump-json is not compatible with --dump-content unless --output is set, because both write to stdout");
+	}
+	if (options.addProof) {
+		if (options.dumpContent && !options.output) {
+			throw new Error("--add-proof is not compatible with --dump-content unless --output is set: the proof is written next to the saved file");
+		}
+		if (options.crawlSaveArchive) {
+			throw new Error("--add-proof is not compatible with --crawl-save-archive: the pages are not saved as files");
+		}
+		if (options.crawlReplaceURLs && !options.compressContent) {
+			throw new Error("--add-proof is not compatible with --crawl-replace-urls unless --compress-content is set: the pages are rewritten after they are saved, which would invalidate their proofs");
+		}
 	}
 	if (options.crawlSaveArchiveDedup && !options.crawlSaveArchive) {
 		throw new Error("--crawl-save-archive-dedup requires --crawl-save-archive");
@@ -434,25 +447,25 @@ async function capturePage(options) {
 				await writeTextFile(filename + MANIFEST_FILENAME_SUFFIX, canonicalize(pageData.manifest));
 				pageData.manifestFilename = pageData.filename + MANIFEST_FILENAME_SUFFIX;
 			}
+			if (options.addProof) {
+				// the page is saved at this point: a proof that cannot be made is counted and
+				// reported as an error, and the capture is not thrown away with it
+				try {
+					await writeProofFile(filename, content, options);
+					pageData.proofFilename = pageData.filename + PROOF_FILENAME_SUFFIX;
+				} catch (error) {
+					error.message = "The page was saved without its proof of existence (" + error.message + ")";
+					await reportError(error, options);
+				}
+			}
 		}
 		dumpJsonMetadata(pageData, options);
 		return pageData;
 	} catch (error) {
-		errorCount++;
-		const date = new Date();
 		if (error && typeof error.message == "string" && error.message.includes(INVALID_STRING_LENGTH_ERROR_MESSAGE)) {
 			error.message = PAGE_TOO_LARGE_ERROR_MESSAGE + " (" + error.message + ")";
 		}
-		let message = `[${date.toISOString()}] URL: ${options.url} Error: ${error.message || error}`;
-		if (!options.errorsTracesDisabled) {
-			message += "\nStack: " + error.stack;
-		}
-		message += "\n";
-		if (options.errorsFile) {
-			await writeTextFile(options.errorsFile, message, { append: true });
-		} else {
-			console.error(error.message || error, message); // eslint-disable-line no-console
-		}
+		await reportError(error, options);
 		if (options.consoleMessagesFile && error.consoleMessages) {
 			await writeTextFile(options.consoleMessagesFile, JSON.stringify(error.consoleMessages, null, 2));
 		}
@@ -461,6 +474,33 @@ async function capturePage(options) {
 				`[${new Date(timestamp).toISOString()}] ${message.join(" ")}`).join("\n"));
 		}
 	}
+}
+
+async function reportError(error, options) {
+	errorCount++;
+	const date = new Date();
+	let message = `[${date.toISOString()}] URL: ${options.url} Error: ${error.message || error}`;
+	if (!options.errorsTracesDisabled) {
+		message += "\nStack: " + error.stack;
+	}
+	message += "\n";
+	if (options.errorsFile) {
+		await writeTextFile(options.errorsFile, message, { append: true });
+	} else {
+		console.error(error.message || error, message); // eslint-disable-line no-console
+	}
+}
+
+// the proof covers the bytes of the file as they are on disk, so that the official clients
+// verify it against the file with no other input. A proof cannot be made again for the same
+// date: an existing one is only replaced when the user asked for files to be overwritten
+async function writeProofFile(filename, content, options) {
+	const bytes = typeof content == "string" ? new TextEncoder().encode(content) : content;
+	const calendarUrls = options.proofCalendarUrls && options.proofCalendarUrls.length ? options.proofCalendarUrls : undefined;
+	const { proof, failures } = await createProof(bytes, { calendarUrls, fetchOptions: getProxyFetchOptions(options) });
+	failures.forEach(({ url, message }) =>
+		console.error(`Warning: no timestamp from ${url} (${message}), the proof of ${filename} was made with the other servers`)); // eslint-disable-line no-console
+	await writeFile(filename + PROOF_FILENAME_SUFFIX, proof, { createNew: options.filenameConflictAction != "overwrite" });
 }
 
 // core hashed the page it produced; the file on disk can differ from it by the BOM

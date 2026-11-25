@@ -120,6 +120,19 @@ Make sure Chrome or a Chromium-based browser is installed in the default folder.
   single-file https://www.wikipedia.org wikipedia.html --manifest
   ```
 
+- Create a proof that the saved page existed at the time of the capture, with [OpenTimestamps](https://opentimestamps.org). The proof is written next to the page, as `wikipedia.html.ots`. Only a hash of the saved file, mixed with a random value, is sent to the public OpenTimestamps servers.
+
+  ```sh
+  single-file https://www.wikipedia.org wikipedia.html --add-proof
+  ```
+
+  The proof is pending when it is written. Upgrade it a few hours later, then verify it, with an OpenTimestamps client or on [opentimestamps.org](https://opentimestamps.org). Keep the two files together and do not modify the page: the proof is only valid for the exact file that was saved, and it cannot be created again for the same date.
+
+  ```sh
+  ots upgrade wikipedia.html.ots
+  ots verify wikipedia.html.ots
+  ```
+
 - Examples
 
   - Dump the HTML content of https://www.wikipedia.org into the console
