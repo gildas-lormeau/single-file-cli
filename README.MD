@@ -224,6 +224,8 @@ Keep the two files together and do not modify the saved page: the proof is only 
 
 The commands above use the JavaScript client of OpenTimestamps, which reads the Bitcoin blockchain through public block explorers. The Python client (`pip3 install opentimestamps-client`, then `ots upgrade` and `ots verify`) reads the same files, but it needs a local Bitcoin Core node to verify.
 
+The public OpenTimestamps servers are free to use and rely on donations. If you rely on this option, consider supporting them: see the [calendars](https://opentimestamps.org/#calendars) listed on opentimestamps.org, each one shows its donation address.
+
 ## Browser sandbox
 
 On macOS and Windows, a Chromium-based browser is launched with its sandbox, which confines the
