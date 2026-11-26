@@ -102,7 +102,9 @@ const OPTIONS_INFO = [{
 	"accept-header-image": { description: "Accept header for images", type: "string", defaultValue: "image/jxl,image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8" },
 	"accept-header-stylesheet": { description: "Accept header for stylesheets", type: "string", defaultValue: "text/css,*/*;q=0.1" },
 	"accept-header-script": { description: "Accept header for scripts", type: "string", defaultValue: "*/*" },
-	"accept-header-document": { description: "Accept header for documents", type: "string", defaultValue: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" }
+	"accept-header-document": { description: "Accept header for documents", type: "string", defaultValue: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
+	"accept-header-video": { description: "Accept header for videos", type: "string", defaultValue: "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5" },
+	"accept-header-audio": { description: "Accept header for audios", type: "string", defaultValue: "audio/webm,audio/ogg,audio/wav,audio/*;q=0.9,application/ogg;q=0.7,video/*;q=0.6,*/*;q=0.5" }
 }, {
 	"block-audios": { description: "Block audios", type: "boolean", defaultValue: true },
 	"block-fonts": { description: "Block fonts", type: "boolean" },
@@ -508,19 +510,25 @@ function parseArgs(args, setDefaultValues = true) {
 		result.options.acceptHeaderImage ||
 		result.options.acceptHeaderStylesheet ||
 		result.options.acceptHeaderScript ||
-		result.options.acceptHeaderDocument) {
+		result.options.acceptHeaderDocument ||
+		result.options.acceptHeaderVideo ||
+		result.options.acceptHeaderAudio) {
 		result.options.acceptHeaders = {
 			font: result.options.acceptHeaderFont,
 			image: result.options.acceptHeaderImage,
 			stylesheet: result.options.acceptHeaderStylesheet,
 			script: result.options.acceptHeaderScript,
-			document: result.options.acceptHeaderDocument
+			document: result.options.acceptHeaderDocument,
+			video: result.options.acceptHeaderVideo,
+			audio: result.options.acceptHeaderAudio
 		};
 		delete result.options.acceptHeaderFont;
 		delete result.options.acceptHeaderImage;
 		delete result.options.acceptHeaderStylesheet;
 		delete result.options.acceptHeaderScript;
 		delete result.options.acceptHeaderDocument;
+		delete result.options.acceptHeaderVideo;
+		delete result.options.acceptHeaderAudio;
 	}
 	if (result.options.browserArgs) {
 		const browserArguments = result.options.browserArguments || [];
