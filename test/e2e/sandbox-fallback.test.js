@@ -41,6 +41,15 @@ function getScript(logPath, sandboxLaunchCommand, noSandboxLaunchCommand) {
 	].join("\n") + "\n";
 }
 
+// The launcher draws a debugging port at random and launches the browser again, the same way, when
+// the browser of another process answers on that port (see lib/chromium.js). The test files run in
+// parallel with browsers of their own, so a launch can be repeated here by a neighbour. What is
+// asserted is the order of the ways the browser was launched: a way logged several times in a row
+// counts once.
+function getLaunchSequence(launches) {
+	return launches.filter((launch, index) => launch != launches[index - 1]);
+}
+
 async function capture(sandboxLaunchCommand, noSandboxLaunchCommand, args = []) {
 	const directory = await mkdtemp(join(tmpdir(), "single-file-test-"));
 	try {
@@ -53,7 +62,7 @@ async function capture(sandboxLaunchCommand, noSandboxLaunchCommand, args = []) 
 			["single-file-node.js", PAGE_URL, outputPath, "--browser-executable-path", scriptPath, ...fastCaptureArgs, ...args],
 			{ cwd: cliDirectory, timeout: 90000 },
 			(error, stdout, stderr) => resolve({ code: error ? error.code : 0, stderr })));
-		const launches = (await readFile(logPath, "utf8")).trim().split("\n");
+		const launches = getLaunchSequence((await readFile(logPath, "utf8")).trim().split("\n"));
 		const content = await readFile(outputPath, "utf8").catch(() => "");
 		return { code, stderr, launches, content };
 	} finally {
